@@ -18,12 +18,12 @@
 package com.adobe.marketing.mobile;
 
 public class Consent {
-    private static final String LOG_TAG = "Consent";
 
-    private Consent() {}
+    private Consent() { }
 
     /**
      * Returns the version of the {@code Consent} extension
+     *
      * @return The version as {@code String}
      */
     public static String extensionVersion() {
@@ -37,7 +37,7 @@ public class Consent {
         MobileCore.registerExtension(ConsentExtension.class, new ExtensionErrorCallback<ExtensionError>() {
             @Override
             public void error(ExtensionError extensionError) {
-                MobileCore.log(LoggingMode.ERROR, LOG_TAG,
+                MobileCore.log(LoggingMode.ERROR, ConsentConstants.LOG_TAG,
                         "There was an error registering the Consent extension: " + extensionError.getErrorName());
             }
         });

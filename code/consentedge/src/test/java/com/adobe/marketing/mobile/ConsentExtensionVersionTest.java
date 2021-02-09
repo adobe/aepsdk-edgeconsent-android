@@ -48,6 +48,9 @@ public class ConsentExtensionVersionTest {
                 moduleVersion, Consent.extensionVersion());
     }
 
+    // ========================================================================================
+    // Private methods
+    // ========================================================================================
 
     private Properties loadProperties(final String filepath) {
         Properties properties = new Properties();

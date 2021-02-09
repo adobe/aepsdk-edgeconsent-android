@@ -17,8 +17,7 @@
 
 package com.adobe.marketing.mobile;
 
-final class ConsentConstants {
-
+public class ConsentTestConstants {
     static final String LOG_TAG = "Consent";
     static final String EXTENSION_VERSION = "1.0.0-alpha-1";
     static final String EXTENSION_NAME = "com.adobe.consent";
@@ -37,5 +36,5 @@ final class ConsentConstants {
         private EventType() { }
     }
 
-    private ConsentConstants() { }
+    private ConsentTestConstants() { }
 }
