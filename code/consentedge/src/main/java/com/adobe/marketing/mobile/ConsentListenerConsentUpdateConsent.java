@@ -40,7 +40,7 @@ class ConsentListenerConsentUpdateConsent extends ExtensionListener {
     @Override
     public void hear(final Event event) {
         if (event == null || event.getEventData() == null) {
-            Log.warning(ConsentConstants.LOG_TAG, "Event or Event data is null. Ignoring the event listened by consentUpdate listener");
+            Log.warning(ConsentConstants.LOG_TAG, "Event or Event data is null. Ignoring the event listened by ConsentListenerConsentUpdateConsent listener");
             return;
         }
 

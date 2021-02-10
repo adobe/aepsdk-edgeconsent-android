@@ -17,57 +17,60 @@
 
 package com.adobe.marketing.mobile;
 
-import android.app.Application;
-
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
-import static junit.framework.TestCase.assertNotNull;
-
-
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({MobileCore.class})
 public class ConsentTest {
-    static AsyncHelper asyncHelper = new AsyncHelper();
-
-    @Mock
-    private Application mockApplication;
 
     @Before
     public void setup() {
-        MobileCore.setApplication(mockApplication);
-        MobileCore.start(null);
+        PowerMockito.mockStatic(MobileCore.class);
     }
 
+    // ========================================================================================
+    // extensionVersion
+    // ========================================================================================
+
+    @Test
+    public void test_extensionVersionAPI() {
+        // test
+        String extensionVersion = Consent.extensionVersion();
+        Assert.assertEquals("The Extension version API returns the correct value", ConsentTestConstants.EXTENSION_VERSION,
+                extensionVersion);
+    }
+
+    // ========================================================================================
+    // registerExtension
+    // ========================================================================================
     @Test
     public void testRegistration() {
         // test
         Consent.registerExtension();
-        asyncHelper.waitForAppThreads(500, true);
+        final ArgumentCaptor<ExtensionErrorCallback> callbackCaptor = ArgumentCaptor.forClass(ExtensionErrorCallback.class);
 
-        // verify
-        Map<String, Extension> extensions = getAllThirdpartyExtensions();
-        Extension consent = extensions.get(ConsentTestConstants.EXTENSION_NAME);
-        assertNotNull(consent);
+
+        // The monitor extension should register with core
+        PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
+        MobileCore.registerExtension(ArgumentMatchers.eq(ConsentExtension.class), callbackCaptor.capture());
+
+        // verify the callback
+        ExtensionErrorCallback extensionErrorCallback = callbackCaptor.getValue();
+        Assert.assertNotNull("The extension callback should not be null", extensionErrorCallback);
+
+        // should not crash on calling the callback
+        extensionErrorCallback.error(ExtensionError.UNEXPECTED_ERROR);
+
     }
 
-    // ========================================================================================
-    // Private methods
-    // ========================================================================================
-
-    private static Map<String, Extension> getAllThirdpartyExtensions() {
-        Map<String, Extension> thirdPartyExtensions = new HashMap<>();
-        Collection<Module> allExtensions = MobileCore.getCore().eventHub.getActiveModules();
-        for (Module currentModule : allExtensions) {
-            if (currentModule instanceof ExtensionApi) {
-                ExtensionApi extensionApi = (ExtensionApi) currentModule;
-                Extension ext = extensionApi.getExtension();
-                thirdPartyExtensions.put(ext.getName(), ext);
-            }
-        }
-        return thirdPartyExtensions;
-    }
 }
