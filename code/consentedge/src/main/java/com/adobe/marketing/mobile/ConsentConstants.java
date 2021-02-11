@@ -1,19 +1,13 @@
-/* ******************************************************************************
- * ADOBE CONFIDENTIAL
- *  ___________________
- *
- *  Copyright 2021 Adobe
- *  All Rights Reserved.
- *
- *  NOTICE: All information contained herein is, and remains
- *  the property of Adobe and its suppliers, if any. The intellectual
- *  and technical concepts contained herein are proprietary to Adobe
- *  and its suppliers and are protected by all applicable intellectual
- *  property laws, including trade secret and copyright laws.
- *  Dissemination of this information or reproduction of this material
- *  is strictly forbidden unless prior written permission is obtained
- *  from Adobe.
- ******************************************************************************/
+/*
+  Copyright 2021 Adobe. All rights reserved.
+  This file is licensed to you under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License. You may obtain a copy
+  of the License at http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software distributed under
+  the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+  OF ANY KIND, either express or implied. See the License for the specific language
+  governing permissions and limitations under the License.
+*/
 
 package com.adobe.marketing.mobile;
 
@@ -24,18 +18,11 @@ final class ConsentConstants {
     static final String EXTENSION_NAME = "com.adobe.consent";
 
     final class EventSource {
-        static final String UPDATE_CONSENT = "com.adobe.eventSource.updateConsent"; //todo move to core
         static final String CONSENT_PREFERENCE = "consent:preferences";
 
         private EventSource() { }
     }
 
-    final class EventType {
-        static final String CONSENT = "com.adobe.eventType.consent"; //todo move to core
-        static final String EDGE = "com.adobe.eventType.edge"; //todo move to core
-
-        private EventType() { }
+    private ConsentConstants() {
     }
-
-    private ConsentConstants() { }
 }

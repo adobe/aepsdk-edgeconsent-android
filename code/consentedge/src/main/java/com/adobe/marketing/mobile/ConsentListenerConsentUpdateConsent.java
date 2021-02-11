@@ -1,19 +1,13 @@
-/* ******************************************************************************
- * ADOBE CONFIDENTIAL
- *  ___________________
- *
- *  Copyright 2021 Adobe
- *  All Rights Reserved.
- *
- *  NOTICE: All information contained herein is, and remains
- *  the property of Adobe and its suppliers, if any. The intellectual
- *  and technical concepts contained herein are proprietary to Adobe
- *  and its suppliers and are protected by all applicable intellectual
- *  property laws, including trade secret and copyright laws.
- *  Dissemination of this information or reproduction of this material
- *  is strictly forbidden unless prior written permission is obtained
- *  from Adobe.
- ******************************************************************************/
+/*
+  Copyright 2021 Adobe. All rights reserved.
+  This file is licensed to you under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License. You may obtain a copy
+  of the License at http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software distributed under
+  the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+  OF ANY KIND, either express or implied. See the License for the specific language
+  governing permissions and limitations under the License.
+*/
 
 package com.adobe.marketing.mobile;
 
@@ -23,16 +17,16 @@ class ConsentListenerConsentUpdateConsent extends ExtensionListener {
      * Constructor.
      *
      * @param extensionApi an instance of {@link ExtensionApi}
-     * @param type         the {@link EventType} this listener is registered to handle
-     * @param source       the {@link EventSource} this listener is registered to handle
+     * @param type         the {@link String} eventType this listener is registered to handle
+     * @param source       the {@link String} eventSource this listener is registered to handle
      */
     ConsentListenerConsentUpdateConsent(final ExtensionApi extensionApi, final String type, final String source) {
         super(extensionApi, type, source);
     }
 
     /**
-     * Method that gets called when event with event type {@link ConsentConstants.EventType#CONSENT}
-     * and with event source {@link ConsentConstants.EventSource#UPDATE_CONSENT}  is dispatched through eventHub.
+     * Method that gets called when event with event type {@link EventType#CONSENT}
+     * and with event source {@link EventSource#UPDATE_CONSENT}  is dispatched through eventHub.
      * <p>
      *
      * @param event the consent update {@link Event} to be processed
@@ -40,14 +34,14 @@ class ConsentListenerConsentUpdateConsent extends ExtensionListener {
     @Override
     public void hear(final Event event) {
         if (event == null || event.getEventData() == null) {
-            Log.warning(ConsentConstants.LOG_TAG, "Event or Event data is null. Ignoring the event listened by ConsentListenerConsentUpdateConsent listener");
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Event or Event data is null. Ignoring the event listened by ConsentListenerConsentUpdateConsent");
             return;
         }
 
         final ConsentExtension parentExtension = (ConsentExtension) getParentExtension();
 
         if (parentExtension == null) {
-            Log.warning(ConsentConstants.LOG_TAG,
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
                     "The parent extension, associated with the ConsentListenerConsentUpdateConsent is null, ignoring the consent update event.");
             return;
         }
