@@ -11,7 +11,7 @@
 
 package com.adobe.marketing.mobile;
 
-import com.adobe.marketing.mobile.Consent;
+import com.adobe.marketing.mobile.consent.Consent;
 
 import org.junit.Test;
 

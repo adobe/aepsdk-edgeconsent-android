@@ -22,7 +22,7 @@ import android.util.Log;
 
 import com.adobe.marketing.mobile.AdobeCallback;
 import com.adobe.marketing.mobile.Assurance;
-import com.adobe.marketing.mobile.Consent;
+import com.adobe.marketing.mobile.consent.Consent;
 import com.adobe.marketing.mobile.Edge;
 import com.adobe.marketing.mobile.Identity;
 import com.adobe.marketing.mobile.InvalidInitException;

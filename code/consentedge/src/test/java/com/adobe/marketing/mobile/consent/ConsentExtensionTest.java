@@ -11,6 +11,11 @@
 
 package com.adobe.marketing.mobile;
 
+import com.adobe.marketing.mobile.consent.ConsentConstants;
+import com.adobe.marketing.mobile.consent.ConsentExtension;
+import com.adobe.marketing.mobile.consent.ConsentListenerConsentUpdateConsent;
+import com.adobe.marketing.mobile.consent.ConsentListenerEdgeConsentPreference;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
