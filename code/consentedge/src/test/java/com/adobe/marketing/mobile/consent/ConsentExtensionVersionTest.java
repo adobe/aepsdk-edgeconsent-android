@@ -9,9 +9,8 @@
   governing permissions and limitations under the License.
 */
 
-package com.adobe.marketing.mobile;
+package com.adobe.marketing.mobile.consent;
 
-import com.adobe.marketing.mobile.consent.Consent;
 
 import org.junit.Test;
 

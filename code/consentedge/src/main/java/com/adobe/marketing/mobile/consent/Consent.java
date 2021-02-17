@@ -9,7 +9,12 @@
   governing permissions and limitations under the License.
 */
 
-package com.adobe.marketing.mobile;
+package com.adobe.marketing.mobile.consent;
+
+import com.adobe.marketing.mobile.ExtensionError;
+import com.adobe.marketing.mobile.ExtensionErrorCallback;
+import com.adobe.marketing.mobile.LoggingMode;
+import com.adobe.marketing.mobile.MobileCore;
 
 public class Consent {
 

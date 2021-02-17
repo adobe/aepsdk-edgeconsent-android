@@ -9,7 +9,15 @@
   governing permissions and limitations under the License.
 */
 
-package com.adobe.marketing.mobile;
+package com.adobe.marketing.mobile.consent;
+
+import com.adobe.marketing.mobile.Event;
+import com.adobe.marketing.mobile.Extension;
+import com.adobe.marketing.mobile.ExtensionApi;
+import com.adobe.marketing.mobile.ExtensionError;
+import com.adobe.marketing.mobile.ExtensionErrorCallback;
+import com.adobe.marketing.mobile.LoggingMode;
+import com.adobe.marketing.mobile.MobileCore;
 
 class ConsentExtension extends Extension {
 
@@ -20,9 +28,9 @@ class ConsentExtension extends Extension {
      * Called during the Consent extension's registration.
      * The following listeners are registered during this extension's registration.
      * <ul>
-     *     <li> Listener {@link ConsentListenerConsentUpdateConsent} to listen for event with eventType {@link EventType#CONSENT}
-     *     and EventSource {@link EventSource#UPDATE_CONSENT}</li>
-     *     <li> Listener {@link ConsentListenerEdgeConsentPreference} to listen for event with eventType {@link EventType#EDGE}
+     *     <li> Listener {@link ConsentListenerConsentUpdateConsent} to listen for event with eventType {@link ConsentConstants.EventType#CONSENT}
+     *     and EventSource {@link ConsentConstants.EventSource#UPDATE_CONSENT}</li>
+     *     <li> Listener {@link ConsentListenerEdgeConsentPreference} to listen for event with eventType {@link ConsentConstants.EventType#EDGE}
      *     and EventSource {@link ConsentConstants.EventSource#CONSENT_PREFERENCE}</li>
      * </ul>
      * <p>
@@ -40,8 +48,8 @@ class ConsentExtension extends Extension {
                         extensionError.getErrorName()));
             }
         };
-        extensionApi.registerEventListener(EventType.CONSENT.getName(), EventSource.UPDATE_CONSENT.getName(), ConsentListenerConsentUpdateConsent.class, listenerErrorCallback);
-        extensionApi.registerEventListener(EventType.EDGE.getName(), ConsentConstants.EventSource.CONSENT_PREFERENCE, ConsentListenerEdgeConsentPreference.class, listenerErrorCallback);
+        extensionApi.registerEventListener(ConsentConstants.EventType.CONSENT, ConsentConstants.EventSource.UPDATE_CONSENT, ConsentListenerConsentUpdateConsent.class, listenerErrorCallback);
+        extensionApi.registerEventListener(ConsentConstants.EventType.EDGE, ConsentConstants.EventSource.CONSENT_PREFERENCE, ConsentListenerEdgeConsentPreference.class, listenerErrorCallback);
     }
 
     /**

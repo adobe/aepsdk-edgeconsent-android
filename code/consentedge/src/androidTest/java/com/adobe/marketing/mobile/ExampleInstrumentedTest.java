@@ -15,7 +15,7 @@
  *  from Adobe.
  ******************************************************************************/
 
-package com.adobe.marketing.mobile.consent;
+package com.adobe.marketing.mobile;
 
 import android.content.Context;
 

@@ -9,7 +9,8 @@
   governing permissions and limitations under the License.
 */
 
-package com.adobe.marketing.mobile;
+package com.adobe.marketing.mobile.consent;
+
 
 final class ConsentConstants {
 
@@ -19,8 +20,16 @@ final class ConsentConstants {
 
     final class EventSource {
         static final String CONSENT_PREFERENCE = "consent:preferences";
-
+        static final String UPDATE_CONSENT = "com.adobe.eventSource.updateConsent";
+        static final String REQUEST_CONSENT = "com.adobe.eventSource.requestConsent";
         private EventSource() { }
+    }
+
+    final class EventType {
+        static final String CONSENT = "com.adobe.eventType.consent";
+        static final String EDGE = "com.adobe.eventType.edge";
+
+        private EventType() { }
     }
 
     private ConsentConstants() {

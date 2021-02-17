@@ -9,7 +9,13 @@
   governing permissions and limitations under the License.
 */
 
-package com.adobe.marketing.mobile;
+package com.adobe.marketing.mobile.consent;
+
+import com.adobe.marketing.mobile.Event;
+import com.adobe.marketing.mobile.ExtensionApi;
+import com.adobe.marketing.mobile.ExtensionListener;
+import com.adobe.marketing.mobile.LoggingMode;
+import com.adobe.marketing.mobile.MobileCore;
 
 class ConsentListenerConsentUpdateConsent extends ExtensionListener {
 
@@ -25,8 +31,8 @@ class ConsentListenerConsentUpdateConsent extends ExtensionListener {
     }
 
     /**
-     * Method that gets called when event with event type {@link EventType#CONSENT}
-     * and with event source {@link EventSource#UPDATE_CONSENT}  is dispatched through eventHub.
+     * Method that gets called when event with event type {@link ConsentConstants.EventType#CONSENT}
+     * and with event source {@link ConsentConstants.EventSource#UPDATE_CONSENT}  is dispatched through eventHub.
      * <p>
      *
      * @param event the consent update {@link Event} to be processed
@@ -38,7 +44,7 @@ class ConsentListenerConsentUpdateConsent extends ExtensionListener {
             return;
         }
 
-        final ConsentExtension parentExtension = (ConsentExtension) getParentExtension();
+        final ConsentExtension parentExtension = getConsentExtension();
 
         if (parentExtension == null) {
             MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
@@ -49,4 +55,13 @@ class ConsentListenerConsentUpdateConsent extends ExtensionListener {
         parentExtension.handleConsentUpdate(event);
     }
 
+
+    /**
+     * Returns the parent extension associated with the listener.
+     *
+     * @return {a @link ConsentExtension} object registered with the eventHub
+     */
+    ConsentExtension getConsentExtension() {
+        return (ConsentExtension) getParentExtension();
+    }
 }

@@ -9,7 +9,13 @@
   governing permissions and limitations under the License.
 */
 
-package com.adobe.marketing.mobile;
+package com.adobe.marketing.mobile.consent;
+
+import com.adobe.marketing.mobile.Event;
+import com.adobe.marketing.mobile.ExtensionApi;
+import com.adobe.marketing.mobile.ExtensionListener;
+import com.adobe.marketing.mobile.LoggingMode;
+import com.adobe.marketing.mobile.MobileCore;
 
 class ConsentListenerEdgeConsentPreference extends ExtensionListener {
 
@@ -25,7 +31,7 @@ class ConsentListenerEdgeConsentPreference extends ExtensionListener {
     }
 
     /**
-     * Method that gets called when event with event type {@link EventType#EDGE}
+     * Method that gets called when event with event type {@link ConsentConstants.EventType#EDGE}
      * and with event source {@link ConsentConstants.EventSource#CONSENT_PREFERENCE}  is dispatched through eventHub.
      *
      * @param event the edge request {@link Event} to be processed
@@ -37,7 +43,7 @@ class ConsentListenerEdgeConsentPreference extends ExtensionListener {
             return;
         }
 
-        final ConsentExtension parentExtension = (ConsentExtension) getParentExtension();
+        final ConsentExtension parentExtension = getConsentExtension();
 
         if (parentExtension == null) {
             MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
@@ -46,5 +52,14 @@ class ConsentListenerEdgeConsentPreference extends ExtensionListener {
         }
 
         parentExtension.handleEdgeConsentPreference(event);
+    }
+
+    /**
+     * Returns the parent extension associated with the listener.
+     *
+     * @return {a @link ConsentExtension} object registered with the eventHub
+     */
+    ConsentExtension getConsentExtension() {
+        return (ConsentExtension) getParentExtension();
     }
 }

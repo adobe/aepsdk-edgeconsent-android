@@ -9,18 +9,20 @@
   governing permissions and limitations under the License.
 */
 
-package com.adobe.marketing.mobile;
+package com.adobe.marketing.mobile.consent;
 
-import com.adobe.marketing.mobile.consent.ConsentConstants;
-import com.adobe.marketing.mobile.consent.ConsentExtension;
-import com.adobe.marketing.mobile.consent.ConsentListenerConsentUpdateConsent;
-import com.adobe.marketing.mobile.consent.ConsentListenerEdgeConsentPreference;
+import com.adobe.marketing.mobile.Event;
+import com.adobe.marketing.mobile.ExtensionApi;
+import com.adobe.marketing.mobile.ExtensionError;
+import com.adobe.marketing.mobile.ExtensionErrorCallback;
+import com.adobe.marketing.mobile.MobileCore;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -62,17 +64,17 @@ import static org.mockito.Mockito.verify;
                 anyString(), any(Class.class),any(ExtensionErrorCallback.class));
 
         // verify listeners are registered with correct event source and type
-        verify(mockExtensionApi, times(1)).registerEventListener(eq(EventType.CONSENT.getName()),
-                eq(EventSource.UPDATE_CONSENT.getName()), eq(ConsentListenerConsentUpdateConsent.class),any(ExtensionErrorCallback.class));
-        verify(mockExtensionApi, times(1)).registerEventListener(eq(EventType.EDGE.getName()),
+        verify(mockExtensionApi, times(1)).registerEventListener(ArgumentMatchers.eq(ConsentConstants.EventType.CONSENT),
+                ArgumentMatchers.eq(ConsentConstants.EventSource.UPDATE_CONSENT), eq(ConsentListenerConsentUpdateConsent.class),any(ExtensionErrorCallback.class));
+        verify(mockExtensionApi, times(1)).registerEventListener(eq(ConsentConstants.EventType.EDGE),
                 eq(ConsentConstants.EventSource.CONSENT_PREFERENCE), eq(ConsentListenerEdgeConsentPreference.class),callbackCaptor.capture());
 
         // verify the callback
         ExtensionErrorCallback extensionErrorCallback = callbackCaptor.getValue();
         Assert.assertNotNull("The extension callback should not be null", extensionErrorCallback);
 
-        // should not crash on calling the callback
-        extensionErrorCallback.error(ExtensionError.UNEXPECTED_ERROR);
+        // TODO - AFTER CORE PACKAGE RESHUFFLE - evaluate this assertion once core exposes ExtensionError class. If not exposed remove it later
+        //extensionErrorCallback.error(ExtensionError.UNEXPECTED_ERROR);
     }
 
     // ========================================================================================
