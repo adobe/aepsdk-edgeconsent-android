@@ -36,7 +36,7 @@ import static org.mockito.Mockito.verify;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Event.class, MobileCore.class, ExtensionApi.class})
-        public class ConsentExtensionTest {
+public class ConsentExtensionTest {
     private ConsentExtension extension;
 
     @Mock
@@ -61,13 +61,13 @@ import static org.mockito.Mockito.verify;
 
         // verify 2 listeners are registered
         verify(mockExtensionApi, times(2)).registerEventListener(anyString(),
-                anyString(), any(Class.class),any(ExtensionErrorCallback.class));
+                anyString(), any(Class.class), any(ExtensionErrorCallback.class));
 
         // verify listeners are registered with correct event source and type
         verify(mockExtensionApi, times(1)).registerEventListener(ArgumentMatchers.eq(ConsentConstants.EventType.CONSENT),
-                ArgumentMatchers.eq(ConsentConstants.EventSource.UPDATE_CONSENT), eq(ConsentListenerConsentUpdateConsent.class),any(ExtensionErrorCallback.class));
+                ArgumentMatchers.eq(ConsentConstants.EventSource.UPDATE_CONSENT), eq(ConsentListenerConsentUpdateConsent.class), any(ExtensionErrorCallback.class));
         verify(mockExtensionApi, times(1)).registerEventListener(eq(ConsentConstants.EventType.EDGE),
-                eq(ConsentConstants.EventSource.CONSENT_PREFERENCE), eq(ConsentListenerEdgeConsentPreference.class),callbackCaptor.capture());
+                eq(ConsentConstants.EventSource.CONSENT_PREFERENCE), eq(ConsentListenerEdgeConsentPreference.class), callbackCaptor.capture());
 
         // verify the callback
         ExtensionErrorCallback extensionErrorCallback = callbackCaptor.getValue();

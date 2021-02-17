@@ -36,7 +36,7 @@ public class ConsentListenerConsentUpdateConsentTest {
     public void setup() {
         mockConsentExtension = Mockito.mock(ConsentExtension.class);
         MobileCore.start(null);
-        listener = spy(new ConsentListenerConsentUpdateConsent(null,ConsentConstants.EventType.EDGE, ConsentConstants.EventSource.CONSENT_PREFERENCE));
+        listener = spy(new ConsentListenerConsentUpdateConsent(null, ConsentConstants.EventType.EDGE, ConsentConstants.EventSource.CONSENT_PREFERENCE));
     }
 
     @Test
