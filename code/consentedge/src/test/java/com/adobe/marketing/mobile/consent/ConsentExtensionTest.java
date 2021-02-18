@@ -73,7 +73,7 @@ public class ConsentExtensionTest {
         ExtensionErrorCallback extensionErrorCallback = callbackCaptor.getValue();
         Assert.assertNotNull("The extension callback should not be null", extensionErrorCallback);
 
-        // TODO - AFTER CORE PACKAGE RESHUFFLE - evaluate this assertion once core exposes ExtensionError class. If not exposed remove it later
+        // TODO - enable when ExtensionError creation is available
         //extensionErrorCallback.error(ExtensionError.UNEXPECTED_ERROR);
     }
 
