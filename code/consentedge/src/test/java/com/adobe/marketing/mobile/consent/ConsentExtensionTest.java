@@ -13,7 +13,6 @@ package com.adobe.marketing.mobile.consent;
 
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.ExtensionApi;
-import com.adobe.marketing.mobile.ExtensionError;
 import com.adobe.marketing.mobile.ExtensionErrorCallback;
 import com.adobe.marketing.mobile.MobileCore;
 
@@ -24,9 +23,15 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 
+import java.util.Map;
+
+import static com.adobe.marketing.mobile.consent.ConsentTestUtil.CreateConsentDataMap;
 import static junit.framework.TestCase.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -42,9 +47,13 @@ public class ConsentExtensionTest {
     @Mock
     ExtensionApi mockExtensionApi;
 
+    @Mock
+    ConsentManager mockConsentManager;
+
 
     @Before
     public void setup() {
+        PowerMockito.mockStatic(MobileCore.class);
         extension = new ConsentExtension(mockExtensionApi);
     }
 
@@ -94,8 +103,97 @@ public class ConsentExtensionTest {
     public void test_getVersion() {
         // test
         String moduleVersion = extension.getVersion();
-        assertEquals("getVesion should return the correct module version", ConsentConstants.EXTENSION_VERSION,
+        assertEquals("getVersion should return the correct module version", ConsentConstants.EXTENSION_VERSION,
                 moduleVersion);
+    }
+
+    // ========================================================================================
+    // handleConsentUpdate
+    // ========================================================================================
+    @Test
+    public void test_handleConsentUpdate() {
+        // setup
+        Event event = buildConsentUpdateEvent("y", "n");
+        final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+
+        // test
+        extension.handleConsentUpdate(event);
+
+        // verify
+        PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
+        MobileCore.dispatchEvent(eventCaptor.capture(), any(ExtensionErrorCallback.class));
+
+        // verify the dispatched event
+        // verify
+        // Initial null and null
+        // Updated YES and NO
+        // Merged  YES and NO
+        Event dispatchedEvent = eventCaptor.getValue();
+        assertEquals(dispatchedEvent.getName(), ConsentConstants.EventNames.EDGE_CONSENT_UPDATE);
+        assertEquals(dispatchedEvent.getType(), ConsentConstants.EventType.EDGE.toLowerCase());
+        assertEquals(dispatchedEvent.getSource(), ConsentConstants.EventSource.UPDATE_CONSENT.toLowerCase());
+        assertEquals(dispatchedEvent.getEventData(), CreateConsentDataMap("y", "n"));
+    }
+
+    @Test
+    public void test_handleConsentUpdate_MergesWithExistingConsents() {
+        // setup
+        Whitebox.setInternalState(extension, "consentManager", mockConsentManager);
+        Mockito.when(mockConsentManager.getCurrentConsents()).thenReturn(new Consents(CreateConsentDataMap("n", "n"))); // set existingConsent to No and No
+        final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+
+        // test
+        extension.handleConsentUpdate(buildConsentUpdateEvent("y", null)); // send second event which overrides collect consent to YES
+
+        // verify
+        // Initial NO and No
+        // Updated YES and null
+        // Merged  YES and NO
+        PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
+        MobileCore.dispatchEvent(eventCaptor.capture(), any(ExtensionErrorCallback.class));
+        Event lastDispatchedEvent = eventCaptor.getValue();
+        assertEquals(lastDispatchedEvent.getEventData(), CreateConsentDataMap("y", "n"));
+    }
+
+    @Test
+    public void test_handleConsentUpdate_NullOrEmptyConsents() {
+        // setup
+        Whitebox.setInternalState(extension, "consentManager", mockConsentManager);
+        Mockito.when(mockConsentManager.getCurrentConsents()).thenReturn(new Consents(CreateConsentDataMap("n", "n"))); // set existingConsent to No and No
+
+        // test
+        extension.handleConsentUpdate(buildConsentUpdateEvent(null, null)); // send second event which overrides collect consent to YES
+
+        // verify
+        // Initial NO and NO
+        // Updated null and null
+        // No edge update event  dispatched
+        PowerMockito.verifyStatic(MobileCore.class, Mockito.times(0));
+        MobileCore.dispatchEvent(any(Event.class), any(ExtensionErrorCallback.class));
+    }
+
+    @Test
+    public void test_handleConsentUpdate_NullEventData() {
+        // setup
+        Event event = new Event.Builder("Consent Response", ConsentConstants.EventType.CONSENT, ConsentConstants.EventSource.UPDATE_CONSENT).setEventData(null).build();
+
+        // test
+        extension.handleConsentUpdate(event); // send second event which overrides collect consent to YES
+
+        // verify
+        PowerMockito.verifyStatic(MobileCore.class, Mockito.times(0));
+        MobileCore.dispatchEvent(any(Event.class), any(ExtensionErrorCallback.class));
+    }
+
+
+    // ========================================================================================
+    // private methods
+    // ========================================================================================
+
+    private Event buildConsentUpdateEvent(final String collectConsentString, final String adIdConsentString) {
+        Map<String, Object> eventData = CreateConsentDataMap(collectConsentString, adIdConsentString);
+        Event event = new Event.Builder("Consent Response", ConsentConstants.EventType.CONSENT, ConsentConstants.EventSource.UPDATE_CONSENT).setEventData(eventData).build();
+        return event;
     }
 
 }

@@ -19,7 +19,11 @@ import com.adobe.marketing.mobile.ExtensionErrorCallback;
 import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
 
+import java.util.Map;
+
 class ConsentExtension extends Extension {
+
+    ConsentManager consentManager;
 
     /**
      * Constructor.
@@ -50,6 +54,7 @@ class ConsentExtension extends Extension {
         };
         extensionApi.registerEventListener(ConsentConstants.EventType.CONSENT, ConsentConstants.EventSource.UPDATE_CONSENT, ConsentListenerConsentUpdateConsent.class, listenerErrorCallback);
         extensionApi.registerEventListener(ConsentConstants.EventType.EDGE, ConsentConstants.EventSource.CONSENT_PREFERENCE, ConsentListenerEdgeConsentPreference.class, listenerErrorCallback);
+        consentManager = new ConsentManager();
     }
 
     /**
@@ -72,12 +77,74 @@ class ConsentExtension extends Extension {
         return ConsentConstants.EXTENSION_VERSION;
     }
 
-    void handleConsentUpdate(final Event event) {
 
+    /**
+     * Use this method to process the event with eventType {@link ConsentConstants.EventType#CONSENT}
+     * and EventSource {@link ConsentConstants.EventSource#UPDATE_CONSENT}.
+     * <p>
+     * 1. Read the event data and extract new available consents.
+     * 2. Merge with the existing consents.
+     * 3. Dispatch the merged consent to edge for processing.
+     *
+     * @param event the {@link Event} to be processed
+     */
+    void handleConsentUpdate(final Event event) {
+        // bail out if event data is empty
+        Map<String, Object> consentData = event.getEventData();
+        if (consentData == null || consentData.isEmpty()) {
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Consent data not found in consent update event. Dropping event.");
+            return;
+        }
+
+        // bail out if no valid consents are found in eventData
+        Consents newConsents = new Consents(consentData);
+        if (newConsents.isEmpty()) {
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Unable to find valid data from consent update event. Dropping event.");
+            return;
+        }
+
+
+        // dispatch obtained consent if current consent is null/empty
+        Consents currentConsents = consentManager.getCurrentConsents();
+        if (currentConsents == null || currentConsents.isEmpty()) {
+            dispatchEdgeConsentUpdateEvent(newConsents);
+            return;
+        }
+
+        // If current consent exists, create a copy and merge with newConsent
+        Consents copyConsent = new Consents(currentConsents);
+        copyConsent.merge(newConsents);
+        dispatchEdgeConsentUpdateEvent(copyConsent);
     }
 
     void handleEdgeConsentPreference(final Event event) {
-        // TODO: Upcoming in PR's
+        // TODO: In Upcoming PR's
+    }
+
+    /**
+     * Dispatches a consent update event with the latest consent represented as event data.
+     * <p>
+     * Does not dispatch the event if the current consent data is null/empty.
+     *
+     * @param consents {@link Consents} object representing the updated consents of AEP SDK
+     */
+    private void dispatchEdgeConsentUpdateEvent(final Consents consents) {
+        // do not send an event if the consent data is empty
+        if (consents == null || consents.isEmpty()) {
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Current consent data is null/empty, not dispatching consent update event.");
+            return;
+        }
+
+        // create and dispatch an consent update event
+        ExtensionErrorCallback<ExtensionError> errorCallback = new ExtensionErrorCallback<ExtensionError>() {
+            @Override
+            public void error(final ExtensionError extensionError) {
+                MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, String.format("Failed to dispatch %s event: Error : %s.", ConsentConstants.EventNames.EDGE_CONSENT_UPDATE,
+                        extensionError.getErrorName()));
+            }
+        };
+        Event event = new Event.Builder(ConsentConstants.EventNames.EDGE_CONSENT_UPDATE, ConsentConstants.EventType.EDGE, ConsentConstants.EventSource.UPDATE_CONSENT).setEventData(consents.asMap()).build();
+        MobileCore.dispatchEvent(event, errorCallback);
     }
 
 }

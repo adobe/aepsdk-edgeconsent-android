@@ -33,7 +33,6 @@ class ConsentListenerConsentUpdateConsent extends ExtensionListener {
     /**
      * Method that gets called when event with event type {@link ConsentConstants.EventType#CONSENT}
      * and with event source {@link ConsentConstants.EventSource#UPDATE_CONSENT}  is dispatched through eventHub.
-     * <p>
      *
      * @param event the consent update {@link Event} to be processed
      */
