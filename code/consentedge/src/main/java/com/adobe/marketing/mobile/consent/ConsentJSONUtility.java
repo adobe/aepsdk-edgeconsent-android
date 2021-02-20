@@ -35,7 +35,7 @@ class ConsentJSONUtility {
             return null;
         }
 
-        final Map<String, Object> serializedMap = new HashMap<String, Object>();
+        final Map<String, Object> serializedMap = new HashMap<>();
         final Iterator<String> keysIterator = jsonObject.keys();
 
         while (keysIterator.hasNext()) {
@@ -75,7 +75,7 @@ class ConsentJSONUtility {
             return null;
         }
 
-        final List<Object> serializedArray = new ArrayList<Object>();
+        final List<Object> serializedArray = new ArrayList<>();
 
         for (int i = 0, c = jsonValueAsJsonArray.length(); i < c; ++i) {
             Object element;
@@ -87,5 +87,7 @@ class ConsentJSONUtility {
 
         return serializedArray;
     }
+
+    private ConsentJSONUtility(){}
 
 }

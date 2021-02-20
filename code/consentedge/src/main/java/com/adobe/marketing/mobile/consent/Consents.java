@@ -101,7 +101,7 @@ public class Consents {
             return null;
         }
 
-        Map<String, Object> allConsents = new HashMap<String, Object>();
+        Map<String, Object> allConsents = new HashMap<>();
 
         // add collect consent if it exist
         Map<String, String> collectConsentMap = getConsentMapFromValue(collectConsent);
@@ -119,7 +119,7 @@ public class Consents {
         // add Metadata
         if (metadata != null) {
             // check for each metadata value and add them in the map
-            Map<String, String> metaDataMap = new HashMap<String, String>();
+            Map<String, String> metaDataMap = new HashMap<>();
             if (metadata.getTime() != null) {
                 metaDataMap.put(ConsentConstants.EventDataKey.TIME, metadata.getTime());
             }
@@ -127,7 +127,7 @@ public class Consents {
         }
 
 
-        Map<String, Object> consentMap = new HashMap<String, Object>();
+        Map<String, Object> consentMap = new HashMap<>();
         consentMap.put(ConsentConstants.EventDataKey.CONSENTS, allConsents);
         return consentMap;
     }
@@ -176,7 +176,7 @@ public class Consents {
             return null;
         }
 
-        Map<String, String> consentMap = new HashMap<String, String>();
+        Map<String, String> consentMap = new HashMap<>();
         consentMap.put(ConsentConstants.EventDataKey.VALUE, value.stringValue());
         return consentMap;
     }

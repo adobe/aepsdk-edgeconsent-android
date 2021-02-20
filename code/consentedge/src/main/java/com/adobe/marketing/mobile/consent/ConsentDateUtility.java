@@ -16,8 +16,9 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class ConsentDateUtility {
+class ConsentDateUtility {
 
+    private ConsentDateUtility(){}
     private static final String TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
     /**
@@ -29,7 +30,7 @@ public class ConsentDateUtility {
      * @return {@code timestamp} formatted to a string in the format of 'yyyy-MM-dd'T'HH:mm:ss'Z'',
      * or an empty string if {@code timestamp} is null
      */
-    public static String dateToISO8601String(final Date timestamp) {
+    static String dateToISO8601String(final Date timestamp) {
         if (timestamp == null) {
             return "";
         }

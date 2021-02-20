@@ -18,7 +18,7 @@ public enum ConsentValue {
     YES("y"),
     NO("n");
 
-    private String consentStatusString;
+    private String consentString;
 
     /**
      * Returns {@link ConsentValue} value of the provided string.
@@ -27,24 +27,24 @@ public enum ConsentValue {
      *
      * @return {@link ConsentValue} value for provided status string
      */
-    ConsentValue(final String consentStatusString) {
-        this.consentStatusString = consentStatusString;
+    ConsentValue(final String consentString) {
+        this.consentString = consentString;
     }
 
     public String stringValue() {
-        return consentStatusString;
+        return consentString;
     }
 
     /**
      * Returns {@link ConsentValue} enum value for the provided string.
      * <p>
-     * Defaults to NO if the provided string is not a valid {@link ConsentValue} enum value
+     * returns null if the provided string is not an valid enum string
      *
-     * @return {@link ConsentValue} value for provided status string
+     * @param consentString string value of consent thats needs to be looked up
+     * @return {@link ConsentValue} value for provided consent string
      */
-    public static ConsentValue get(final String statusString) {
-        ConsentValue enumValue = lookup.get(statusString);
-        return enumValue;
+    public static ConsentValue get(final String consentString) {
+        return lookup.get(consentString);
     }
 
     // generate look up table on load time

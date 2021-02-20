@@ -32,10 +32,10 @@ class ConsentManager {
     }
 
     /**
-     * Call this method to merge the {@link #currentConsents} maintained by the {@link ConsentManager} provided Consent.
-     * <p>
+     * Merges the provided {@link Consents} with {@link #currentConsents} and persists them in shared Preference
      *
-     * @return {}
+     * @param newConsents the newly obtained constents thats needs to be merged with existing consents
+     * @return {@link Consents} representing the current Consents after the merge
      */
     Consents mergeAndPersist(final Consents newConsents) {
         // if new consents is null or empty
@@ -65,7 +65,7 @@ class ConsentManager {
     }
 
     /**
-     * Call this method to save the current consent values to sharedPreferences.
+     * Call this method to save the updated consent values to sharedPreferences.
      * <p>
      * The value of {@link #currentConsents} is converted to jsonString and stored in the SharedPreference.
      * Saving to preferences fails if {@link SharedPreferences} or {@link SharedPreferences.Editor} is null.

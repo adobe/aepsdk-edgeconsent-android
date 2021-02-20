@@ -90,14 +90,14 @@ class ConsentExtension extends Extension {
      */
     void handleConsentUpdate(final Event event) {
         // bail out if event data is empty
-        Map<String, Object> consentData = event.getEventData();
+        final Map<String, Object> consentData = event.getEventData();
         if (consentData == null || consentData.isEmpty()) {
             MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Consent data not found in consent update event. Dropping event.");
             return;
         }
 
         // bail out if no valid consents are found in eventData
-        Consents newConsents = new Consents(consentData);
+        final Consents newConsents = new Consents(consentData);
         if (newConsents.isEmpty()) {
             MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Unable to find valid data from consent update event. Dropping event.");
             return;
@@ -105,14 +105,14 @@ class ConsentExtension extends Extension {
 
 
         // dispatch obtained consent if current consent is null/empty
-        Consents currentConsents = consentManager.getCurrentConsents();
+        final Consents currentConsents = consentManager.getCurrentConsents();
         if (currentConsents == null || currentConsents.isEmpty()) {
             dispatchEdgeConsentUpdateEvent(newConsents);
             return;
         }
 
         // If current consent exists, create a copy and merge with newConsent
-        Consents copyConsent = new Consents(currentConsents);
+        final Consents copyConsent = new Consents(currentConsents);
         copyConsent.merge(newConsents);
         dispatchEdgeConsentUpdateEvent(copyConsent);
     }
@@ -122,9 +122,9 @@ class ConsentExtension extends Extension {
     }
 
     /**
-     * Dispatches a consent update event with the latest consent represented as event data.
+     * Dispatches an {@link ConsentConstants.EventNames#EDGE_CONSENT_UPDATE} event with the latest consents in the event data.
      * <p>
-     * Does not dispatch the event if the current consent data is null/empty.
+     * Does not dispatch the event if the latests consents is null/empty.
      *
      * @param consents {@link Consents} object representing the updated consents of AEP SDK
      */
@@ -143,7 +143,7 @@ class ConsentExtension extends Extension {
                         extensionError.getErrorName()));
             }
         };
-        Event event = new Event.Builder(ConsentConstants.EventNames.EDGE_CONSENT_UPDATE, ConsentConstants.EventType.EDGE, ConsentConstants.EventSource.UPDATE_CONSENT).setEventData(consents.asMap()).build();
+        final Event event = new Event.Builder(ConsentConstants.EventNames.EDGE_CONSENT_UPDATE, ConsentConstants.EventType.EDGE, ConsentConstants.EventSource.UPDATE_CONSENT).setEventData(consents.asMap()).build();
         MobileCore.dispatchEvent(event, errorCallback);
     }
 

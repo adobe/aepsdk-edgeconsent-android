@@ -27,7 +27,7 @@ public class ConsentMetadata {
      *
      * @param date must be a valid ISO8601 date String
      */
-    public ConsentMetadata(String date) {
+    public ConsentMetadata(final String date) {
         this.time = date;
     }
 }
