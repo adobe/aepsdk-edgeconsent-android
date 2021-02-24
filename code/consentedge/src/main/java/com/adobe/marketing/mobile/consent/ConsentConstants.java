@@ -19,8 +19,6 @@ final class ConsentConstants {
 
     final class EventDataKey {
         static final String CONSENTS = "consents";
-        static final String ADID = "adId";
-        static final String COLLECT = "collect";
         static final String MEATADATA = "metadata";
         static final String TIME = "time";
         static final String VALUE = "val";

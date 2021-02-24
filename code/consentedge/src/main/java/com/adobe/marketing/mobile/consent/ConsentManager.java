@@ -27,6 +27,11 @@ class ConsentManager {
 
     private Consents currentConsents;
 
+    /**
+     * Constructor
+     * <p>
+     * Initializes the {@link #currentConsents} from data in persistence
+     */
     ConsentManager() {
         loadFromPreference();
     }
@@ -34,15 +39,10 @@ class ConsentManager {
     /**
      * Merges the provided {@link Consents} with {@link #currentConsents} and persists them in shared Preference
      *
-     * @param newConsents the newly obtained constents thats needs to be merged with existing consents
+     * @param newConsents the newly obtained consents thats needs to be merged with existing consents
      * @return {@link Consents} representing the current Consents after the merge
      */
     Consents mergeAndPersist(final Consents newConsents) {
-        // if new consents is null or empty
-        if (newConsents == null || newConsents.isEmpty()) {
-            return currentConsents;
-        }
-
         // merge and persist
         if (currentConsents == null) {
             currentConsents = new Consents(newConsents);
@@ -50,7 +50,8 @@ class ConsentManager {
             currentConsents.merge(newConsents);
         }
         saveToPreference();
-        return currentConsents;
+        // make a copy of the merged consents and return
+        return new Consents(currentConsents);
     }
 
     /**
@@ -63,6 +64,7 @@ class ConsentManager {
     Consents getCurrentConsents() {
         return currentConsents;
     }
+
 
     /**
      * Call this method to save the updated consent values to sharedPreferences.
@@ -89,7 +91,7 @@ class ConsentManager {
             return;
         }
 
-        final JSONObject jsonObject = new JSONObject(currentConsents.asMap());
+        final JSONObject jsonObject = new JSONObject(currentConsents.asXDMMap());
         final String jsonString = jsonObject.toString();
         editor.putString(ConsentConstants.DataStoreKey.CONSENT, jsonString);
         editor.apply();

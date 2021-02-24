@@ -77,12 +77,11 @@ class ConsentExtension extends Extension {
         return ConsentConstants.EXTENSION_VERSION;
     }
 
-
     /**
      * Use this method to process the event with eventType {@link ConsentConstants.EventType#CONSENT}
      * and EventSource {@link ConsentConstants.EventSource#UPDATE_CONSENT}.
      * <p>
-     * 1. Read the event data and extract new available consents.
+     * 1. Reads the event data and extract new available consents in XDM Format.
      * 2. Merge with the existing consents.
      * 3. Dispatch the merged consent to edge for processing.
      *
@@ -103,22 +102,40 @@ class ConsentExtension extends Extension {
             return;
         }
 
+        // set the timestamp and merge with existing consents
+        newConsents.setTimeStamp(event.getTimestamp());
+        Consents mergedConsent = consentManager.mergeAndPersist(newConsents);
 
-        // dispatch obtained consent if current consent is null/empty
-        final Consents currentConsents = consentManager.getCurrentConsents();
-        if (currentConsents == null || currentConsents.isEmpty()) {
-            dispatchEdgeConsentUpdateEvent(newConsents);
-            return;
-        }
-
-        // If current consent exists, create a copy and merge with newConsent
-        final Consents copyConsent = new Consents(currentConsents);
-        copyConsent.merge(newConsents);
-        dispatchEdgeConsentUpdateEvent(copyConsent);
+        // share and dispatch the updated consents
+        createXDMSharedState(mergedConsent, event);
+        dispatchEdgeConsentUpdateEvent(mergedConsent);
     }
 
     void handleEdgeConsentPreference(final Event event) {
         // TODO: In Upcoming PR's
+    }
+
+
+    /**
+     * Creates an XDM Shared state with the consents provided.
+     * <p>
+     * Will not share the XDMSharedEventState if consents is null.
+     *
+     * @param consents {@link Consents} object representing the latest consents
+     */
+    private void createXDMSharedState(final Consents consents, final Event event) {
+        if (consents == null) {
+            return;
+        }
+        ExtensionErrorCallback<ExtensionError> errorCallback = new ExtensionErrorCallback<ExtensionError>() {
+            @Override
+            public void error(final ExtensionError extensionError) {
+                MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, String.format("Failed create XDM shared state %s event: Error : %s.", ConsentConstants.EventNames.EDGE_CONSENT_UPDATE,
+                        extensionError.getErrorName()));
+            }
+        };
+
+        getApi().setXDMSharedEventState(consents.asXDMMap(), event, errorCallback);
     }
 
     /**
@@ -131,7 +148,7 @@ class ConsentExtension extends Extension {
     private void dispatchEdgeConsentUpdateEvent(final Consents consents) {
         // do not send an event if the consent data is empty
         if (consents == null || consents.isEmpty()) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Current consent data is null/empty, not dispatching consent update event.");
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Consent data is null/empty, not dispatching Edge Consent Update event.");
             return;
         }
 
@@ -143,7 +160,7 @@ class ConsentExtension extends Extension {
                         extensionError.getErrorName()));
             }
         };
-        final Event event = new Event.Builder(ConsentConstants.EventNames.EDGE_CONSENT_UPDATE, ConsentConstants.EventType.EDGE, ConsentConstants.EventSource.UPDATE_CONSENT).setEventData(consents.asMap()).build();
+        final Event event = new Event.Builder(ConsentConstants.EventNames.EDGE_CONSENT_UPDATE, ConsentConstants.EventType.EDGE, ConsentConstants.EventSource.UPDATE_CONSENT).setEventData(consents.asXDMMap()).build();
         MobileCore.dispatchEvent(event, errorCallback);
     }
 

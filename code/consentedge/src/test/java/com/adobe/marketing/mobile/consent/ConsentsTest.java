@@ -5,7 +5,7 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.adobe.marketing.mobile.consent.ConsentTestUtil.CreateConsentDataMap;
+import static com.adobe.marketing.mobile.consent.ConsentTestUtil.CreateConsentXDMMap;
 import static com.adobe.marketing.mobile.consent.ConsentTestUtil.SAMPLE_METADATA_TIMESTAMP;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -14,110 +14,52 @@ import static org.junit.Assert.assertTrue;
 
 public class ConsentsTest {
 
-
-    @Test
-    public void test_ConsentsGetterAndSetter() {
-        // setup
-        Consents consents = new Consents();
-
-        // verify
-        assertNull(consents.getCollectConsent());
-        assertNull(consents.getAdIdConsent());
-        assertNull(consents.getMetadata());
-        assertTrue(consents.isEmpty());
-
-        // test and verify collectConsent Getter/Setter
-        consents.setCollectConsent(ConsentValue.NO);
-        assertEquals(ConsentValue.NO, consents.getCollectConsent());
-
-        // test and verify adIdConsent Getter/Setter
-        consents.setAdIdConsent(ConsentValue.YES);
-        assertEquals(ConsentValue.YES, consents.getAdIdConsent());
-        assertFalse(consents.isEmpty());
-    }
-
-    @Test
-    public void test_CopyConstructor() {
-        // setup
-        Map<String, Object> consentData = CreateConsentDataMap("y", "n");
-        Consents originalConsent = new Consents(consentData, SAMPLE_METADATA_TIMESTAMP);
-
-        // test
-        Consents copiedConsent = new Consents(originalConsent);
-
-        assertEquals(copiedConsent.getCollectConsent(), originalConsent.getCollectConsent());
-        assertEquals(copiedConsent.getAdIdConsent(), originalConsent.getAdIdConsent());
-        assertEquals(copiedConsent.getMetadata(), originalConsent.getMetadata());
-    }
-
-
+    // ========================================================================================
+    // Test Scenarios   : All possible XDMFormatted Map values
+    // Test method      : Constructor, isEmpty
+    // ========================================================================================
     @Test
     public void test_ConsentsCreation_With_ConsentDataMap() {
         // setup
-        Map<String, Object> consentData = CreateConsentDataMap("y", "n");
+        Map<String, Object> consentData = CreateConsentXDMMap("y", "n", "vi", SAMPLE_METADATA_TIMESTAMP);
 
         // test
         Consents consents = new Consents(consentData);
 
         // verify
-        assertEquals(ConsentValue.YES, consents.getCollectConsent());
-        assertEquals(ConsentValue.NO, consents.getAdIdConsent());
+        assertEquals("y", ConsentTestUtil.readCollectConsent(consents));
+        assertEquals("n", ConsentTestUtil.readAdIdConsent(consents));
+        assertEquals("vi", ConsentTestUtil.readPersonalizeConsent(consents));
+        assertEquals(SAMPLE_METADATA_TIMESTAMP, ConsentTestUtil.readTimeStamp(consents));
         assertFalse(consents.isEmpty());
     }
 
+    //
     @Test
-    public void test_ConsentsCreation_With_AdIdOnlyMap() {
+    public void test_ConsentsCreation_With_CollectConsentOnly() {
         // setup
-        Map<String, Object> consentData = CreateConsentDataMap(null, "n");
+        Map<String, Object> consentData = ConsentTestUtil.CreateConsentXDMMap("n");
 
         // test
         Consents consents = new Consents(consentData);
 
         // verify
-        assertNull(consents.getCollectConsent());
-        assertEquals(ConsentValue.NO, consents.getAdIdConsent());
-        assertFalse(consents.isEmpty());
+        assertEquals("n", ConsentTestUtil.readCollectConsent(consents));
+        assertNull(ConsentTestUtil.readAdIdConsent(consents));
+        assertNull(ConsentTestUtil.readPersonalizeConsent(consents));
+        assertNull(ConsentTestUtil.readTimeStamp(consents));
     }
 
-    @Test
-    public void test_ConsentsCreation_With_CollectConsentOnlyMap() {
-        // setup
-        Map<String, Object> consentData = CreateConsentDataMap("y", null);
-
-        // test
-        Consents consents = new Consents(consentData);
-
-        // verify
-        assertEquals(ConsentValue.YES, consents.getCollectConsent());
-        assertNull(consents.getAdIdConsent());
-        assertFalse(consents.isEmpty());
-    }
 
     @Test
     public void test_ConsentsCreation_With_NoConsentDetailsInMap() {
         // setup
-        Map<String, Object> consentData = CreateConsentDataMap(null, null);
+        Map<String, Object> consentData = ConsentTestUtil.CreateConsentXDMMap(null, null);
 
         // test
         Consents consents = new Consents(consentData);
 
         // verify
-        assertNull(consents.getAdIdConsent());
-        assertNull(consents.getCollectConsent());
-        assertTrue(consents.isEmpty());
-    }
-
-    @Test
-    public void test_ConsentsCreation_With_InvalidValueForAdIDAndCollectConsent() {
-        // setup
-        Map<String, Object> consentData = CreateConsentDataMap("invalid", "");
-
-        // test
-        Consents consents = new Consents(consentData);
-
-        // verify
-        assertNull(consents.getAdIdConsent());
-        assertNull(consents.getCollectConsent());
         assertTrue(consents.isEmpty());
     }
 
@@ -127,19 +69,16 @@ public class ConsentsTest {
         Consents consents = new Consents(new HashMap<String, Object>());
 
         // verify
-        assertNull(consents.getAdIdConsent());
-        assertNull(consents.getCollectConsent());
         assertTrue(consents.isEmpty());
     }
 
     @Test
     public void test_ConsentsCreation_With_NullConsentMap() {
         // test
-        Consents consents = new Consents(new HashMap<String, Object>());
+        Map<String, Object> xdmMap = null;
+        Consents consents = new Consents(xdmMap);
 
         // verify
-        assertNull(consents.getAdIdConsent());
-        assertNull(consents.getCollectConsent());
         assertTrue(consents.isEmpty());
     }
 
@@ -153,69 +92,101 @@ public class ConsentsTest {
         });
 
         // verify
-        assertNull(consents.getAdIdConsent());
-        assertNull(consents.getCollectConsent());
         assertTrue(consents.isEmpty());
     }
 
+    // ========================================================================================
+    // Test Scenarios   : All possible Consent object values
+    // Test method      : Copy Constructor, isEmpty
+    // ========================================================================================
+
     @Test
-    public void test_AsMap() {
+    public void test_CopyConstructor() {
         // setup
-        Map<String, Object> consentData = CreateConsentDataMap("y", "n");
+        Map<String, Object> consentData = ConsentTestUtil.CreateConsentXDMMap("y", "n");
+        Consents originalConsent = new Consents(consentData);
+
+        // test
+        Consents copiedConsent = new Consents(originalConsent);
+
+        assertEquals("y", ConsentTestUtil.readCollectConsent(copiedConsent));
+        assertEquals("n", ConsentTestUtil.readAdIdConsent(copiedConsent));
+    }
+
+    @Test
+    public void test_CopyConstructor_nullConsents() {
+        // setup
+        Consents originalConsent = null;
+
+        // test
+        Consents copiedConsent = new Consents(originalConsent);
+
+        // verify
+        assertTrue(copiedConsent.isEmpty());
+    }
+
+    // ========================================================================================
+    // Test method : AsXDMMap
+    // ========================================================================================
+    @Test
+    public void test_AsXDMMap() {
+        // setup
+        Map<String, Object> consentData = CreateConsentXDMMap("y", "n", "vi", SAMPLE_METADATA_TIMESTAMP);
 
         // test and verify
         Consents consents = new Consents(consentData);
-        assertEquals(consentData, consents.asMap());
+        assertEquals(consentData, consents.asXDMMap());
     }
 
     @Test
     public void test_AsMap_whenEmptyConsents() {
         // setup
-        Consents consents = new Consents();
+        Map<String, Object> consentData = ConsentTestUtil.CreateConsentXDMMap(null, null);
+        Consents consents = new Consents(consentData);
 
         // test and verify
-        assertNull(consents.asMap());
+        assertNull(consents.asXDMMap());
     }
 
+    // ========================================================================================
+    // Test method : Merge
+    // ========================================================================================
     @Test
     public void test_merge() {
         // setup
-        Consents baseConsent = new Consents();
-        baseConsent.setAdIdConsent(ConsentValue.YES);
-        baseConsent.setCollectConsent(ConsentValue.NO);
+        Map<String, Object> xdmMap = null;
+        Consents baseConsent = new Consents(xdmMap);
 
         // test
-        Consents firstOverridingConsent = new Consents(CreateConsentDataMap("y", null));
+        Consents firstOverridingConsent = new Consents(CreateConsentXDMMap("y"));
         baseConsent.merge(firstOverridingConsent);
 
         // verify
-        assertEquals(ConsentValue.YES, baseConsent.getCollectConsent());
-        assertEquals(ConsentValue.YES, baseConsent.getAdIdConsent());
-        assertNull(baseConsent.getMetadata());
+        assertEquals("y", ConsentTestUtil.readCollectConsent(baseConsent));
+        assertNull(ConsentTestUtil.readAdIdConsent(baseConsent));
+        assertNull(ConsentTestUtil.readTimeStamp(baseConsent));
 
         // test again
-        Consents secondOverridingConsent = new Consents(CreateConsentDataMap("n", "n"), SAMPLE_METADATA_TIMESTAMP);
+        Consents secondOverridingConsent = new Consents(CreateConsentXDMMap("n", "n", SAMPLE_METADATA_TIMESTAMP));
         baseConsent.merge(secondOverridingConsent);
 
-        assertEquals(ConsentValue.NO, baseConsent.getCollectConsent());
-        assertEquals(ConsentValue.NO, baseConsent.getAdIdConsent());
-        assertEquals(SAMPLE_METADATA_TIMESTAMP, baseConsent.getMetadata().getTime());
+        assertEquals("n", ConsentTestUtil.readCollectConsent(baseConsent));
+        assertEquals("n", ConsentTestUtil.readAdIdConsent(baseConsent));
+        assertEquals(SAMPLE_METADATA_TIMESTAMP, ConsentTestUtil.readTimeStamp(baseConsent));
     }
 
     @Test
     public void test_merge_NullConsent() {
         // setup
-        Consents baseConsent = new Consents();
-        baseConsent.setCollectConsent(ConsentValue.NO);
-        baseConsent.setAdIdConsent(ConsentValue.YES);
+        Consents baseConsent = new Consents(CreateConsentXDMMap("n", null, SAMPLE_METADATA_TIMESTAMP));
 
         // test
         baseConsent.merge(null);
 
         // verify
-        assertEquals(ConsentValue.NO, baseConsent.getCollectConsent());
-        assertEquals(ConsentValue.YES, baseConsent.getAdIdConsent());
-        assertNull(baseConsent.getMetadata());
+        assertEquals("n", ConsentTestUtil.readCollectConsent(baseConsent));
+        assertNull(ConsentTestUtil.readAdIdConsent(baseConsent));
+        assertEquals(SAMPLE_METADATA_TIMESTAMP, ConsentTestUtil.readTimeStamp(baseConsent));
     }
 
 }

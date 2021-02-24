@@ -11,193 +11,109 @@
 
 package com.adobe.marketing.mobile.consent;
 
+
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Consents {
-    private ConsentValue adIdConsent;
-    private ConsentValue collectConsent;
-    private ConsentMetadata metadata;
+class Consents {
+    private Map<String, Object> consents;
 
-    public Consents() {
+    // Suppresses default constructor.
+    private Consents() {
     }
-
-    // copy Constructor
-    Consents(final Consents newConsent) {
-        this.adIdConsent = newConsent.adIdConsent;
-        this.collectConsent = newConsent.collectConsent;
-        this.metadata = newConsent.metadata;
-    }
-
-    Consents(final Map<String, Object> consentData) {
-        this(consentData, null);
-    }
-
-    Consents(final Map<String, Object> consentData, final String iso8601timestamp) {
-        initWithConsentData(consentData);
-        if (iso8601timestamp != null && !iso8601timestamp.isEmpty()) {
-            metadata = new ConsentMetadata(iso8601timestamp);
-        }
-    }
-
-    // ========================================================================================
-    // Public Methods : Setters
-    // ========================================================================================
-    public void setAdIdConsent(final ConsentValue adIdConsent) {
-        this.adIdConsent = adIdConsent;
-    }
-
-    public void setCollectConsent(final ConsentValue collectConsent) {
-        this.collectConsent = collectConsent;
-    }
-
-    // ========================================================================================
-    // Public Methods : Getters
-    // ========================================================================================
-
-    public ConsentValue getAdIdConsent() {
-        return adIdConsent;
-    }
-
-    public ConsentValue getCollectConsent() {
-        return collectConsent;
-    }
-
-    public ConsentMetadata getMetadata() {
-        return metadata;
-    }
-
-    boolean isEmpty() {
-        return adIdConsent == null && collectConsent == null;
-    }
-
-    // ========================================================================================
-    // protected methods
-    // ========================================================================================
 
     /**
-     * Merges the provided {@link Consents} with the current object.
-     * The current object is undisturbed if the provided consent is null.
+     * Copy Constructor.
      *
-     * @param newConsents the consents that needs to be merged
+     * @param newConsents the consents values
      */
-    void merge(final Consents newConsents) {
+    Consents(final Consents newConsents) {
         if (newConsents == null) {
             return;
         }
-        collectConsent = (newConsents.collectConsent != null) ? newConsents.collectConsent : collectConsent;
-        adIdConsent = (newConsents.adIdConsent != null) ? newConsents.adIdConsent : adIdConsent;
-        metadata = (newConsents.metadata != null) ? newConsents.metadata : metadata;
+        this.consents = newConsents.consents;
     }
 
     /**
-     * Dictionary representation of the available consent associated with this {@link Consents} object.
+     * Constructor.
      *
-     * @return {@link Map} representing the Consents in XDM format
+     * @param xdmMap a {@link Map} in consents XDMFormat
      */
-    Map<String, Object> asMap() {
-
-        if (isEmpty()) {
-            return null;
+    Consents(final Map<String, Object> xdmMap) {
+        if (xdmMap == null || xdmMap.isEmpty()) {
+            return;
         }
 
-        Map<String, Object> allConsents = new HashMap<>();
-
-        // add collect consent if it exist
-        Map<String, String> collectConsentMap = getConsentMapFromValue(collectConsent);
-        if (collectConsentMap != null) {
-            allConsents.put(ConsentConstants.EventDataKey.COLLECT, collectConsentMap);
-        }
-
-        // add adId consent if it exist
-        Map<String, String> adIDConsentMap = getConsentMapFromValue(adIdConsent);
-        if (collectConsentMap != null) {
-            allConsents.put(ConsentConstants.EventDataKey.ADID, adIDConsentMap);
-        }
-
-
-        // add Metadata
-        if (metadata != null) {
-            // check for each metadata value and add them in the map
-            Map<String, String> metaDataMap = new HashMap<>();
-            if (metadata.getTime() != null) {
-                metaDataMap.put(ConsentConstants.EventDataKey.TIME, metadata.getTime());
-            }
-            allConsents.put(ConsentConstants.EventDataKey.MEATADATA, metaDataMap);
-        }
-
-
-        Map<String, Object> consentMap = new HashMap<>();
-        consentMap.put(ConsentConstants.EventDataKey.CONSENTS, allConsents);
-        return consentMap;
-    }
-
-    // ========================================================================================
-    // private methods
-    // ========================================================================================
-
-    private void initWithConsentData(final Map<String, Object> consentMap) {
-        Object allConsents = consentMap.get(ConsentConstants.EventDataKey.CONSENTS);
+        Object allConsents = xdmMap.get(ConsentConstants.EventDataKey.CONSENTS);
         final Map<String, Object> allConsentsMap = (allConsents instanceof HashMap) ? (Map<String, Object>) allConsents : null;
 
         if (allConsentsMap == null || allConsentsMap.isEmpty()) {
             return;
         }
 
-        // check and update collect consent.
-        final Map<String, String> collectConsentMap = (Map<String, String>) allConsentsMap.get(ConsentConstants.EventDataKey.COLLECT);
-        if (collectConsentMap != null && !collectConsentMap.isEmpty()) {
-            collectConsent = getConsentValueFromMap(collectConsentMap);
-        }
-
-        // check and update adId consent.
-        final Map<String, String> adIdConsentMap = (Map<String, String>) allConsentsMap.get(ConsentConstants.EventDataKey.ADID);
-        if (adIdConsentMap != null && !adIdConsentMap.isEmpty()) {
-            adIdConsent = getConsentValueFromMap(adIdConsentMap);
-        }
-
-        // check and update time
-        // TODO : double check on the assumption that metadata is always String:String
-        final Map<String, String> metadataMap = (Map<String, String>) allConsentsMap.get(ConsentConstants.EventDataKey.MEATADATA);
-        if (metadataMap != null && !metadataMap.isEmpty()) {
-            String time = getTimeFromMetaDataMap(metadataMap);
-            if (time != null) {
-                metadata = new ConsentMetadata(time);
-            }
-        }
+        consents = allConsentsMap;
     }
 
-    // ========================================================================================
-    // Helper functions
-    // ========================================================================================
-
-    private Map<String, String> getConsentMapFromValue(final ConsentValue value) {
-        if (value == null) {
-            return null;
+    /**
+     * Use this method to set the metadata timestamp for the consents.
+     *
+     * @param timeStamp {@code long} timestamp in milliseconds indicating the time of last consents update
+     */
+    void setTimeStamp(final long timeStamp) {
+        Map<String, Object> metaDataContents = (Map<String, Object>) consents.get(ConsentConstants.EventDataKey.MEATADATA);
+        if (metaDataContents == null || metaDataContents.isEmpty()) {
+            metaDataContents = new HashMap<String, Object>();
         }
 
-        Map<String, String> consentMap = new HashMap<>();
-        consentMap.put(ConsentConstants.EventDataKey.VALUE, value.stringValue());
-        return consentMap;
+        metaDataContents.put(ConsentConstants.EventDataKey.TIME, ConsentDateUtility.dateToISO8601String(new Date(timeStamp)));
+        consents.put(ConsentConstants.EventDataKey.MEATADATA, metaDataContents);
     }
 
 
-    private ConsentValue getConsentValueFromMap(final Map<String, String> consentMap) {
-        String consentValueString = consentMap.get(ConsentConstants.EventDataKey.VALUE);
-        if (consentValueString == null || consentValueString.isEmpty()) {
-            return null;
-        }
-
-        return ConsentValue.get(consentValueString);
+    /**
+     * Verifies if the consents associated with the current object is empty.
+     * Returns true if at least one consent is found, false otherwise.
+     *
+     * @return {@code true} if there are no consents
+     */
+    boolean isEmpty() {
+        return consents == null || consents.isEmpty();
     }
 
-    private String getTimeFromMetaDataMap(final Map<String, String> metaDataMap) {
-        String time = metaDataMap.get(ConsentConstants.EventDataKey.TIME);
-        if (time == null || time.isEmpty()) {
+
+    /**
+     * Merges the provided {@link Consents} with the current object.
+     * The current object is undisturbed if the provided consent is null or empty.
+     *
+     * @param newConsents the consents that needs to be merged
+     */
+    void merge(final Consents newConsents) {
+        if (newConsents == null || newConsents.isEmpty()) {
+            return;
+        }
+
+        if (isEmpty()) {
+            consents = newConsents.consents;
+            return;
+        }
+
+        consents.putAll(newConsents.consents);
+    }
+
+    /**
+     * Dictionary representation of the available consents associated with this {@link Consents} object.
+     *
+     * @return {@link Map} representing the Consents in XDM format
+     */
+    Map<String, Object> asXDMMap() {
+        if (isEmpty()) {
             return null;
         }
-        // TODO : check if we need validation of time string (ISO6801)
-        return time;
+
+        Map<String, Object> xdmFormattedMap = new HashMap<>();
+        xdmFormattedMap.put(ConsentConstants.EventDataKey.CONSENTS, consents);
+        return xdmFormattedMap;
     }
 
 }
