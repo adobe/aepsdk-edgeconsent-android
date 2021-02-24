@@ -156,7 +156,10 @@ public class ConsentExtensionTest {
         assertEquals(dispatchedEvent.getName(), ConsentConstants.EventNames.EDGE_CONSENT_UPDATE);
         assertEquals(dispatchedEvent.getType(), ConsentConstants.EventType.EDGE.toLowerCase());
         assertEquals(dispatchedEvent.getSource(), ConsentConstants.EventSource.UPDATE_CONSENT.toLowerCase());
-        assertEquals(dispatchedEvent.getEventData(), CreateConsentXDMMap("y", "n"));
+
+        assertEquals("y", ((Map) ((Map) dispatchedEvent.getEventData().get("consents")).get("collect")).get("val"));
+        assertEquals("n", ((Map) ((Map) dispatchedEvent.getEventData().get("consents")).get("adId")).get("val"));
+        assertNotNull(((Map) ((Map) dispatchedEvent.getEventData().get("consents")).get("metadata")).get("time"));
     }
 
     @Test
