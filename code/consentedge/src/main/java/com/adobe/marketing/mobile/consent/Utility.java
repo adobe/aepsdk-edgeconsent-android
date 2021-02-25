@@ -27,7 +27,7 @@ import java.util.Map;
 
 import static com.adobe.marketing.mobile.consent.ConsentConstants.LOG_TAG;
 
-class Utils {
+class Utility {
 
     /**
      * Method to serialize jsonObject to Map.
@@ -140,6 +140,6 @@ class Utils {
         return null;
     }
 
-    private Utils(){}
+    private Utility(){}
 
 }

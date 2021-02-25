@@ -18,7 +18,7 @@ import java.util.TimeZone;
 
 import static junit.framework.TestCase.assertEquals;
 
-public class ConsentDateUtilityTest {
+public class DateUtilityTest {
 
     @Test
     public void dateToISO8601String_onValidTimestamp_returnsFormattedString() {
@@ -32,14 +32,14 @@ public class ConsentDateUtilityTest {
                 .setTimeZone(TimeZone.getTimeZone("America/Los_Angeles"))
                 .build();
 
-        String serializedDate = ConsentDateUtility.dateToISO8601String(cal.getTime());
+        String serializedDate = DateUtility.dateToISO8601String(cal.getTime());
         // Expected time in UTC which is +7 hours from America/Los_Angeles during Daylight Savings
         assertEquals("2019-09-23T18:15:45Z", serializedDate);
     }
 
     @Test
     public void dateToISO8601String_onNull_returnsEmptyString() {
-        String serializedDate = ConsentDateUtility.dateToISO8601String(null);
+        String serializedDate = DateUtility.dateToISO8601String(null);
         assertEquals("", serializedDate);
     }
 }
