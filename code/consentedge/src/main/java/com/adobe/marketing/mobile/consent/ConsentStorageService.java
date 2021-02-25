@@ -12,7 +12,7 @@ import org.json.JSONObject;
 
 import java.util.Map;
 
-class LocalStorageService {
+class ConsentStorageService {
 
     /**
      * Loads the consents from persistence.
