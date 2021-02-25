@@ -6,13 +6,36 @@
     android:layout_height="match_parent"
     tools:context=".consentTestApp.MainActivity">
 
-    <TextView
+    <Button
+        android:id="@+id/btnCollectNO"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:text="Collect Consent - NO"
+        tools:layout_editor_absoluteX="114dp"
+        tools:layout_editor_absoluteY="127dp" />
+
+    <Button
+        android:id="@+id/btnCollectYES"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Collect Consent -YES"
+        tools:layout_editor_absoluteX="114dp"
+        tools:layout_editor_absoluteY="50dp" />
+
+    <Button
+        android:id="@+id/btnGetConsents"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="GET CONSENTS"
+        tools:layout_editor_absoluteX="143dp"
+        tools:layout_editor_absoluteY="205dp" />
+
+    <TextView
+        android:id="@+id/txtViewConsents"
+        android:layout_width="136dp"
+        android:layout_height="86dp"
+        android:text="TextView"
+        tools:layout_editor_absoluteX="137dp"
+        tools:layout_editor_absoluteY="281dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

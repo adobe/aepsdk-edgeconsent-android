@@ -47,7 +47,8 @@ final class ConsentConstants {
     final class EventNames {
         static final String EDGE_CONSENT_UPDATE = "Edge Consent Update";
         static final String CONSENT_FRAGMENTS_UPDATE_REQUEST = "Consent Fragments Update Request";
-        static final String CONSENT_RESPONSE = "Get Consents Response";
+        static final String GET_CONSENTS_REQUEST = "GetConsents Request";
+        static final String GET_CONSENTS_RESPONSE = "GetConsents Response";
         static final String CONFIGURATION_UPDATE = "Consent Configuration Update";
         private EventNames() { }
     }
