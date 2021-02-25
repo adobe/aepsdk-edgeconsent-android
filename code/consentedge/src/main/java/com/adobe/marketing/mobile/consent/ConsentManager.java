@@ -11,20 +11,7 @@
 
 package com.adobe.marketing.mobile.consent;
 
-import android.app.Application;
-import android.content.Context;
-import android.content.SharedPreferences;
-
-import com.adobe.marketing.mobile.LoggingMode;
-import com.adobe.marketing.mobile.MobileCore;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.Map;
-
 class ConsentManager {
-
     private Consents currentConsents;
 
     /**
@@ -33,11 +20,11 @@ class ConsentManager {
      * Initializes the {@link #currentConsents} from data in persistence.
      */
     ConsentManager() {
-        loadFromPersistence();
+        currentConsents = ConsentStorageService.loadConsentsFromPersistence();
     }
 
     /**
-     * Merges the provided {@link Consents} with {@link #currentConsents} and persists them in {@link SharedPreferences}
+     * Merges the provided {@link Consents} with {@link #currentConsents} and persists them.
      *
      * @param newConsents the newly obtained consents that needs to be merged with existing consents
      * @return {@link Consents} representing the current Consents after the merge
@@ -49,7 +36,7 @@ class ConsentManager {
         } else {
             currentConsents.merge(newConsents);
         }
-        saveToPersistence();
+        ConsentStorageService.saveConsentsToPersistence(currentConsents);
         // make a copy of the merged consents and return
         return new Consents(currentConsents);
     }
@@ -64,95 +51,5 @@ class ConsentManager {
     Consents getCurrentConsents() {
         return currentConsents;
     }
-
-
-    /**
-     * Call this method to save the updated consents to persistence.
-     * <p>
-     * The value of {@link #currentConsents} is converted to jsonString and stored in the persistence.
-     * Saving to persistence fails if {@link SharedPreferences} or {@link SharedPreferences.Editor} is null.
-     */
-    private void saveToPersistence() {
-        SharedPreferences sharedPreferences = getSharedPreference();
-        if (sharedPreferences == null) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Shared Preference value is null. Unable to write consents to persistence.");
-            return;
-        }
-
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        if (editor == null) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Shared Preference Editor is null. Unable to write consents to persistence.");
-            return;
-        }
-
-        if (currentConsents.isEmpty()) {
-            editor.remove(ConsentConstants.DataStoreKey.CONSENT);
-            editor.apply();
-            return;
-        }
-
-        final JSONObject jsonObject = new JSONObject(currentConsents.asXDMMap());
-        final String jsonString = jsonObject.toString();
-        editor.putString(ConsentConstants.DataStoreKey.CONSENT, jsonString);
-        editor.apply();
-    }
-
-    /**
-     * Loads the consents from persistence.
-     * <p>
-     * The jsonString from persistence is serialized and loaded into {@link #currentConsents}.
-     * Loading from persistence fails if {@link SharedPreferences} or {@link SharedPreferences.Editor} is null.
-     */
-    private void loadFromPersistence() {
-        final SharedPreferences sharedPreferences = getSharedPreference();
-        if (sharedPreferences == null) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Shared Preference value is null. Unable to load saved consents from persistence.");
-            return;
-        }
-
-        final String jsonString = sharedPreferences.getString(ConsentConstants.DataStoreKey.CONSENT, null);
-
-        if (jsonString == null) {
-            MobileCore.log(LoggingMode.VERBOSE, ConsentConstants.LOG_TAG, "No previous consents were store in persistence. Current consent is null");
-            return;
-        }
-
-        try {
-            final JSONObject jsonObject = new JSONObject(jsonString);
-            final Map<String, Object> consentMap = Utility.toMap(jsonObject);
-            final Consents loadedConsents = new Consents(consentMap);
-            if (!loadedConsents.isEmpty()) {
-                currentConsents = loadedConsents;
-            }
-
-        } catch (JSONException exception) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Serialization error while reading consent jsonString from persistence. Unable to load saved consents from persistence.");
-        }
-    }
-
-    /**
-     * Getter for the applications {@link SharedPreferences}
-     * <p>
-     * Returns null if the app or app context is not available
-     *
-     * @return a {@code SharedPreferences} instance
-     */
-    private SharedPreferences getSharedPreference() {
-        final Application application = MobileCore.getApplication();
-        if (application == null) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Application value is null. Unable to read/write consent data from persistence.");
-            return null;
-        }
-
-        final Context context = application.getApplicationContext();
-        if (context == null) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Context value is null. Unable to read/write consent data from persistence.");
-            return null;
-        }
-
-        return context.getSharedPreferences(ConsentConstants.DataStoreKey.DATASTORE_NAME, Context.MODE_PRIVATE);
-    }
-
 
 }
