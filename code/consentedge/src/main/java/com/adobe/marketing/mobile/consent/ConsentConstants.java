@@ -29,6 +29,7 @@ final class ConsentConstants {
         static final String CONSENT_PREFERENCE = "consent:preferences";
         static final String UPDATE_CONSENT = "com.adobe.eventSource.updateConsent";
         static final String REQUEST_CONSENT = "com.adobe.eventSource.requestConsent";
+        static final String RESPONSE_CONTENT = "com.adobe.eventSource.responseContent";
         private EventSource() { }
     }
 
@@ -40,7 +41,7 @@ final class ConsentConstants {
 
     final class DataStoreKey {
         static final String DATASTORE_NAME = "com.adobe.consent";
-        static final String CONSENT = "consent:preference";
+        static final String CONSENT = "consent:preferences";
         private DataStoreKey() { }
     }
 
@@ -48,7 +49,7 @@ final class ConsentConstants {
         static final String EDGE_CONSENT_UPDATE = "Edge Consent Update";
         static final String CONSENTS_REQUEST = "Consents Request";
         static final String CONSENT_RESPONSE = "Get Consents Response";
-        static final String CONFIGURATION_UPDATE = "Consent Configuration Update";
+        static final String CONSENT_PREFERENCES_UPDATED = "Consent Preferences Updated";
         private EventNames() { }
     }
 

@@ -2,6 +2,7 @@ package com.adobe.marketing.mobile.consent;
 
 import org.junit.Test;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import static com.adobe.marketing.mobile.consent.ConsentTestUtil.CreateConsentXD
 import static com.adobe.marketing.mobile.consent.ConsentTestUtil.SAMPLE_METADATA_TIMESTAMP;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -83,7 +85,7 @@ public class ConsentsTest {
     }
 
     @Test
-    public void test_ConsentsCreation_With_InvalidConsentMap() {
+    public void test_ConsentsCreation_With_InvalidMap() {
         // test
         Consents consents = new Consents(new HashMap<String, Object>() {
             {
@@ -94,6 +96,20 @@ public class ConsentsTest {
         // verify
         assertTrue(consents.isEmpty());
     }
+
+    @Test
+    public void test_ConsentsCreation_With_InvalidConsentMap() {
+        // test
+        Consents consents = new Consents(new HashMap<String, Object>() {
+            {
+                put("consents", 30034);
+            }
+        });
+
+        // verify
+        assertTrue(consents.isEmpty());
+    }
+
 
     // ========================================================================================
     // Test Scenarios   : All possible Consent object values
@@ -189,4 +205,32 @@ public class ConsentsTest {
         assertEquals(SAMPLE_METADATA_TIMESTAMP, ConsentTestUtil.readTimeStamp(baseConsent));
     }
 
+    // ========================================================================================
+    // Test method : setTimestamp
+    // ========================================================================================
+    @Test
+    public void test_setTimeStamp() {
+        // setup
+        Consents consents = new Consents(CreateConsentXDMMap("n"));
+
+        // test
+        long currentTimestamp = System.currentTimeMillis();
+        String iso8601DateString = DateUtility.dateToISO8601String(new Date(currentTimestamp));
+        consents.setTimeStamp(currentTimestamp);
+
+        // verify
+        assertEquals(iso8601DateString, ConsentTestUtil.readTimeStamp(consents));
+    }
+
+    @Test
+    public void test_setTimeStamp_whenConsentsEmpty() {
+        // setup
+        Consents consents = new Consents(new HashMap<String, Object>());
+
+        // test
+        consents.setTimeStamp(System.currentTimeMillis());
+
+        // verify
+        assertNull(ConsentTestUtil.readTimeStamp(consents));
+    }
 }

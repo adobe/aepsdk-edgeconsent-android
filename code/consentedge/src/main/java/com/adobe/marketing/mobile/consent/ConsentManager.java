@@ -107,7 +107,7 @@ class ConsentManager {
     private void loadFromPreference() {
         final SharedPreferences sharedPreferences = getSharedPreference();
         if (sharedPreferences == null) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Shared Preference value is null. Unable to read/write consent data from Shared Preference.");
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Shared Preference value is null. Unable to load consent data from Shared Preference.");
             return;
         }
 
@@ -120,7 +120,7 @@ class ConsentManager {
 
         try {
             final JSONObject jsonObject = new JSONObject(jsonString);
-            final Map<String, Object> consentMap = ConsentJSONUtility.serializeJSONObject(jsonObject);
+            final Map<String, Object> consentMap = Utility.toMap(jsonObject);
             final Consents loadedConsents = new Consents(consentMap);
             if (!loadedConsents.isEmpty()) {
                 currentConsents = loadedConsents;
