@@ -73,11 +73,6 @@ class ConsentManager {
      * Saving to preferences fails if {@link SharedPreferences} or {@link SharedPreferences.Editor} is null.
      */
     private void saveToPreference() {
-        if (currentConsents.isEmpty()) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Consents is empty. Ignoring to save to persistence");
-            return;
-        }
-
         SharedPreferences sharedPreferences = getSharedPreference();
         if (sharedPreferences == null) {
             MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Shared Preference value is null. Unable to read/write consent data from Shared Preference.");
@@ -88,6 +83,12 @@ class ConsentManager {
 
         if (editor == null) {
             MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Shared Preference Editor is null. Unable to read/write consent data from Shared Preference.");
+            return;
+        }
+
+        if (currentConsents.isEmpty()) {
+            editor.remove(ConsentConstants.DataStoreKey.CONSENT);
+            editor.apply();
             return;
         }
 

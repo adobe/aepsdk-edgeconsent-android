@@ -295,6 +295,9 @@ public class ConsentManagerTest {
         // verify
         assertTrue(mergedConsent.isEmpty());
         assertTrue(consentManager.getCurrentConsents().isEmpty());
+
+        // verify that consents is removed from shared preference
+        verify(mockSharedPreferenceEditor, times(   1)).remove(ConsentConstants.DataStoreKey.CONSENT);
     }
 
 }
