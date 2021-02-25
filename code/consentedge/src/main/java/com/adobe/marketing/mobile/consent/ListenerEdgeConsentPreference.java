@@ -17,7 +17,7 @@ import com.adobe.marketing.mobile.ExtensionListener;
 import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
 
-class ConsentListenerEdgeConsentPreference extends ExtensionListener {
+class ListenerEdgeConsentPreference extends ExtensionListener {
 
     /**
      * Constructor.
@@ -26,7 +26,7 @@ class ConsentListenerEdgeConsentPreference extends ExtensionListener {
      * @param type         the {@link String} eventType this listener is registered to handle
      * @param source       the {@link String} eventSource this listener is registered to handle
      */
-    ConsentListenerEdgeConsentPreference(final ExtensionApi extensionApi, final String type, final String source) {
+    ListenerEdgeConsentPreference(final ExtensionApi extensionApi, final String type, final String source) {
         super(extensionApi, type, source);
     }
 
@@ -39,7 +39,7 @@ class ConsentListenerEdgeConsentPreference extends ExtensionListener {
     @Override
     public void hear(final Event event) {
         if (event == null || event.getEventData() == null) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Event or Event data is null. Ignoring the event listened by ConsentListenerEdgeConsentPreference");
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Event or Event data is null. Ignoring the event listened by ListenerEdgeConsentPreference");
             return;
         }
 
@@ -47,7 +47,7 @@ class ConsentListenerEdgeConsentPreference extends ExtensionListener {
 
         if (parentExtension == null) {
             MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
-                    "The parent extension, associated with the ConsentListenerEdgeConsentPreference is null, ignoring the consent update event.");
+                    "The parent extension, associated with the ListenerEdgeConsentPreference is null, ignoring the consent update event.");
             return;
         }
 

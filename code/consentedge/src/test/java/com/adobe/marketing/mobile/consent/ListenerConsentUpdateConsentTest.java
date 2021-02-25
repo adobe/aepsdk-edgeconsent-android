@@ -25,18 +25,18 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class ConsentListenerConsentUpdateConsentTest {
+public class ListenerConsentUpdateConsentTest {
 
     @Mock
     private ConsentExtension mockConsentExtension;
 
-    private ConsentListenerConsentUpdateConsent listener;
+    private ListenerConsentUpdateConsent listener;
 
     @Before
     public void setup() {
         mockConsentExtension = Mockito.mock(ConsentExtension.class);
         MobileCore.start(null);
-        listener = spy(new ConsentListenerConsentUpdateConsent(null, ConsentConstants.EventType.EDGE, ConsentConstants.EventSource.CONSENT_PREFERENCE));
+        listener = spy(new ListenerConsentUpdateConsent(null, ConsentConstants.EventType.EDGE, ConsentConstants.EventSource.CONSENT_PREFERENCE));
     }
 
     @Test

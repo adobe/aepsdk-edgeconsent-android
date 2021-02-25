@@ -28,7 +28,8 @@ final class ConsentConstants {
     final class EventSource {
         static final String CONSENT_PREFERENCE = "consent:preferences";
         static final String UPDATE_CONSENT = "com.adobe.eventSource.updateConsent";
-        static final String REQUEST_CONSENT = "com.adobe.eventSource.requestConsent";
+        static final String REQUEST_CONTENT = "com.adobe.eventSource.requestContent";
+        static final String RESPONSE_CONTENT = "com.adobe.eventSource.responseContent";
         private EventSource() { }
     }
 

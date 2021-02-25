@@ -49,7 +49,12 @@ public class Consent {
 
 
     /**
-     * Registers the extension with the Mobile SDK. This method should be called only once in your application class.
+     * Merges the existing consents with the given consents.
+     * <p>
+     * If the consent is already contained in the extension, the old consent is replaced by the specified consent
+     * Any new consents provided will be appended to the existing consents list.
+     *
+     * @param xdmFormattedConsents An {@link Map} of consents in predefined XDMformat
      */
     public static void update(final Map<String,Object> xdmFormattedConsents) {
         // create and dispatch an consent fragments update event
@@ -65,7 +70,11 @@ public class Consent {
     }
 
     /**
-     * Registers the extension with the Mobile SDK. This method should be called only once in your application class.
+     * Retrieves the current consents stored in the Consent extension.
+     * <p>
+     * Callback is invoked with null value if no consents were present in the extension.
+     *
+     * @param callback a {@link AdobeCallback} of {@link Map} invoked with current consents of the extension
      */
     public static void getConsents(final AdobeCallback<Map<String,Object>> callback) {
         // create and dispatch an consent fragments update event
@@ -78,7 +87,7 @@ public class Consent {
         };
 
 
-        final Event event = new Event.Builder(ConsentConstants.EventNames.GET_CONSENTS_REQUEST, ConsentConstants.EventType.CONSENT, ConsentConstants.EventSource.REQUEST_CONSENT).build();
+        final Event event = new Event.Builder(ConsentConstants.EventNames.GET_CONSENTS_REQUEST, ConsentConstants.EventType.CONSENT, ConsentConstants.EventSource.REQUEST_CONTENT).build();
         MobileCore.dispatchEventWithResponseCallback(event, new AdobeCallback<Event>() {
             @Override
             public void call(Event event) {

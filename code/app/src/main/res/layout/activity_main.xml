@@ -10,32 +10,43 @@
         android:id="@+id/btnCollectNO"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:text="Collect Consent - NO"
-        tools:layout_editor_absoluteX="114dp"
-        tools:layout_editor_absoluteY="127dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnCollectYES" />
 
     <Button
         android:id="@+id/btnCollectYES"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
         android:text="Collect Consent -YES"
-        tools:layout_editor_absoluteX="114dp"
-        tools:layout_editor_absoluteY="50dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btnGetConsents"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
         android:text="GET CONSENTS"
-        tools:layout_editor_absoluteX="143dp"
-        tools:layout_editor_absoluteY="205dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnCollectNO" />
 
     <TextView
         android:id="@+id/txtViewConsents"
-        android:layout_width="136dp"
-        android:layout_height="86dp"
-        android:text="TextView"
-        tools:layout_editor_absoluteX="137dp"
-        tools:layout_editor_absoluteY="281dp" />
+        android:layout_width="297dp"
+        android:layout_height="74dp"
+        android:layout_marginTop="24dp"
+        android:text='Hit "Get Consent" for latest consents'
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnGetConsents" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -11,6 +11,8 @@
 
 package com.adobe.marketing.mobile.consent;
 
+import com.adobe.marketing.mobile.AdobeCallback;
+import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.ExtensionErrorCallback;
 import com.adobe.marketing.mobile.MobileCore;
 
@@ -25,10 +27,22 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({MobileCore.class})
 public class ConsentTest {
+
+    private static Map<String,Object> SAMPLE_CONSENTS_MAP = ConsentTestUtil.CreateConsentXDMMap("y");
 
     @Before
     public void setup() {
@@ -56,19 +70,111 @@ public class ConsentTest {
         Consent.registerExtension();
         final ArgumentCaptor<ExtensionErrorCallback> callbackCaptor = ArgumentCaptor.forClass(ExtensionErrorCallback.class);
 
-
         // The monitor extension should register with core
         PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
         MobileCore.registerExtension(ArgumentMatchers.eq(ConsentExtension.class), callbackCaptor.capture());
 
         // verify the callback
         ExtensionErrorCallback extensionErrorCallback = callbackCaptor.getValue();
-        Assert.assertNotNull("The extension callback should not be null", extensionErrorCallback);
+        assertNotNull("The extension callback should not be null", extensionErrorCallback);
 
         // TODO - enable when ExtensionError creation is available
         // should not crash on calling the callback
         //extensionErrorCallback.error(ExtensionError.UNEXPECTED_ERROR);
-
     }
 
+    // ========================================================================================
+    // update API
+    // ========================================================================================
+    @Test
+    public void testUpdate() {
+        // setup
+        final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        final ArgumentCaptor<ExtensionErrorCallback> callbackCaptor = ArgumentCaptor.forClass(ExtensionErrorCallback.class);
+
+        // test
+        Consent.update(SAMPLE_CONSENTS_MAP);
+
+        // verify
+        PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
+        MobileCore.dispatchEvent(eventCaptor.capture(), callbackCaptor.capture());
+
+        Event dispatchedEvent = eventCaptor.getValue();
+        assertEquals(ConsentConstants.EventNames.CONSENT_FRAGMENTS_UPDATE_REQUEST,dispatchedEvent.getName());
+        assertEquals(ConsentConstants.EventType.CONSENT.toLowerCase(),dispatchedEvent.getType());
+        assertEquals(ConsentConstants.EventSource.UPDATE_CONSENT.toLowerCase(),dispatchedEvent.getSource());
+        assertEquals(SAMPLE_CONSENTS_MAP, dispatchedEvent.getEventData());
+
+        // TODO - enable when ExtensionError creation is available
+        // should not crash on calling the callback
+        //extensionErrorCallback.error(ExtensionError.UNEXPECTED_ERROR);
+    }
+
+    @Test
+    public void testUpdate_null() {
+        // setup
+        final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+
+        // test
+        Consent.update(null);
+
+        // verify
+        PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
+        MobileCore.dispatchEvent(eventCaptor.capture(), any(ExtensionErrorCallback.class));
+
+        Event dispatchedEvent = eventCaptor.getValue();
+        assertTrue(dispatchedEvent.getEventData().isEmpty());
+    }
+
+    // ========================================================================================
+    // getConsents API
+    // ========================================================================================
+    @Test
+    public void testGetConsents() {
+        // setup
+        final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        final ArgumentCaptor<AdobeCallback> adobeCallbackCaptor = ArgumentCaptor.forClass(AdobeCallback.class);
+        final ArgumentCaptor<ExtensionErrorCallback> extensionErrorCallbackCaptor = ArgumentCaptor.forClass(ExtensionErrorCallback.class);
+        final List<Map<String,Object>> callbackReturnValues = new ArrayList<>();
+
+        // test
+        Consent.getConsents(new AdobeCallback<Map<String, Object>>() {
+            @Override
+            public void call(Map<String, Object> stringObjectMap) {
+                callbackReturnValues.add(stringObjectMap);
+            }
+        });
+
+        // verify
+        PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
+        MobileCore.dispatchEventWithResponseCallback(eventCaptor.capture(), adobeCallbackCaptor.capture(), extensionErrorCallbackCaptor.capture());
+
+        // verify the dispatched event details
+        Event dispatchedEvent = eventCaptor.getValue();
+        assertEquals(ConsentConstants.EventNames.GET_CONSENTS_REQUEST,dispatchedEvent.getName());
+        assertEquals(ConsentConstants.EventType.CONSENT.toLowerCase(),dispatchedEvent.getType());
+        assertEquals(ConsentConstants.EventSource.REQUEST_CONTENT.toLowerCase(),dispatchedEvent.getSource());
+        assertTrue(dispatchedEvent.getEventData().isEmpty());
+
+        //verify callback responses
+        adobeCallbackCaptor.getValue().call(buildConsentResponseEvent(SAMPLE_CONSENTS_MAP));
+        assertEquals(SAMPLE_CONSENTS_MAP, callbackReturnValues.get(0));
+
+        adobeCallbackCaptor.getValue().call(buildConsentResponseEvent(null));
+        assertTrue(callbackReturnValues.get(1).isEmpty());
+
+        adobeCallbackCaptor.getValue().call(null);
+        assertNull(callbackReturnValues.get(2));
+
+        // TODO - enable when ExtensionError creation is available
+        // should not crash on calling the callback
+        //extensionErrorCallback.error(ExtensionError.UNEXPECTED_ERROR);
+    }
+
+    // ========================================================================================
+    // Private method
+    // ========================================================================================
+    private Event buildConsentResponseEvent (final Map<String, Object> eventData) {
+        return new Event.Builder(ConsentConstants.EventNames.GET_CONSENTS_RESPONSE, ConsentConstants.EventType.CONSENT, ConsentConstants.EventSource.RESPONSE_CONTENT).setEventData(eventData).build();
+    }
 }
