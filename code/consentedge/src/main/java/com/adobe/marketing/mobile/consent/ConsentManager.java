@@ -28,18 +28,18 @@ class ConsentManager {
     private Consents currentConsents;
 
     /**
-     * Constructor
+     * Constructor.
      * <p>
-     * Initializes the {@link #currentConsents} from data in persistence
+     * Initializes the {@link #currentConsents} from data in persistence.
      */
     ConsentManager() {
-        loadFromPreference();
+        loadFromPersistence();
     }
 
     /**
-     * Merges the provided {@link Consents} with {@link #currentConsents} and persists them in shared Preference
+     * Merges the provided {@link Consents} with {@link #currentConsents} and persists them in {@link SharedPreferences}
      *
-     * @param newConsents the newly obtained consents thats needs to be merged with existing consents
+     * @param newConsents the newly obtained consents that needs to be merged with existing consents
      * @return {@link Consents} representing the current Consents after the merge
      */
     Consents mergeAndPersist(final Consents newConsents) {
@@ -49,7 +49,7 @@ class ConsentManager {
         } else {
             currentConsents.merge(newConsents);
         }
-        saveToPreference();
+        saveToPersistence();
         // make a copy of the merged consents and return
         return new Consents(currentConsents);
     }
@@ -67,22 +67,22 @@ class ConsentManager {
 
 
     /**
-     * Call this method to save the updated consent values to sharedPreferences.
+     * Call this method to save the updated consents to persistence.
      * <p>
-     * The value of {@link #currentConsents} is converted to jsonString and stored in the SharedPreference.
-     * Saving to preferences fails if {@link SharedPreferences} or {@link SharedPreferences.Editor} is null.
+     * The value of {@link #currentConsents} is converted to jsonString and stored in the persistence.
+     * Saving to persistence fails if {@link SharedPreferences} or {@link SharedPreferences.Editor} is null.
      */
-    private void saveToPreference() {
+    private void saveToPersistence() {
         SharedPreferences sharedPreferences = getSharedPreference();
         if (sharedPreferences == null) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Shared Preference value is null. Unable to read/write consent data from Shared Preference.");
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Shared Preference value is null. Unable to write consents to persistence.");
             return;
         }
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         if (editor == null) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Shared Preference Editor is null. Unable to read/write consent data from Shared Preference.");
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Shared Preference Editor is null. Unable to write consents to persistence.");
             return;
         }
 
@@ -99,22 +99,22 @@ class ConsentManager {
     }
 
     /**
-     * Loads the consent details from sharedPreferences.
+     * Loads the consents from persistence.
      * <p>
-     * The jsonString from the sharedPreference is serialized and loaded into {@link #currentConsents}.
-     * Loading from preferences fails if {@link SharedPreferences} or {@link SharedPreferences.Editor} is null.
+     * The jsonString from persistence is serialized and loaded into {@link #currentConsents}.
+     * Loading from persistence fails if {@link SharedPreferences} or {@link SharedPreferences.Editor} is null.
      */
-    private void loadFromPreference() {
+    private void loadFromPersistence() {
         final SharedPreferences sharedPreferences = getSharedPreference();
         if (sharedPreferences == null) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Shared Preference value is null. Unable to load consent data from Shared Preference.");
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Shared Preference value is null. Unable to load saved consents from persistence.");
             return;
         }
 
         final String jsonString = sharedPreferences.getString(ConsentConstants.DataStoreKey.CONSENT, null);
 
         if (jsonString == null) {
-            MobileCore.log(LoggingMode.VERBOSE, ConsentConstants.LOG_TAG, "No previous consents were store in preference. Current consent is null");
+            MobileCore.log(LoggingMode.VERBOSE, ConsentConstants.LOG_TAG, "No previous consents were store in persistence. Current consent is null");
             return;
         }
 
@@ -127,7 +127,7 @@ class ConsentManager {
             }
 
         } catch (JSONException exception) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Serialization error while reading consent data from Shared preference. Unable to load current shared preference value.");
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Serialization error while reading consent jsonString from persistence. Unable to load saved consents from persistence.");
         }
     }
 
@@ -141,13 +141,13 @@ class ConsentManager {
     private SharedPreferences getSharedPreference() {
         final Application application = MobileCore.getApplication();
         if (application == null) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Application value is null. Unable to read/write consent data from Shared Preference.");
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Application value is null. Unable to read/write consent data from persistence.");
             return null;
         }
 
         final Context context = application.getApplicationContext();
         if (context == null) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Context value is null. Unable to read/write consent data from Shared Preference.");
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Context value is null. Unable to read/write consent data from persistence.");
             return null;
         }
 
