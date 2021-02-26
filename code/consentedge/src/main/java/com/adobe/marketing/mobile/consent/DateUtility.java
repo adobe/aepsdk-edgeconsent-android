@@ -16,9 +16,9 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-class ConsentDateUtility {
+class DateUtility {
 
-    private ConsentDateUtility(){}
+    private DateUtility(){}
     private static final String TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
     /**

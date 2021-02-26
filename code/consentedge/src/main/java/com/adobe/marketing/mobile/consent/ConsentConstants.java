@@ -20,6 +20,7 @@ final class ConsentConstants {
     final class EventDataKey {
         static final String CONSENTS = "consents";
         static final String MEATADATA = "metadata";
+        static final String PAYLOAD = "payload";
         static final String TIME = "time";
         static final String VALUE = "val";
         private EventDataKey() { }
@@ -41,7 +42,7 @@ final class ConsentConstants {
 
     final class DataStoreKey {
         static final String DATASTORE_NAME = "com.adobe.consent";
-        static final String CONSENT = "consent:preference";
+        static final String CONSENT = "consent:preferences";
         private DataStoreKey() { }
     }
 
@@ -50,7 +51,7 @@ final class ConsentConstants {
         static final String CONSENT_FRAGMENTS_UPDATE_REQUEST = "Consent Fragments Update Request";
         static final String GET_CONSENTS_REQUEST = "GetConsents Request";
         static final String GET_CONSENTS_RESPONSE = "GetConsents Response";
-        static final String CONFIGURATION_UPDATE = "Consent Configuration Update";
+        static final String CONSENT_PREFERENCES_UPDATED = "Consent Preferences Updated";
         private EventNames() { }
     }
 

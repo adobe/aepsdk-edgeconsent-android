@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 class Consents {
-    private Map<String, Object> consents;
+    private Map<String, Object> consentsMap;
 
     // Suppresses default constructor.
     private Consents() {
@@ -32,7 +32,7 @@ class Consents {
         if (newConsents == null) {
             return;
         }
-        this.consents = newConsents.consents;
+        this.consentsMap = Utility.deepCopy(newConsents.consentsMap);
     }
 
     /**
@@ -46,13 +46,7 @@ class Consents {
         }
 
         Object allConsents = xdmMap.get(ConsentConstants.EventDataKey.CONSENTS);
-        final Map<String, Object> allConsentsMap = (allConsents instanceof HashMap) ? (Map<String, Object>) allConsents : null;
-
-        if (allConsentsMap == null || allConsentsMap.isEmpty()) {
-            return;
-        }
-
-        consents = allConsentsMap;
+        consentsMap = (allConsents instanceof HashMap) ? Utility.deepCopy((Map<String, Object>) allConsents) : null;
     }
 
     /**
@@ -61,13 +55,16 @@ class Consents {
      * @param timeStamp {@code long} timestamp in milliseconds indicating the time of last consents update
      */
     void setTimeStamp(final long timeStamp) {
-        Map<String, Object> metaDataContents = (Map<String, Object>) consents.get(ConsentConstants.EventDataKey.MEATADATA);
+        if (isEmpty()) {
+            return;
+        }
+        Map<String, Object> metaDataContents = (Map<String, Object>) consentsMap.get(ConsentConstants.EventDataKey.MEATADATA);
         if (metaDataContents == null || metaDataContents.isEmpty()) {
-            metaDataContents = new HashMap<String, Object>();
+            metaDataContents = new HashMap<>();
         }
 
-        metaDataContents.put(ConsentConstants.EventDataKey.TIME, ConsentDateUtility.dateToISO8601String(new Date(timeStamp)));
-        consents.put(ConsentConstants.EventDataKey.MEATADATA, metaDataContents);
+        metaDataContents.put(ConsentConstants.EventDataKey.TIME, DateUtility.dateToISO8601String(new Date(timeStamp)));
+        consentsMap.put(ConsentConstants.EventDataKey.MEATADATA, metaDataContents);
     }
 
 
@@ -78,7 +75,7 @@ class Consents {
      * @return {@code true} if there are no consents
      */
     boolean isEmpty() {
-        return consents == null || consents.isEmpty();
+        return consentsMap == null || consentsMap.isEmpty();
     }
 
 
@@ -94,11 +91,11 @@ class Consents {
         }
 
         if (isEmpty()) {
-            consents = newConsents.consents;
+            consentsMap = newConsents.consentsMap;
             return;
         }
 
-        consents.putAll(newConsents.consents);
+        consentsMap.putAll(newConsents.consentsMap);
     }
 
     /**
@@ -112,7 +109,7 @@ class Consents {
         }
 
         Map<String, Object> xdmFormattedMap = new HashMap<>();
-        xdmFormattedMap.put(ConsentConstants.EventDataKey.CONSENTS, consents);
+        xdmFormattedMap.put(ConsentConstants.EventDataKey.CONSENTS, consentsMap);
         return xdmFormattedMap;
     }
 

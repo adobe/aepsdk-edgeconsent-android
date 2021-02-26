@@ -19,6 +19,7 @@ import com.adobe.marketing.mobile.ExtensionErrorCallback;
 import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
 
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -111,20 +112,27 @@ class ConsentExtension extends Extension {
         Consents mergedConsent = consentManager.mergeAndPersist(newConsents);
 
         // share and dispatch the updated consents
-        createXDMSharedState(mergedConsent, event);
+        createXDMStateAndDispatchResponseEvent(mergedConsent, event);
         dispatchEdgeConsentUpdateEvent(mergedConsent);
     }
 
     void handleEdgeConsentPreference(final Event event) {
         // bail out if event data is empty
-        final Map<String, Object> consentData = event.getEventData();
-        if (consentData == null || consentData.isEmpty()) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Consent data not in edge consent preference event. Dropping event.");
+        final Map<String, Object> eventData = event.getEventData();
+        if (eventData == null || eventData.isEmpty()) {
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Event data is empty in edge consent preference event. Dropping event.");
             return;
         }
 
+        final List<Map<String, Object>> payload = (List<Map<String, Object>>) eventData.get(ConsentConstants.EventDataKey.PAYLOAD);
+        if (payload == null || payload.isEmpty()) {
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "consent.preferences response event from edge is missing payload. Dropping event.");
+            return;
+        }
+
+
         // bail out if no valid consents are found in eventData
-        final Consents newConsents = new Consents(consentData);
+        final Consents newConsents = new Consents(prepareConsentXDMMapWithPayload(payload.get(0)));
         if (newConsents.isEmpty()) {
             MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Unable to find valid consent data from edge consent preference event. Dropping event.");
             return;
@@ -135,7 +143,7 @@ class ConsentExtension extends Extension {
         newConsents.setTimeStamp(event.getTimestamp());
         Consents mergedConsent = consentManager.mergeAndPersist(newConsents);
 
-        createXDMSharedState(mergedConsent, event);
+        createXDMStateAndDispatchResponseEvent(mergedConsent, event);
     }
 
     /**
@@ -162,25 +170,38 @@ class ConsentExtension extends Extension {
     }
 
     /**
-     * Creates an XDM Shared state with the consents provided.
+     * Creates an XDM Shared state with the consents provided and then dispatches {@link ConsentConstants.EventNames#CONSENT_PREFERENCES_UPDATED} event to eventHub.
      * <p>
-     * Will not share the XDMSharedEventState if consents is null.
+     * Will not share the XDMSharedEventState or dispatch event if consents is null.
      *
      * @param consents {@link Consents} object representing the latest consents
      */
-    private void createXDMSharedState(final Consents consents, final Event event) {
+    private void createXDMStateAndDispatchResponseEvent(final Consents consents, final Event event) {
         if (consents == null) {
             return;
         }
+
+        // set the shared state
         ExtensionErrorCallback<ExtensionError> errorCallback = new ExtensionErrorCallback<ExtensionError>() {
             @Override
             public void error(final ExtensionError extensionError) {
-                MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, String.format("Failed create XDM shared state %s event: Error : %s.", ConsentConstants.EventNames.EDGE_CONSENT_UPDATE,
-                        extensionError.getErrorName()));
+                MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, String.format("Failed create XDM shared state. Error : %s.", extensionError.getErrorName()));
             }
         };
 
         getApi().setXDMSharedEventState(consents.asXDMMap(), event, errorCallback);
+
+
+        // create and dispatch an consent response event
+        final Event responseEvent = new Event.Builder(ConsentConstants.EventNames.CONSENT_PREFERENCES_UPDATED, ConsentConstants.EventType.CONSENT, ConsentConstants.EventSource.RESPONSE_CONTENT).setEventData(consents.asXDMMap()).build();
+        ExtensionErrorCallback<ExtensionError> dispatchErrorCallback = new ExtensionErrorCallback<ExtensionError>() {
+            @Override
+            public void error(final ExtensionError extensionError) {
+                MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, String.format("Failed to dispatch %s event: Error : %s.", responseEvent.getName(),
+                        extensionError.getErrorName()));
+            }
+        };
+        MobileCore.dispatchEvent(responseEvent, dispatchErrorCallback);
     }
 
     /**
@@ -197,16 +218,23 @@ class ConsentExtension extends Extension {
             return;
         }
 
-        // create and dispatch an consent update event
+        // create and dispatch an edge consent update event
+        final Event edgeConsentUpdateEvent = new Event.Builder(ConsentConstants.EventNames.EDGE_CONSENT_UPDATE, ConsentConstants.EventType.EDGE, ConsentConstants.EventSource.UPDATE_CONSENT).setEventData(consents.asXDMMap()).build();
         ExtensionErrorCallback<ExtensionError> errorCallback = new ExtensionErrorCallback<ExtensionError>() {
             @Override
             public void error(final ExtensionError extensionError) {
-                MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, String.format("Failed to dispatch %s event: Error : %s.", ConsentConstants.EventNames.EDGE_CONSENT_UPDATE,
+                MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, String.format("Failed to dispatch %s event: Error : %s.", edgeConsentUpdateEvent.getName(),
                         extensionError.getErrorName()));
             }
         };
-        final Event event = new Event.Builder(ConsentConstants.EventNames.EDGE_CONSENT_UPDATE, ConsentConstants.EventType.EDGE, ConsentConstants.EventSource.UPDATE_CONSENT).setEventData(consents.asXDMMap()).build();
-        MobileCore.dispatchEvent(event, errorCallback);
+        MobileCore.dispatchEvent(edgeConsentUpdateEvent, errorCallback);
+    }
+
+
+    private Map<String,Object> prepareConsentXDMMapWithPayload(final Map<String,Object> payload) {
+        return new HashMap<String,Object>(){{
+            put(ConsentConstants.EventDataKey.CONSENTS, payload);
+        }};
     }
 
 }
