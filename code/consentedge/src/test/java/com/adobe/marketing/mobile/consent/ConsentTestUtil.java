@@ -20,7 +20,7 @@ public class ConsentTestUtil {
 
     public static String SAMPLE_METADATA_TIMESTAMP = "2019-09-23T18:15:45Z";
     public static String SAMPLE_METADATA_TIMESTAMP_OTHER = "2020-07-23T18:16:45Z";
-    private static final String ADID = "adId";
+    private static final String ADID = "adID";
     private static final String COLLECT = "collect";
     private static final String PERSONALIZE = "personalize";
     private static final String CONTENT = "content";
@@ -29,7 +29,7 @@ public class ConsentTestUtil {
      * A fully prepared valid consent JSON looks like :
      * {
      *   "consents": {
-     *     "adId": {
+     *     "adID": {
      *       "val": "n"
      *     },
      *     "collect": {

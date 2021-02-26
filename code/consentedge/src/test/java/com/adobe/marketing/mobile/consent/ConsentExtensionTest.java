@@ -160,7 +160,7 @@ public class ConsentExtensionTest {
         assertEquals(consentResponseEvent.getSource(), ConsentConstants.EventSource.RESPONSE_CONTENT.toLowerCase());
 
         assertEquals("y", ((Map) ((Map) consentResponseEvent.getEventData().get("consents")).get("collect")).get("val"));
-        assertEquals("n", ((Map) ((Map) consentResponseEvent.getEventData().get("consents")).get("adId")).get("val"));
+        assertEquals("n", ((Map) ((Map) consentResponseEvent.getEventData().get("consents")).get("adID")).get("val"));
         assertNotNull(((Map) ((Map) consentResponseEvent.getEventData().get("consents")).get("metadata")).get("time"));
 
         // verify edge consent event dispatched
@@ -170,7 +170,7 @@ public class ConsentExtensionTest {
         assertEquals(edgeConsentUpdateEvent.getSource(), ConsentConstants.EventSource.UPDATE_CONSENT.toLowerCase());
 
         assertEquals("y", ((Map) ((Map) edgeConsentUpdateEvent.getEventData().get("consents")).get("collect")).get("val"));
-        assertEquals("n", ((Map) ((Map) edgeConsentUpdateEvent.getEventData().get("consents")).get("adId")).get("val"));
+        assertEquals("n", ((Map) ((Map) edgeConsentUpdateEvent.getEventData().get("consents")).get("adID")).get("val"));
         assertNotNull(((Map) ((Map) edgeConsentUpdateEvent.getEventData().get("consents")).get("metadata")).get("time"));
     }
 
@@ -197,20 +197,20 @@ public class ConsentExtensionTest {
         // verify consent response event dispatched
         Event consentResponseEvent = eventCaptor.getAllValues().get(0);
         assertEquals("y", ((Map) ((Map) consentResponseEvent.getEventData().get("consents")).get("collect")).get("val"));
-        assertEquals("n", ((Map) ((Map) consentResponseEvent.getEventData().get("consents")).get("adId")).get("val"));
+        assertEquals("n", ((Map) ((Map) consentResponseEvent.getEventData().get("consents")).get("adID")).get("val"));
         assertNotNull(((Map) ((Map) consentResponseEvent.getEventData().get("consents")).get("metadata")).get("time"));
 
         // verify edge consent event dispatched
         Event edgeConsentUpdateEvent = eventCaptor.getAllValues().get(1);
         assertEquals("y", ((Map) ((Map) edgeConsentUpdateEvent.getEventData().get("consents")).get("collect")).get("val"));
-        assertEquals("n", ((Map) ((Map) edgeConsentUpdateEvent.getEventData().get("consents")).get("adId")).get("val"));
+        assertEquals("n", ((Map) ((Map) edgeConsentUpdateEvent.getEventData().get("consents")).get("adID")).get("val"));
         assertNotNull(((Map) ((Map) edgeConsentUpdateEvent.getEventData().get("consents")).get("metadata")).get("time"));
 
         // verify XDM shared state
         verify(mockExtensionApi, times(1)).setXDMSharedEventState(sharedStateCaptor.capture(), eq(consentUpdateEvent), any(ExtensionErrorCallback.class));
         Map<String, Object> sharedState = sharedStateCaptor.getValue();
         assertEquals("y", ((Map) ((Map) sharedState.get("consents")).get("collect")).get("val"));
-        assertEquals("n", ((Map) ((Map) sharedState.get("consents")).get("adId")).get("val"));
+        assertEquals("n", ((Map) ((Map) sharedState.get("consents")).get("adID")).get("val"));
         assertNotNull(((Map) ((Map) sharedState.get("consents")).get("metadata")).get("time"));
     }
 
