@@ -32,7 +32,7 @@ public class ConsentsTest {
         assertEquals("y", ConsentTestUtil.readCollectConsent(consents));
         assertEquals("n", ConsentTestUtil.readAdIdConsent(consents));
         assertEquals("vi", ConsentTestUtil.readPersonalizeConsent(consents));
-        assertEquals(SAMPLE_METADATA_TIMESTAMP, ConsentTestUtil.readTimeStamp(consents));
+        assertEquals(SAMPLE_METADATA_TIMESTAMP, ConsentTestUtil.readTimestamp(consents));
         assertFalse(consents.isEmpty());
     }
 
@@ -49,7 +49,7 @@ public class ConsentsTest {
         assertEquals("n", ConsentTestUtil.readCollectConsent(consents));
         assertNull(ConsentTestUtil.readAdIdConsent(consents));
         assertNull(ConsentTestUtil.readPersonalizeConsent(consents));
-        assertNull(ConsentTestUtil.readTimeStamp(consents));
+        assertNull(ConsentTestUtil.readTimestamp(consents));
     }
 
 
@@ -180,7 +180,7 @@ public class ConsentsTest {
         // verify
         assertEquals("y", ConsentTestUtil.readCollectConsent(baseConsent));
         assertNull(ConsentTestUtil.readAdIdConsent(baseConsent));
-        assertNull(ConsentTestUtil.readTimeStamp(baseConsent));
+        assertNull(ConsentTestUtil.readTimestamp(baseConsent));
 
         // test again
         Consents secondOverridingConsent = new Consents(CreateConsentXDMMap("n", "n", SAMPLE_METADATA_TIMESTAMP));
@@ -188,7 +188,7 @@ public class ConsentsTest {
 
         assertEquals("n", ConsentTestUtil.readCollectConsent(baseConsent));
         assertEquals("n", ConsentTestUtil.readAdIdConsent(baseConsent));
-        assertEquals(SAMPLE_METADATA_TIMESTAMP, ConsentTestUtil.readTimeStamp(baseConsent));
+        assertEquals(SAMPLE_METADATA_TIMESTAMP, ConsentTestUtil.readTimestamp(baseConsent));
     }
 
     @Test
@@ -202,7 +202,7 @@ public class ConsentsTest {
         // verify
         assertEquals("n", ConsentTestUtil.readCollectConsent(baseConsent));
         assertNull(ConsentTestUtil.readAdIdConsent(baseConsent));
-        assertEquals(SAMPLE_METADATA_TIMESTAMP, ConsentTestUtil.readTimeStamp(baseConsent));
+        assertEquals(SAMPLE_METADATA_TIMESTAMP, ConsentTestUtil.readTimestamp(baseConsent));
     }
 
     // ========================================================================================
@@ -216,10 +216,10 @@ public class ConsentsTest {
         // test
         long currentTimestamp = System.currentTimeMillis();
         String iso8601DateString = DateUtility.dateToISO8601String(new Date(currentTimestamp));
-        consents.setTimeStamp(currentTimestamp);
+        consents.setTimestamp(currentTimestamp);
 
         // verify
-        assertEquals(iso8601DateString, ConsentTestUtil.readTimeStamp(consents));
+        assertEquals(iso8601DateString, ConsentTestUtil.readTimestamp(consents));
     }
 
     @Test
@@ -228,9 +228,9 @@ public class ConsentsTest {
         Consents consents = new Consents(new HashMap<String, Object>());
 
         // test
-        consents.setTimeStamp(System.currentTimeMillis());
+        consents.setTimestamp(System.currentTimeMillis());
 
         // verify
-        assertNull(ConsentTestUtil.readTimeStamp(consents));
+        assertNull(ConsentTestUtil.readTimestamp(consents));
     }
 }

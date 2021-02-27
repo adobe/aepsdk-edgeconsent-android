@@ -54,7 +54,7 @@ class Consents {
      *
      * @param timeStamp {@code long} timestamp in milliseconds indicating the time of last consents update
      */
-    void setTimeStamp(final long timeStamp) {
+    void setTimestamp(final long timeStamp) {
         if (isEmpty()) {
             return;
         }

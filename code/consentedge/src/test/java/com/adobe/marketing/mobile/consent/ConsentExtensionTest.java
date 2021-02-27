@@ -216,11 +216,11 @@ public class ConsentExtensionTest {
 
     @Test
     public void test_handleConsentUpdate_NullOrEmptyConsents() {
-        // setup
+        // setup event with no valid consents
         setupExistingConsents(CreateConsentsXDMJSONString("n", "n"));
 
         // test
-        extension.handleConsentUpdate(buildConsentUpdateEvent(null, null)); // send second event which overrides collect consent to YES
+        extension.handleConsentUpdate(buildConsentUpdateEvent(null, null));
 
         // verify
         // Initial NO and NO
@@ -236,7 +236,7 @@ public class ConsentExtensionTest {
         Event event = new Event.Builder("Consent Response", ConsentConstants.EventType.CONSENT, ConsentConstants.EventSource.UPDATE_CONSENT).setEventData(null).build();
 
         // test
-        extension.handleConsentUpdate(event); // send second event which overrides collect consent to YES
+        extension.handleConsentUpdate(event);
 
         // verify
         PowerMockito.verifyStatic(MobileCore.class, Mockito.times(0));
@@ -249,7 +249,7 @@ public class ConsentExtensionTest {
     // ========================================================================================
 
     private void setupExistingConsents(final String jsonString) {
-        Mockito.when(mockSharedPreference.getString(ConsentConstants.DataStoreKey.CONSENT, null)).thenReturn(jsonString);
+        Mockito.when(mockSharedPreference.getString(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES, null)).thenReturn(jsonString);
         ConsentManager consentManager = new ConsentManager(); // loads the shared preference
         Whitebox.setInternalState(extension, "consentManager", consentManager);
     }

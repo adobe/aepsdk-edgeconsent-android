@@ -29,7 +29,7 @@ class ConsentManager {
      * @param newConsents the newly obtained consents that needs to be merged with existing consents
      * @return {@link Consents} representing the current Consents after the merge
      */
-    Consents mergeAndPersist(final Consents newConsents) {
+    void mergeAndPersist(final Consents newConsents) {
         // merge and persist
         if (currentConsents == null) {
             currentConsents = new Consents(newConsents);
@@ -38,7 +38,7 @@ class ConsentManager {
         }
         ConsentStorageService.saveConsentsToPersistence(currentConsents);
         // make a copy of the merged consents and return
-        return new Consents(currentConsents);
+        return;
     }
 
     /**

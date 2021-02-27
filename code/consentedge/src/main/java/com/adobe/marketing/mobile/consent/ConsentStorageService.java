@@ -42,10 +42,10 @@ class ConsentStorageService {
             return null;
         }
 
-        final String jsonString = sharedPreferences.getString(ConsentConstants.DataStoreKey.CONSENT, null);
+        final String jsonString = sharedPreferences.getString(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES, null);
 
         if (jsonString == null) {
-            MobileCore.log(LoggingMode.VERBOSE, ConsentConstants.LOG_TAG, "No previous consents were store in persistence. Current consent is null");
+            MobileCore.log(LoggingMode.VERBOSE, ConsentConstants.LOG_TAG, "No previous consents were stored in persistence. Current consent is null");
             return null;
         }
 
@@ -68,7 +68,7 @@ class ConsentStorageService {
      * The consents are converted to jsonString and stored in the persistence.
      * Saving to persistence fails if {@link SharedPreferences} or {@link SharedPreferences.Editor} is null.
      *
-     * @param consents the consents that needs to be persisted under key {@link ConsentConstants.DataStoreKey#CONSENT}
+     * @param consents the consents that needs to be persisted under key {@link ConsentConstants.DataStoreKey#CONSENT_PREFERENCES}
      */
     static void saveConsentsToPersistence(final Consents consents) {
         SharedPreferences sharedPreferences = getSharedPreference();
@@ -85,14 +85,14 @@ class ConsentStorageService {
         }
 
         if (consents.isEmpty()) {
-            editor.remove(ConsentConstants.DataStoreKey.CONSENT);
+            editor.remove(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES);
             editor.apply();
             return;
         }
 
         final JSONObject jsonObject = new JSONObject(consents.asXDMMap());
         final String jsonString = jsonObject.toString();
-        editor.putString(ConsentConstants.DataStoreKey.CONSENT, jsonString);
+        editor.putString(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES, jsonString);
         editor.apply();
     }
 

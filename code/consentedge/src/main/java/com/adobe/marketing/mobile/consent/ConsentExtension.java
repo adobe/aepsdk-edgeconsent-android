@@ -103,12 +103,12 @@ class ConsentExtension extends Extension {
         }
 
         // set the timestamp and merge with existing consents
-        newConsents.setTimeStamp(event.getTimestamp());
-        Consents mergedConsent = consentManager.mergeAndPersist(newConsents);
+        newConsents.setTimestamp(event.getTimestamp());
+        consentManager.mergeAndPersist(newConsents);
 
         // share and dispatch the updated consents
-        createXDMStateAndDispatchResponseEvent(mergedConsent, event);
-        dispatchEdgeConsentUpdateEvent(mergedConsent);
+        createXDMStateAndDispatchResponseEvent(consentManager.getCurrentConsents(), event);
+        dispatchEdgeConsentUpdateEvent(consentManager.getCurrentConsents());
     }
 
     void handleEdgeConsentPreference(final Event event) {
