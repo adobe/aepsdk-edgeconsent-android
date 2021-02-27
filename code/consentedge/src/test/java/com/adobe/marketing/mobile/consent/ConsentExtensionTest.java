@@ -221,11 +221,11 @@ public class ConsentExtensionTest {
 
     @Test
     public void test_handleConsentUpdate_NullOrEmptyConsents() {
-        // setup
+        // setup event with no valid consents
         setupExistingConsents(CreateConsentsXDMJSONString("n", "n"));
 
         // test
-        extension.handleConsentUpdate(buildConsentUpdateEvent(null, null)); // send second event which overrides collect consent to YES
+        extension.handleConsentUpdate(buildConsentUpdateEvent(null, null));
 
         // verify
         // Initial NO and NO
@@ -432,7 +432,7 @@ public class ConsentExtensionTest {
     // ========================================================================================
 
     private void setupExistingConsents(final String jsonString) {
-        Mockito.when(mockSharedPreference.getString(ConsentConstants.DataStoreKey.CONSENT, null)).thenReturn(jsonString);
+        Mockito.when(mockSharedPreference.getString(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES, null)).thenReturn(jsonString);
         ConsentManager consentManager = new ConsentManager(); // loads the shared preference
         Whitebox.setInternalState(extension, "consentManager", consentManager);
     }

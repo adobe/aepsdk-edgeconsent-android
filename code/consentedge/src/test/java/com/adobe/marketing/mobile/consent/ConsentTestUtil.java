@@ -118,14 +118,14 @@ public class ConsentTestUtil {
         return consentData;
     }
 
-    public static String readTimeStamp(Consents consents) {
+    public static String readTimestamp(Consents consents) {
         Map<String, Object> allConsentMap = getAllConsentsMap(consents);
-        if (allConsentMap == null || allConsentMap.isEmpty()) {
+        if (isNullOrEmpty(allConsentMap)) {
             return null;
         }
 
         Map<String, Object> collectMap = (Map<String, Object>) allConsentMap.get(ConsentConstants.EventDataKey.MEATADATA);
-        if (collectMap == null || collectMap.isEmpty()) {
+        if (isNullOrEmpty(collectMap)) {
             return null;
         }
 
@@ -134,12 +134,12 @@ public class ConsentTestUtil {
 
     public static String readCollectConsent(Consents consents) {
         Map<String, Object> allConsentMap = getAllConsentsMap(consents);
-        if (allConsentMap == null || allConsentMap.isEmpty()) {
+        if (isNullOrEmpty(allConsentMap)) {
             return null;
         }
 
         Map<String, Object> collectMap = (Map<String, Object>) allConsentMap.get(COLLECT);
-        if (collectMap == null || collectMap.isEmpty()) {
+        if (isNullOrEmpty(collectMap)) {
             return null;
         }
 
@@ -148,12 +148,12 @@ public class ConsentTestUtil {
 
     public static String readAdIdConsent(Consents consents) {
         Map<String, Object> allConsentMap = getAllConsentsMap(consents);
-        if (allConsentMap == null || allConsentMap.isEmpty()) {
+        if (isNullOrEmpty(allConsentMap)) {
             return null;
         }
 
         Map<String, Object> adIdMap = (Map<String, Object>) allConsentMap.get(ADID);
-        if (adIdMap == null || adIdMap.isEmpty()) {
+        if (isNullOrEmpty(adIdMap)) {
             return null;
         }
 
@@ -162,17 +162,17 @@ public class ConsentTestUtil {
 
     public static String readPersonalizeConsent(Consents consents) {
         Map<String, Object> allConsentMap = getAllConsentsMap(consents);
-        if (allConsentMap == null || allConsentMap.isEmpty()) {
+        if (isNullOrEmpty(allConsentMap)) {
             return null;
         }
 
         Map<String, Object> personalize = (Map<String, Object>) allConsentMap.get(PERSONALIZE);
-        if (personalize == null || personalize.isEmpty()) {
+        if (isNullOrEmpty(personalize)) {
             return null;
         }
 
         Map<String, String> contentMap = (Map<String, String>) personalize.get(CONTENT);
-        if (contentMap == null || contentMap.isEmpty()) {
+        if (isNullOrEmpty(contentMap)) {
             return null;
         }
         return contentMap.get("val");
@@ -180,15 +180,20 @@ public class ConsentTestUtil {
 
     private static Map<String, Object> getAllConsentsMap(Consents consents) {
         Map<String, Object> xdmMap = consents.asXDMMap();
-        if (xdmMap == null || xdmMap.isEmpty()) {
+        if (isNullOrEmpty(xdmMap)) {
             return null;
         }
 
         Map<String, Object> allConsents = (Map<String, Object>) xdmMap.get(ConsentConstants.EventDataKey.CONSENTS);
-        if (allConsents == null || allConsents.isEmpty()) {
+        if (isNullOrEmpty(allConsents)) {
             return null;
         }
 
         return allConsents;
+    }
+
+
+    private static boolean isNullOrEmpty(final Map map){
+        return (map == null || map.isEmpty());
     }
 }

@@ -21,6 +21,7 @@ final class ConsentConstants {
         static final String CONSENTS = "consents";
         static final String MEATADATA = "metadata";
         static final String PAYLOAD = "payload";
+
         static final String TIME = "time";
         static final String VALUE = "val";
         private EventDataKey() { }
@@ -42,7 +43,7 @@ final class ConsentConstants {
 
     final class DataStoreKey {
         static final String DATASTORE_NAME = "com.adobe.consent";
-        static final String CONSENT = "consent:preferences";
+        static final String CONSENT_PREFERENCES = "consent:preferences";
         private DataStoreKey() { }
     }
 

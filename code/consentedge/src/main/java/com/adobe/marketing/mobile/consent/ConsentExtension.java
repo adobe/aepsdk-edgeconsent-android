@@ -19,8 +19,9 @@ import com.adobe.marketing.mobile.ExtensionErrorCallback;
 import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
 
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
+
 import java.util.Map;
 
 class ConsentExtension extends Extension {
@@ -108,12 +109,12 @@ class ConsentExtension extends Extension {
         }
 
         // set the timestamp and merge with existing consents
-        newConsents.setTimeStamp(event.getTimestamp());
-        Consents mergedConsent = consentManager.mergeAndPersist(newConsents);
+        newConsents.setTimestamp(event.getTimestamp());
+        consentManager.mergeAndPersist(newConsents);
 
         // share and dispatch the updated consents
-        createXDMStateAndDispatchResponseEvent(mergedConsent, event);
-        dispatchEdgeConsentUpdateEvent(mergedConsent);
+        createXDMStateAndDispatchResponseEvent(consentManager.getCurrentConsents(), event);
+        dispatchEdgeConsentUpdateEvent(consentManager.getCurrentConsents());
     }
 
     void handleEdgeConsentPreference(final Event event) {
@@ -140,10 +141,10 @@ class ConsentExtension extends Extension {
 
         // update the timestamp and share the
         // todo double check if need to explicity set time stamp on edge consent preference event. Wondering the timestamp would already be in the xdmFormatted edge response
-        newConsents.setTimeStamp(event.getTimestamp());
-        Consents mergedConsent = consentManager.mergeAndPersist(newConsents);
+        newConsents.setTimestamp(event.getTimestamp());
+        consentManager.mergeAndPersist(newConsents);
 
-        createXDMStateAndDispatchResponseEvent(mergedConsent, event);
+        createXDMStateAndDispatchResponseEvent(consentManager.getCurrentConsents(), event);
     }
 
     /**
@@ -168,6 +169,8 @@ class ConsentExtension extends Extension {
         final Event responseEvent = new Event.Builder(ConsentConstants.EventNames.GET_CONSENTS_RESPONSE, ConsentConstants.EventType.CONSENT, ConsentConstants.EventSource.RESPONSE_CONTENT).setEventData(xdmMap).build();
         MobileCore.dispatchResponseEvent(responseEvent, event, errorCallback);
     }
+
+
 
     /**
      * Creates an XDM Shared state with the consents provided and then dispatches {@link ConsentConstants.EventNames#CONSENT_PREFERENCES_UPDATED} event to eventHub.

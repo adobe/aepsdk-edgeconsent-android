@@ -54,7 +54,7 @@ class Consents {
      *
      * @param timeStamp {@code long} timestamp in milliseconds indicating the time of last consents update
      */
-    void setTimeStamp(final long timeStamp) {
+    void setTimestamp(final long timeStamp) {
         if (isEmpty()) {
             return;
         }
@@ -100,6 +100,8 @@ class Consents {
 
     /**
      * Dictionary representation of the available consents associated with this {@link Consents} object.
+     * <p>
+     * Will make a deep copy of the available consents map before sharing.
      *
      * @return {@link Map} representing the Consents in XDM format
      */
@@ -109,7 +111,7 @@ class Consents {
         }
 
         Map<String, Object> xdmFormattedMap = new HashMap<>();
-        xdmFormattedMap.put(ConsentConstants.EventDataKey.CONSENTS, consentsMap);
+        xdmFormattedMap.put(ConsentConstants.EventDataKey.CONSENTS, Utility.deepCopy(consentsMap));
         return xdmFormattedMap;
     }
 
