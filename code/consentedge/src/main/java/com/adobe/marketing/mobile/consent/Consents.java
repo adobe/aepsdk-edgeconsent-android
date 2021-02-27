@@ -100,6 +100,8 @@ class Consents {
 
     /**
      * Dictionary representation of the available consents associated with this {@link Consents} object.
+     * <p>
+     * Will make a deep copy of the avaialble consents map before sharing.
      *
      * @return {@link Map} representing the Consents in XDM format
      */
@@ -109,7 +111,7 @@ class Consents {
         }
 
         Map<String, Object> xdmFormattedMap = new HashMap<>();
-        xdmFormattedMap.put(ConsentConstants.EventDataKey.CONSENTS, consentsMap);
+        xdmFormattedMap.put(ConsentConstants.EventDataKey.CONSENTS, Utility.deepCopy(consentsMap));
         return xdmFormattedMap;
     }
 
