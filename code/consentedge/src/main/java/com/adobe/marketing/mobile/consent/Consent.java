@@ -18,7 +18,6 @@ import com.adobe.marketing.mobile.ExtensionErrorCallback;
 import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class Consent {
@@ -47,18 +46,24 @@ public class Consent {
         });
     }
 
-
+    // TODO:<DOC_LINK_HERE> Provide a git book doc link, with an example usage of this API with correct XDM format.
     /**
-     * Merges the existing consents with the given consents.
+     * Updates the consent for the user with the provided value.
      * <p>
-     * If the consent is already contained in the extension, the old consent is replaced by the specified consent
+     * The provided consents map must be in XDMFormat. DOC_LINK_HERE
+     * If the consent is already contained in the extension, the old consent is replaced by the newly specified consent.
      * Any new consents provided will be appended to the existing consents list.
+     *
+     * On a successful consent update following happens.
+     * 1. Edge servers are notified with the updated consents for the user.
+     * 2. XDMSharedState is updated for {@link Consent} extension with the changed consents.
+     * 3. An {@link ConsentConstants.EventNames#CONSENT_PREFERENCES_UPDATED} event is dispatched to eventHub to notify other concerned extensions about the Consent Changes.
      *
      * @param xdmFormattedConsents An {@link Map} of consents in predefined XDMformat
      */
     public static void update(final Map<String,Object> xdmFormattedConsents) {
         // create and dispatch an consent fragments update event
-        ExtensionErrorCallback<ExtensionError> errorCallback = new ExtensionErrorCallback<ExtensionError>() {
+        final ExtensionErrorCallback<ExtensionError> errorCallback = new ExtensionErrorCallback<ExtensionError>() {
             @Override
             public void error(final ExtensionError extensionError) {
                 MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, String.format("Consents.update() API. Failed to dispatch %s event: Error : %s.", ConsentConstants.EventNames.CONSENT_FRAGMENTS_UPDATE_REQUEST,
@@ -70,15 +75,16 @@ public class Consent {
     }
 
     /**
-     * Retrieves the current consents stored in the Consent extension.
+     * Retrieves the current consents for the User.
      * <p>
-     * Callback is invoked with null value if no consents were present in the extension.
+     * Callback is invoked with null value if no consents were assigned to this user.
+     * This can happen if there is no default consents provided for your application. Please check the launch property and verify if the consents extension is installed.
      *
      * @param callback a {@link AdobeCallback} of {@link Map} invoked with current consents of the extension
      */
     public static void getConsents(final AdobeCallback<Map<String,Object>> callback) {
         // create and dispatch an consent fragments update event
-        ExtensionErrorCallback<ExtensionError> errorCallback = new ExtensionErrorCallback<ExtensionError>() {
+        final ExtensionErrorCallback<ExtensionError> errorCallback = new ExtensionErrorCallback<ExtensionError>() {
             @Override
             public void error(final ExtensionError extensionError) {
                 MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, String.format("Consents.getConsents() API. Failed to dispatch %s event: Error : %s.", ConsentConstants.EventNames.CONSENT_FRAGMENTS_UPDATE_REQUEST,

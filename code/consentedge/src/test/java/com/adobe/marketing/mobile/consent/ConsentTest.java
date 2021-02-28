@@ -84,7 +84,7 @@ public class ConsentTest {
     }
 
     // ========================================================================================
-    // update API
+    // update Public API
     // ========================================================================================
     @Test
     public void testUpdate() {
@@ -111,7 +111,7 @@ public class ConsentTest {
     }
 
     @Test
-    public void testUpdate_null() {
+    public void testUpdate_withNull() {
         // setup
         final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
 
@@ -127,7 +127,7 @@ public class ConsentTest {
     }
 
     // ========================================================================================
-    // getConsents API
+    // getConsents Public API
     // ========================================================================================
     @Test
     public void testGetConsents() {

@@ -32,14 +32,14 @@ public class ListenerConsentRequestContent extends ExtensionListener {
 
     /**
      * Method that gets called when event with event type {@link ConsentConstants.EventType#CONSENT}
-     * and with event source {@link ConsentConstants.EventSource#REQUEST_CONTENT}  is dispatched through eventHub.
+     * and with event source {@link ConsentConstants.EventSource#REQUEST_CONTENT} is dispatched through eventHub.
      *
      * @param event the consent update {@link Event} to be processed
      */
     @Override
     public void hear(final Event event) {
         if (event == null || event.getEventData() == null) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Event or Event data is null. Ignoring the event listened by ListenerConsentRequestContent");
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Event or Event data is null. Ignoring the event listened by ListenerConsentRequestContent.");
             return;
         }
 
@@ -58,7 +58,7 @@ public class ListenerConsentRequestContent extends ExtensionListener {
     /**
      * Returns the parent extension associated with the listener.
      *
-     * @return {a @link ConsentExtension} object registered with the eventHub
+     * @return a {@link ConsentExtension} object registered with the eventHub
      */
     ConsentExtension getConsentExtension() {
         return (ConsentExtension) getParentExtension();

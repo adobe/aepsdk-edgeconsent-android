@@ -69,11 +69,7 @@ class ConsentStorageService {
      * The consents are converted to jsonString and stored in the persistence.
      * Saving to persistence fails if {@link SharedPreferences} or {@link SharedPreferences.Editor} is null.
      *
-<<<<<<< HEAD
-     * @param consents the consents that needs to be persisted under key {@link ConsentConstants.DataStoreKey#CONSENT}
-=======
      * @param consents the consents that needs to be persisted under key {@link ConsentConstants.DataStoreKey#CONSENT_PREFERENCES}
->>>>>>> a405fcd09e96562d363e198af6920dc385bba9cf
      */
     static void saveConsentsToPersistence(final Consents consents) {
         SharedPreferences sharedPreferences = getSharedPreference();

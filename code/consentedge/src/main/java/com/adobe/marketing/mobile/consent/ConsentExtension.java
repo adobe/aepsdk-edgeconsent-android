@@ -117,14 +117,24 @@ class ConsentExtension extends Extension {
         dispatchEdgeConsentUpdateEvent(consentManager.getCurrentConsents());
     }
 
+    /**
+     * Handles the event with eventType {@link ConsentConstants.EventType#EDGE} and EventSource {@link ConsentConstants.EventSource#CONSENT_PREFERENCE}.
+     * <p>
+     * 1. Reads the event data and extract newconsents from the edge response in XDM Format.
+     * 2. Merge with the existing consents.
+     * 3. Creates XDMSharedState and dispatches a Consent response event for other modules to notify the consent change.
+     *
+     * @param event the Edge consent preferences response {@link Event} to be processed
+     */
     void handleEdgeConsentPreference(final Event event) {
         // bail out if event data is empty
         final Map<String, Object> eventData = event.getEventData();
         if (eventData == null || eventData.isEmpty()) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Event data is empty in edge consent preference event. Dropping event.");
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Event data is empty in edge consent preference response event. Dropping event.");
             return;
         }
 
+        // bail out if you dont find payload in edge consent preference response event
         final List<Map<String, Object>> payload = (List<Map<String, Object>>) eventData.get(ConsentConstants.EventDataKey.PAYLOAD);
         if (payload == null || payload.isEmpty()) {
             MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "consent.preferences response event from edge is missing payload. Dropping event.");
@@ -135,11 +145,11 @@ class ConsentExtension extends Extension {
         // bail out if no valid consents are found in eventData
         final Consents newConsents = new Consents(prepareConsentXDMMapWithPayload(payload.get(0)));
         if (newConsents.isEmpty()) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Unable to find valid consent data from edge consent preference event. Dropping event.");
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Unable to find valid consent data from edge consent preference response event. Dropping event.");
             return;
         }
 
-        // update the timestamp and share the
+        // update the timestamp and share the updatedConsents as XDMSharedState and dispatch the consent response event
         // todo double check if need to explicity set time stamp on edge consent preference event. Wondering the timestamp would already be in the xdmFormatted edge response
         newConsents.setTimestamp(event.getTimestamp());
         consentManager.mergeAndPersist(newConsents);
@@ -148,10 +158,10 @@ class ConsentExtension extends Extension {
     }
 
     /**
-     * Handles the get consents request event and dispatches a response event of EventType {@link ConsentConstants.EventType#CONSENT} and EventSource {@link ConsentConstants.EventSource#RESPONSE_CONTENT}
-     * with the current consent details
+     * Handles the get consents request event and dispatches a response event of EventType {@link ConsentConstants.EventType#CONSENT} and EventSource
+     * {@link ConsentConstants.EventSource#RESPONSE_CONTENT} with the current consent details.
      * <p>
-     * Dispatched event will contain empty eventData if currentConsents is null/empty
+     * Dispatched event will contain empty eventData if currentConsents are null/empty.
      *
      * @param event the {@link Event} requesting consents
      */
@@ -170,10 +180,9 @@ class ConsentExtension extends Extension {
         MobileCore.dispatchResponseEvent(responseEvent, event, errorCallback);
     }
 
-
-
     /**
-     * Creates an XDM Shared state with the consents provided and then dispatches {@link ConsentConstants.EventNames#CONSENT_PREFERENCES_UPDATED} event to eventHub.
+     * Creates an XDM Shared state with the consents provided and then dispatches {@link ConsentConstants.EventNames#CONSENT_PREFERENCES_UPDATED}
+     * event to eventHub to notify other concerned extensions about the Consent changes.
      * <p>
      * Will not share the XDMSharedEventState or dispatch event if consents is null.
      *
@@ -234,10 +243,15 @@ class ConsentExtension extends Extension {
     }
 
 
+    /**
+     * Helper methods that take the payload from the edge consent preferences response and builds a XDM formatted consentMap.
+     *
+     * @param payload a {@link Map} representing a payload from edge consent response
+     */
     private Map<String,Object> prepareConsentXDMMapWithPayload(final Map<String,Object> payload) {
-        return new HashMap<String,Object>(){{
-            put(ConsentConstants.EventDataKey.CONSENTS, payload);
-        }};
+        Map<String,Object> consentMap = new HashMap<>();
+        consentMap.put(ConsentConstants.EventDataKey.CONSENTS, payload);
+        return consentMap;
     }
 
 }
