@@ -57,7 +57,7 @@ jobs:
   functional-test:
     executor:
       name: android/android-machine
-      resource-class: large
+      resource-class: medium
     steps:
       - checkout
       - android/start-emulator-and-run-tests:
