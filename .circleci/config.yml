@@ -66,7 +66,7 @@ jobs:
           test-command: ./code/gradlew -p code/consentedge connectedPhoneDebugAndroidTest platformFunctionalTestJacocoReport
       - run:
           name: Copy Functional Test files
-          command: cp -r ./code/consentedge/build ./ci/functional-test
+          command: mkdir -p ./ci/functional-test && cp -r ./code/consentedge/build ./ci/functional-test
       - store_artifacts:
           path: ci/functional-test/build/reports
       - store_test_results:
