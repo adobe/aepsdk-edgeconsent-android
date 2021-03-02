@@ -408,15 +408,20 @@ public class ConsentExtensionTest {
     }
 
     @Test
-    public void test_handleEdgeConsentPreference_NullOrEmptyConsents() throws Exception{
+    public void test_handleEdgeConsentPreference_InvalidPayload() throws Exception{
         // test
         extension.handleEdgeConsentPreference(buildEdgeConsentPreferenceEvent("{\n" +
-                "    \"payload\": [],\n" +
-                "    \"type\": \"consent:preferences\"\n" +
+                "  \"payload\": {\n" +
+                "    \"adId\": {\n" +
+                "      \"val\": \"n\"\n" +
+                "    }\n" +
+                "  }\n" +
                 "}"));
 
         // verify shared state is not set
         verify(mockExtensionApi, times(0)).setXDMSharedEventState(any(Map.class), any(Event.class), any(ExtensionErrorCallback.class));
+        PowerMockito.verifyStatic(MobileCore.class, Mockito.times(0));
+        MobileCore.dispatchEvent(any(Event.class), any(ExtensionErrorCallback.class));
     }
 
     @Test

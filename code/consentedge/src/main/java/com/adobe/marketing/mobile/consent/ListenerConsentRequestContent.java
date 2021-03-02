@@ -38,8 +38,8 @@ public class ListenerConsentRequestContent extends ExtensionListener {
      */
     @Override
     public void hear(final Event event) {
-        if (event == null || event.getEventData() == null) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Event or Event data is null. Ignoring the event listened by ListenerConsentRequestContent.");
+        if (event == null) {
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Event null. Ignoring the event listened by ListenerConsentRequestContent.");
             return;
         }
 

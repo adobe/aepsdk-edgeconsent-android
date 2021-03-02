@@ -171,6 +171,16 @@ public class ConsentTest {
         //extensionErrorCallback.error(ExtensionError.UNEXPECTED_ERROR);
     }
 
+    @Test
+    public void testGetConsents_NullCallback() {
+        // test
+        Consent.getConsents(null);
+
+        // verify
+        PowerMockito.verifyStatic(MobileCore.class, Mockito.times(0));
+        MobileCore.dispatchEventWithResponseCallback(any(Event.class),any(AdobeCallback.class),any(ExtensionErrorCallback.class));
+    }
+
     // ========================================================================================
     // Private method
     // ========================================================================================

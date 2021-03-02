@@ -36,56 +36,39 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button btnCollectYES = (Button) findViewById(R.id.btnCollectYES);
-        Button btnCollectNO = (Button) findViewById(R.id.btnCollectNO);
-        Button btnGetConsents = (Button) findViewById(R.id.btnGetConsents);
+    }
+
+    // Implement the OnClickListener callback
+    public void btnCollectNoClicked(View v) {
+        Map<String,Object> consents = new HashMap<String, Object>() {{
+            put("consents", new HashMap<String,Object>(){{
+                put("collect", new HashMap<String,String>(){{
+                    put("val","n");
+                }});
+            }});
+        }};
+        Consent.update(consents);
+    }
+
+    public void btnCollectYESClicked(View v) {
+        Map<String,Object> consents = new HashMap<String, Object>() {{
+            put("consents", new HashMap<String,Object>(){{
+                put("collect", new HashMap<String,String>(){{
+                    put("val","y");
+                }});
+            }});
+        }};
+        Consent.update(consents);
+    }
+
+    public void btnGetConsentsClicked(View v) {
         final TextView txtViewConsents = (TextView) findViewById(R.id.txtViewConsents);
-
-
-        /********* Collect Consent YES **********/
-        btnCollectYES.setOnClickListener(new View.OnClickListener() {
+        Consent.getConsents(new AdobeCallback<Map<String, Object>>() {
             @Override
-            public void onClick(View view) {
-                Map<String,Object> consents = new HashMap<String, Object>() {{
-                 put("consents", new HashMap<String,Object>(){{
-                     put("collect", new HashMap<String,String>(){{
-                         put("val","y");
-                     }});
-                 }});
-                }};
-                Consent.update(consents);
+            public void call(Map<String, Object> consents) {
+                txtViewConsents.setText(consents.toString());
             }
         });
-
-        /********* Collect Consent NO **********/
-        btnCollectNO.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Map<String,Object> consents = new HashMap<String, Object>() {{
-                    put("consents", new HashMap<String,Object>(){{
-                        put("collect", new HashMap<String,String>(){{
-                            put("val","n");
-                        }});
-                    }});
-                }};
-                Consent.update(consents);
-            }
-        });
-
-        /********* Get Consents**********/
-        btnGetConsents.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Consent.getConsents(new AdobeCallback<Map<String, Object>>() {
-                    @Override
-                    public void call(Map<String, Object> consents) {
-                        txtViewConsents.setText(consents.toString());
-                    }
-                });
-            }
-        });
-
-
     }
 
 

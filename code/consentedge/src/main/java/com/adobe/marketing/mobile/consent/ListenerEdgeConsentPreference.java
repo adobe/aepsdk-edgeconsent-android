@@ -38,7 +38,7 @@ class ListenerEdgeConsentPreference extends ExtensionListener {
      */
     @Override
     public void hear(final Event event) {
-        if (event == null || event.getEventData() == null) {
+        if (event == null || event.getEventData() == null || event.getEventData().isEmpty()) {
             MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Event or Event data is null. Ignoring the event listened by ListenerEdgeConsentPreference.");
             return;
         }

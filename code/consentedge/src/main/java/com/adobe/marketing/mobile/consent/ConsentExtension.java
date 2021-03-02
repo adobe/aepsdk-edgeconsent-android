@@ -129,13 +129,16 @@ class ConsentExtension extends Extension {
     void handleEdgeConsentPreference(final Event event) {
         // bail out if event data is empty
         final Map<String, Object> eventData = event.getEventData();
-        if (eventData == null || eventData.isEmpty()) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Event data is empty in edge consent preference response event. Dropping event.");
+
+        // bail out if you don't find payload in edge consent preference response event
+        final List<Map<String, Object>> payload;
+        try {
+            payload = (List<Map<String, Object>>) eventData.get(ConsentConstants.EventDataKey.PAYLOAD);
+        } catch (ClassCastException exp) {
+            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Invalid payload from edge server. Dropping event.");
             return;
         }
 
-        // bail out if you dont find payload in edge consent preference response event
-        final List<Map<String, Object>> payload = (List<Map<String, Object>>) eventData.get(ConsentConstants.EventDataKey.PAYLOAD);
         if (payload == null || payload.isEmpty()) {
             MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "consent.preferences response event from edge is missing payload. Dropping event.");
             return;
