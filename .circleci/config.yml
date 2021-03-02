@@ -61,8 +61,11 @@ jobs:
     steps:
       - checkout
       - android/start-emulator-and-run-tests:
+          #   It should match the name seen in the "sdkmanager --list" output
           system-image: system-images;android-29;default;x86
+          #   The command to be run, while waiting for emulator startup
           post-emulator-launch-assemble-command: ./code/gradlew -p code/consentedge assemblePhone
+          #   The test command
           test-command: ./code/gradlew -p code/consentedge connectedPhoneDebugAndroidTest platformFunctionalTestJacocoReport
       - run:
           name: Copy Functional Test files
@@ -70,7 +73,7 @@ jobs:
       - store_artifacts:
           path: ci/functional-test/build/reports
       - store_test_results:
-          path: ci/functional-test/build/test-results
+          path: ci/functional-test/build/outputs/androidTest-results
 
   publish:
     docker:
