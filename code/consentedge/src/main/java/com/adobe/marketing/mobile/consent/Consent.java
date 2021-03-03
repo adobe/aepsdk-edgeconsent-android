@@ -83,7 +83,7 @@ public class Consent {
      *                  If an {@link AdobeCallbackWithError} is provided, an {@link AdobeError} can be returned in the
      *  				eventuality of any error that occurred while getting the user consents.
      */
-    public static void getConsents(final AdobeCallback callback) {
+    public static void getConsents(final AdobeCallback<Map<String,Object>> callback) {
         if (callback == null) {
             MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Unexpected null callback, provide a callback to retrieve current consents.");
             return;
@@ -120,13 +120,13 @@ public class Consent {
      * @param callback should not be null, should be instance of {@code AdobeCallbackWithError}
      * @param error the {@code AdobeError} returned back in the callback
      */
-    private static void returnError (final AdobeCallback callback, final AdobeError error) {
+    private static void returnError (final AdobeCallback<Map<String,Object>> callback, final AdobeError error) {
         if (callback == null) {
             return;
         }
 
-        final AdobeCallbackWithError adobeCallbackWithError = callback instanceof AdobeCallbackWithError ?
-                (AdobeCallbackWithError) callback : null;
+        final AdobeCallbackWithError<Map<String,Object>> adobeCallbackWithError = callback instanceof AdobeCallbackWithError ?
+                (AdobeCallbackWithError<Map<String,Object>>) callback : null;
 
         if (adobeCallbackWithError != null) {
             adobeCallbackWithError.fail(error);
