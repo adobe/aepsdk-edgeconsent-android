@@ -164,13 +164,13 @@ class ConsentExtension extends Extension {
      * Handles the get consents request event and dispatches a response event of EventType {@link ConsentConstants.EventType#CONSENT} and EventSource
      * {@link ConsentConstants.EventSource#RESPONSE_CONTENT} with the current consent details.
      * <p>
-     * Dispatched event will contain empty eventData if currentConsents are null/empty.
+     * Dispatched event will contain empty XDMConsentMap if currentConsents are null/empty.
      *
      * @param event the {@link Event} requesting consents
      */
     void handleRequestContent(final Event event) {
         Consents currentConsent = consentManager.getCurrentConsents();
-        Map<String,Object> xdmMap = (currentConsent != null && !currentConsent.isEmpty()) ? currentConsent.asXDMMap() : null ;
+        Map<String,Object> xdmMap = (currentConsent != null && !currentConsent.isEmpty()) ? currentConsent.asXDMMap() : emptyConsentXDMMap() ;
 
         ExtensionErrorCallback<ExtensionError> errorCallback = new ExtensionErrorCallback<ExtensionError>() {
             @Override
@@ -254,6 +254,12 @@ class ConsentExtension extends Extension {
     private Map<String,Object> prepareConsentXDMMapWithPayload(final Map<String,Object> payload) {
         Map<String,Object> consentMap = new HashMap<>();
         consentMap.put(ConsentConstants.EventDataKey.CONSENTS, payload);
+        return consentMap;
+    }
+
+    private Map<String, Object> emptyConsentXDMMap() {
+        Map<String,Object> consentMap = new HashMap<>();
+        consentMap.put(ConsentConstants.EventDataKey.CONSENTS, new HashMap<String,Object>());
         return consentMap;
     }
 

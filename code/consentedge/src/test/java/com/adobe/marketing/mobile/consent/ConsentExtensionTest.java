@@ -299,8 +299,9 @@ public class ConsentExtensionTest {
         MobileCore.dispatchResponseEvent(responseEventCaptor.capture(), requestEventCaptor.capture(), errorCallbackCaptor.capture());
 
         // verify that the response event is dispatched with empty event data
-        Event dispatchedEvent = requestEventCaptor.getValue();
-        assertTrue(dispatchedEvent.getEventData().isEmpty());
+        Event dispatchedEvent = responseEventCaptor.getValue();
+        Map consentMap = (Map)dispatchedEvent.getEventData().get("consents");
+        assertTrue(consentMap.isEmpty());
     }
 
     // ========================================================================================

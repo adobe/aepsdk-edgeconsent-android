@@ -12,6 +12,8 @@
 package com.adobe.marketing.mobile.consent;
 
 import com.adobe.marketing.mobile.AdobeCallback;
+import com.adobe.marketing.mobile.AdobeCallbackWithError;
+import com.adobe.marketing.mobile.AdobeError;
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.ExtensionError;
 import com.adobe.marketing.mobile.ExtensionErrorCallback;
@@ -64,11 +66,11 @@ public class Consent {
         final ExtensionErrorCallback<ExtensionError> errorCallback = new ExtensionErrorCallback<ExtensionError>() {
             @Override
             public void error(final ExtensionError extensionError) {
-                MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, String.format("Consents.update() API. Failed to dispatch %s event: Error : %s.", ConsentConstants.EventNames.CONSENT_FRAGMENTS_UPDATE_REQUEST,
+                MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, String.format("Consents.update() API. Failed to dispatch %s event: Error : %s.", ConsentConstants.EventNames.CONSENT_UPDATE_REQUEST,
                         extensionError.getErrorName()));
             }
         };
-        final Event event = new Event.Builder(ConsentConstants.EventNames.CONSENT_FRAGMENTS_UPDATE_REQUEST, ConsentConstants.EventType.CONSENT, ConsentConstants.EventSource.UPDATE_CONSENT).setEventData(xdmFormattedConsents).build();
+        final Event event = new Event.Builder(ConsentConstants.EventNames.CONSENT_UPDATE_REQUEST, ConsentConstants.EventType.CONSENT, ConsentConstants.EventSource.UPDATE_CONSENT).setEventData(xdmFormattedConsents).build();
         MobileCore.dispatchEvent(event, errorCallback);
     }
 
@@ -78,8 +80,10 @@ public class Consent {
      * Callback is invoked with null value if no consents were assigned to this user.
      *
      * @param callback a {@link AdobeCallback} of {@link Map} invoked with current consents of the extension
+     *                  If an {@link AdobeCallbackWithError} is provided, an {@link AdobeError} can be returned in the
+     *  				eventuality of any error that occurred while getting the user consents.
      */
-    public static void getConsents(final AdobeCallback<Map<String,Object>> callback) {
+    public static void getConsents(final AdobeCallback callback) {
         if (callback == null) {
             MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "Unexpected null callback, provide a callback to retrieve current consents.");
             return;
@@ -89,7 +93,8 @@ public class Consent {
         final ExtensionErrorCallback<ExtensionError> errorCallback = new ExtensionErrorCallback<ExtensionError>() {
             @Override
             public void error(final ExtensionError extensionError) {
-                MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, String.format("Consents.getConsents() API. Failed to dispatch %s event: Error : %s.", ConsentConstants.EventNames.CONSENT_FRAGMENTS_UPDATE_REQUEST,
+                returnError(callback, extensionError);
+                MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, String.format("Consents.getConsents() API. Failed to dispatch %s event: Error : %s.", ConsentConstants.EventNames.CONSENT_UPDATE_REQUEST,
                         extensionError.getErrorName()));
             }
         };
@@ -99,14 +104,33 @@ public class Consent {
         MobileCore.dispatchEventWithResponseCallback(event, new AdobeCallback<Event>() {
             @Override
             public void call(Event event) {
-                if (event == null) {
-                    callback.call(null);
+                if (event == null || event.getEventData() == null) {
+                    returnError(callback, AdobeError.UNEXPECTED_ERROR);
                     return;
                 }
 
                 callback.call(event.getEventData());
             }
         }, errorCallback);
+    }
+
+
+    /**
+     * When an {@link AdobeCallbackWithError} is provided, the fail method will be called with provided {@link AdobeError}.
+     * @param callback should not be null, should be instance of {@code AdobeCallbackWithError}
+     * @param error the {@code AdobeError} returned back in the callback
+     */
+    private static void returnError (final AdobeCallback callback, final AdobeError error) {
+        if (callback == null) {
+            return;
+        }
+
+        final AdobeCallbackWithError adobeCallbackWithError = callback instanceof AdobeCallbackWithError ?
+                (AdobeCallbackWithError) callback : null;
+
+        if (adobeCallbackWithError != null) {
+            adobeCallbackWithError.fail(error);
+        }
     }
 
 }

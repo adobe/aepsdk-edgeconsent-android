@@ -16,14 +16,15 @@
  ******************************************************************************/
 
 package com.adobe.marketing.mobile.consentTestApp;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import com.adobe.marketing.mobile.AdobeCallback;
+import com.adobe.marketing.mobile.AdobeCallbackWithError;
+import com.adobe.marketing.mobile.AdobeError;
 import com.adobe.marketing.mobile.consent.Consent;
 
 import java.util.HashMap;
@@ -63,10 +64,15 @@ public class MainActivity extends AppCompatActivity {
 
     public void btnGetConsentsClicked(View v) {
         final TextView txtViewConsents = (TextView) findViewById(R.id.txtViewConsents);
-        Consent.getConsents(new AdobeCallback<Map<String, Object>>() {
+        Consent.getConsents(new AdobeCallbackWithError<Map<String, Object>>() {
             @Override
             public void call(Map<String, Object> consents) {
                 txtViewConsents.setText(consents.toString());
+            }
+
+            @Override
+            public void fail(AdobeError adobeError) {
+                Log.d(this.getClass().getName(), String.format("GetConsents failed with error - %s", adobeError.getErrorName()));
             }
         });
     }
