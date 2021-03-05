@@ -40,7 +40,7 @@ import static org.junit.Assert.fail;
 public class FunctionalTestHelper {
 	private static final String TAG = "FunctionalTestHelper";
 	static final int WAIT_TIMEOUT_MS = 1000;
-	static final int WAIT_EVENT_TIMEOUT_MS = 200000;
+	static final int WAIT_EVENT_TIMEOUT_MS = 2000;
 
 	// List of threads to wait for after test execution
 	private static List<String> whitelistedThreads = new ArrayList<String>();
@@ -86,6 +86,14 @@ public class FunctionalTestHelper {
 						// After test execution
 						MobileCore.log(LoggingMode.DEBUG, "SetupCoreRule", "Finished '" + description.getMethodName() + "'");
 						waitForThreads(5000); // wait to allow thread to run after test execution
+						Core core = MobileCore.getCore();
+
+						if (core != null && core.eventHub != null) {
+							core.eventHub.shutdown();
+							core.eventHub = null;
+						}
+						MobileCore.setCore(null);
+						resetConsentPersistence();
 						resetTestExpectations();
 					}
 				}
@@ -448,12 +456,15 @@ public class FunctionalTestHelper {
 			return;
 		}
 
+		String json = sharedPreferences.getString(FunctionalTestConstants.DataStoreKey.CONSENT_PREFERENCES, null);
+
 		SharedPreferences.Editor editor = sharedPreferences.edit();
 		if (editor == null) {
 			return;
 		}
 
 		editor.remove(FunctionalTestConstants.DataStoreKey.CONSENT_PREFERENCES);
+		editor.apply();
 	}
 
 	private static SharedPreferences getSharedPreference() {

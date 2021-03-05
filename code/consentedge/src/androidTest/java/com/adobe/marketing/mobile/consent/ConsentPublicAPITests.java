@@ -18,7 +18,6 @@ import com.adobe.marketing.mobile.FunctionalTestConstants;
 import com.adobe.marketing.mobile.FunctionalTestHelper;
 import com.adobe.marketing.mobile.MobileCore;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,7 +31,6 @@ import java.util.concurrent.CountDownLatch;
 
 import static com.adobe.marketing.mobile.FunctionalTestHelper.getDispatchedEventsWith;
 import static com.adobe.marketing.mobile.FunctionalTestHelper.getXDMSharedStateFor;
-import static com.adobe.marketing.mobile.FunctionalTestHelper.resetConsentPersistence;
 import static com.adobe.marketing.mobile.FunctionalTestHelper.resetTestExpectations;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -70,17 +68,11 @@ public class ConsentPublicAPITests {
         resetTestExpectations();
     }
 
-    @After
-    public void tearDown() {
-        resetConsentPersistence();
-    }
-
-
     // --------------------------------------------------------------------------------------------
-    // Tests for ConsentUpdateEvent
+    // Tests for Consent.update() API
     // --------------------------------------------------------------------------------------------
     @Test
-    public void testConsentUpdateHappy() throws InterruptedException {
+    public void testUpdateAPI() throws InterruptedException {
         // test
         Map<String, Object> collectConsent = new HashMap<String, Object>();
         collectConsent.put("collect", new HashMap<String, String>() {
@@ -93,17 +85,14 @@ public class ConsentPublicAPITests {
         consents.put(ConsentConstants.EventDataKey.CONSENTS, collectConsent);
         Consent.update(consents);
 
-        // verify
+        // verify event dispatched
         List<Event> dispatchEvents = getDispatchedEventsWith(ConsentConstants.EventType.EDGE,
                 ConsentConstants.EventSource.UPDATE_CONSENT);
         assertEquals(1, dispatchEvents.size());
 
-        // verify shared state
-
+        // verify shared state set
         Map<String,Object> sharedState = getXDMSharedStateFor(FunctionalTestConstants.CONSENT_EXTENSION_NAME, 2000);
         assertNotNull(sharedState);
-
     }
-
 
 }
