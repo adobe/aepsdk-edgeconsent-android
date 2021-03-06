@@ -11,7 +11,7 @@
 
 package com.adobe.marketing.mobile;
 
-public class FunctionalTestConstants {
+public class TestConstants {
 
     public class EventType {
         static final String MONITOR = "com.adobe.functional.eventType.monitor";

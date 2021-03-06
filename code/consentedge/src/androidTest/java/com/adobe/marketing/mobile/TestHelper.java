@@ -35,8 +35,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class FunctionalTestHelper {
-	private static final String TAG = "FunctionalTestHelper";
+public class TestHelper {
+	private static final String TAG = "TestHelper";
 	static final int WAIT_TIMEOUT_MS = 1000;
 	static final int WAIT_EVENT_TIMEOUT_MS = 2000;
 
@@ -55,7 +55,7 @@ public class FunctionalTestHelper {
 	 * To use, add the following to your test class:
 	 * <pre>
 	 * 	@Rule
-	 * 	public FunctionalTestHelper.SetupCoreRule coreRule = new FunctionalTestHelper.SetupCoreRule();
+	 * 	public TestHelper.SetupCoreRule coreRule = new TestHelper.SetupCoreRule();
 	 * </pre>
 	 */
 	public static class SetupCoreRule implements TestRule {
@@ -394,11 +394,11 @@ public class FunctionalTestHelper {
 	 * @throws InterruptedException
 	 */
 	public static Map<String, Object> getXDMSharedStateFor(final String stateOwner, int timeout) throws InterruptedException {
-		Event event = new Event.Builder("Get Shared State Request", FunctionalTestConstants.EventType.MONITOR,
-				FunctionalTestConstants.EventSource.SHARED_STATE_REQUEST)
+		Event event = new Event.Builder("Get Shared State Request", TestConstants.EventType.MONITOR,
+				TestConstants.EventSource.SHARED_STATE_REQUEST)
 				.setEventData(new HashMap<String, Object>() {
 					{
-						put(FunctionalTestConstants.EventDataKey.STATE_OWNER, stateOwner);
+						put(TestConstants.EventDataKey.STATE_OWNER, stateOwner);
 					}
 				})
 				.build();
