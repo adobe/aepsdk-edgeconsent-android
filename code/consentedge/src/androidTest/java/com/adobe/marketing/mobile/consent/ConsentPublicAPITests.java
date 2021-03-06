@@ -14,8 +14,7 @@ package com.adobe.marketing.mobile.consent;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.adobe.marketing.mobile.AdobeCallback;
 import com.adobe.marketing.mobile.Event;
-import com.adobe.marketing.mobile.FunctionalTestConstants;
-import com.adobe.marketing.mobile.FunctionalTestHelper;
+import com.adobe.marketing.mobile.TestHelper;
 import com.adobe.marketing.mobile.MobileCore;
 
 import org.junit.Before;
@@ -29,9 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import static com.adobe.marketing.mobile.FunctionalTestHelper.getDispatchedEventsWith;
-import static com.adobe.marketing.mobile.FunctionalTestHelper.getXDMSharedStateFor;
-import static com.adobe.marketing.mobile.FunctionalTestHelper.resetTestExpectations;
+import static com.adobe.marketing.mobile.TestHelper.getDispatchedEventsWith;
+import static com.adobe.marketing.mobile.TestHelper.getXDMSharedStateFor;
+import static com.adobe.marketing.mobile.TestHelper.resetTestExpectations;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -39,8 +38,8 @@ import static org.junit.Assert.assertNotNull;
 public class ConsentPublicAPITests {
 
     @Rule
-    public RuleChain rule = RuleChain.outerRule(new FunctionalTestHelper.SetupCoreRule())
-            .around(new FunctionalTestHelper.RegisterMonitorExtensionRule());
+    public RuleChain rule = RuleChain.outerRule(new TestHelper.SetupCoreRule())
+            .around(new TestHelper.RegisterMonitorExtensionRule());
 
     // --------------------------------------------------------------------------------------------
     // Setup
