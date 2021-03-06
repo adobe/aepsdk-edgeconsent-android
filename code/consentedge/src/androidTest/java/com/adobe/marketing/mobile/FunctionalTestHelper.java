@@ -14,7 +14,6 @@ package com.adobe.marketing.mobile;
 import android.app.Application;
 import android.app.Instrumentation;
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -27,7 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import com.adobe.marketing.mobile.MonitorExtension.EventSpec;
 
@@ -43,11 +41,11 @@ public class FunctionalTestHelper {
 	static final int WAIT_EVENT_TIMEOUT_MS = 2000;
 
 	// List of threads to wait for after test execution
-	private static List<String> whitelistedThreads = new ArrayList<String>();
+	private static List<String> knownThreads = new ArrayList<String>();
 
 	{
-		whitelistedThreads.add("pool"); // used for threads that execute the listeners code
-		whitelistedThreads.add("ADB"); // module internal threads
+		knownThreads.add("pool"); // used for threads that execute the listeners code
+		knownThreads.add("ADB"); // module internal threads
 	}
 
 	/**
@@ -93,7 +91,7 @@ public class FunctionalTestHelper {
 							core.eventHub = null;
 						}
 						MobileCore.setCore(null);
-						resetConsentPersistence();
+						TestPersistenceHelper.resetKnownPersistence();
 						resetTestExpectations();
 					}
 				}
@@ -133,7 +131,7 @@ public class FunctionalTestHelper {
 	}
 
 	/**
-	 * Waits for all the whitelisted threads to finish or fails the test after timeoutMillis if some of them are still running
+	 * Waits for all the {@code #knownThreads} to finish or fails the test after timeoutMillis if some of them are still running
 	 * when the timer expires. If timeoutMillis is 0, a default timeout will be set = 1000ms
 	 *
 	 * @param timeoutMillis max waiting time
@@ -185,11 +183,11 @@ public class FunctionalTestHelper {
 			threadSet = getEligibleThreads();
 		}
 
-		MobileCore.log(LoggingMode.DEBUG, TAG, "waitForThreads - All whitelisted threads are terminated.");
+		MobileCore.log(LoggingMode.DEBUG, TAG, "waitForThreads - All known threads are terminated.");
 	}
 
 	/**
-	 * Retrieves all the whitelisted threads that are still running
+	 * Retrieves all the known threads that are still running
 	 * @return set of running tests
 	 */
 	private static Set<Thread> getEligibleThreads() {
@@ -207,8 +205,8 @@ public class FunctionalTestHelper {
 	}
 
 	/**
-	 * Checks if current thread is not a daemon and its name starts with one of the whitelisted thread names specified here
-	 * {@link #whitelistedThreads}
+	 * Checks if current thread is not a daemon and its name starts with one of the known thread names specified here
+	 * {@link #knownThreads}
 	 *
 	 * @param t current thread to verify
 	 * @return true if it is a known thread, false otherwise
@@ -218,7 +216,7 @@ public class FunctionalTestHelper {
 			return false;
 		}
 
-		for (String prefix : whitelistedThreads) {
+		for (String prefix : knownThreads) {
 			if (t.getName().startsWith(prefix)) {
 				return true;
 			}
@@ -405,7 +403,7 @@ public class FunctionalTestHelper {
 				})
 				.build();
 
-		final CountDownLatch latch = new CountDownLatch(1);
+		final ADBCountDownLatch latch = new ADBCountDownLatch(1);
 		final Map<String, Object> sharedState = new HashMap<>();
 		MobileCore.dispatchEventWithResponseCallback(event,
 				new AdobeCallback<Event>() {
@@ -450,34 +448,4 @@ public class FunctionalTestHelper {
 		}
 	}
 
-	public static void resetConsentPersistence() {
-		SharedPreferences sharedPreferences = getSharedPreference();
-		if (sharedPreferences == null) {
-			return;
-		}
-
-		String json = sharedPreferences.getString(FunctionalTestConstants.DataStoreKey.CONSENT_PREFERENCES, null);
-
-		SharedPreferences.Editor editor = sharedPreferences.edit();
-		if (editor == null) {
-			return;
-		}
-
-		editor.remove(FunctionalTestConstants.DataStoreKey.CONSENT_PREFERENCES);
-		editor.apply();
-	}
-
-	private static SharedPreferences getSharedPreference() {
-		final Application application = MobileCore.getApplication();
-		if (application == null) {
-			return null;
-		}
-
-		final Context context = application.getApplicationContext();
-		if (context == null) {
-			return null;
-		}
-
-		return context.getSharedPreferences(FunctionalTestConstants.DataStoreKey.DATASTORE_NAME, Context.MODE_PRIVATE);
-	}
 }

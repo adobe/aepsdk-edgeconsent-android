@@ -13,8 +13,6 @@ package com.adobe.marketing.mobile;
 
 public class FunctionalTestConstants {
 
-    public static final String CONSENT_EXTENSION_NAME = "com.adobe.consent";
-
     public class EventType {
         static final String MONITOR = "com.adobe.functional.eventType.monitor";
         private EventType() {}
@@ -32,12 +30,5 @@ public class FunctionalTestConstants {
         static final String STATE_OWNER = "stateowner";
         private EventDataKey() {};
     }
-
-    final class DataStoreKey {
-        static final String DATASTORE_NAME = "com.adobe.consent";
-        static final String CONSENT_PREFERENCES = "consent:preferences";
-        private DataStoreKey() { }
-    }
-
 
 }
