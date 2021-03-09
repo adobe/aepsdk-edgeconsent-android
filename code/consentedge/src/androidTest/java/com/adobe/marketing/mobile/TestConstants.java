@@ -11,6 +11,9 @@
 
 package com.adobe.marketing.mobile;
 
+/**
+ * Class to maintain test constants.
+ */
 public class TestConstants {
 
     public class EventType {

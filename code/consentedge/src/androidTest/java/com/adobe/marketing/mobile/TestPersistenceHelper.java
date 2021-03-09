@@ -19,6 +19,9 @@ import com.adobe.marketing.mobile.consent.ConsentTestConstants;
 
 import java.util.ArrayList;
 
+/**
+ * Helper class to add and remove persisted data to extension concerned with testing Consents.
+ */
 public class TestPersistenceHelper {
 
     private static ArrayList<String> knownDatastoreName = new ArrayList<String>() {{

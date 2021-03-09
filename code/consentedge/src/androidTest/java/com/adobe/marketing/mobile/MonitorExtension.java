@@ -17,6 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * A third party extension class aiding for assertion against dispatched events, shared state
+ * and XDM shared state.
+ */
 class MonitorExtension extends Extension {
 	private static final String LOG_TAG = "MonitorExtension";
 

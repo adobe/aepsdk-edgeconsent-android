@@ -35,6 +35,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+/**
+ * Test helper for functional testing to read, write, reset and assert against eventhub events, shared states and persistence data.
+ */
 public class TestHelper {
 	private static final String TAG = "TestHelper";
 	static final int WAIT_TIMEOUT_MS = 1000;
