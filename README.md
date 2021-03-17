@@ -3,15 +3,15 @@
 
 ## About this project
 
-The AEP Consent Mobile Extension is an extension for the [Adobe Experience Platform SDK](https://github.com/Adobe-Marketing-Cloud/acp-sdks) and requires the `MobileCore` extension.
+The AEP Edge Consent Mobile Extension is an extension for the [Adobe Experience Platform SDK](https://github.com/Adobe-Marketing-Cloud/acp-sdks) and requires the `MobileCore` extension.
 
 
 ### Installation
 
-Integrate the Consent Edge extension into your app by including the following in your gradle file's `dependencies`:
+Integrate the Consent extension into your app by including the following in your gradle file's `dependencies`:
 
 ```
-implementation 'com.adobe.marketing.mobile:consentedge:1.+'
+implementation 'com.adobe.marketing.mobile:edgeconsent:1.+'
 implementation 'com.adobe.marketing.mobile:edge:1.+'
 implementation 'com.adobe.marketing.mobile:sdk-core:1.+'
 ```
@@ -36,7 +36,7 @@ $ adb shell am start -W -a  android.intent.action.VIEW -d "testapp://main?adb_va
 
 Note: replace ADD_YOUR_SESSION_ID_HERE with your Assurance session identifier.
 
-Once the connection is established and the events list starts getting populated, you can filter the Consent extension events by typing `AEP` in the `Search Events` search box. See full list of available events [here](https://aep-sdks.gitbook.io/docs/beta/experience-platform-extension/experience-platform-debugging#event-types-handled-by-the-aep-mobile-extension).
+Once the connection is established and the events list starts getting populated, you can filter the Edge Consent extension events by typing `Consent` in the `Search Events` search box. See full list of available events [here](https://aep-sdks.gitbook.io/docs/beta/experience-platform-extension/experience-platform-debugging#event-types-handled-by-the-aep-mobile-extension).
 
 
 

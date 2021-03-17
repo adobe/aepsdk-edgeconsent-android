@@ -1,4 +1,4 @@
-EXTENSION-LIBRARY-FOLDER-NAME = consentedge
+EXTENSION-LIBRARY-FOLDER-NAME = edgeconsent
 
 BUILD-ASSEMBLE-LOCATION = ./ci/assemble
 ROOT_DIR=$(shell git rev-parse --show-toplevel)
