@@ -25,7 +25,7 @@ import android.widget.TextView;
 
 import com.adobe.marketing.mobile.AdobeCallbackWithError;
 import com.adobe.marketing.mobile.AdobeError;
-import com.adobe.marketing.mobile.consent.Consent;
+import com.adobe.marketing.mobile.edge.consent.Consent;
 
 import java.util.HashMap;
 import java.util.Map;

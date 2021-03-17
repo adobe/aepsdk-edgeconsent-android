@@ -1,3 +1,3 @@
-include ':consentedge'
+include ':edgeconsent'
 include ':app'
-rootProject.name = "consentedge-sdk"
+rootProject.name = "edgeconsent-sdk"
