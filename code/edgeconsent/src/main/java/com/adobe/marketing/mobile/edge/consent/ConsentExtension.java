@@ -132,7 +132,7 @@ class ConsentExtension extends Extension {
 
         // set the timestamp and merge with existing consents
         newConsents.setTimestamp(event.getTimestamp());
-        consentManager.mergeAndPersist(newConsents)
+        consentManager.mergeAndPersist(newConsents);
 
         // share and dispatch the updated consents to edge
         shareCurrentConsents(event);
@@ -165,7 +165,7 @@ class ConsentExtension extends Extension {
             MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "consent.preferences response event from edge is missing payload. Dropping event.");
             return;
         }
-        
+
         // bail out if no valid consents are found in eventData
         final Consents newConsents = new Consents(prepareConsentXDMMapWithPayload(payload.get(0)));
         if (newConsents.isEmpty()) {
