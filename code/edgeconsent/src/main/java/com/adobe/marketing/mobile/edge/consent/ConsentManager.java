@@ -35,11 +35,18 @@ class ConsentManager {
      * Merges the provided {@link Consents} with {@link #userOptedConsents} and persists them.
      *
      * @param newConsents the newly obtained consents that needs to be merged with existing consents
+     * @return true if `currentConsents` has been updated as a result of updating the userOptedConsents consents
      */
-    void mergeAndPersist(final Consents newConsents) {
+    boolean mergeAndPersist(final Consents newConsents) {
+        // hold temp copy of current consents for comparison
+        final Consents existingConsents = getCurrentConsents();
+
         // merge and persist
         userOptedConsents.merge(newConsents);
         ConsentStorageService.saveConsentsToPersistence(userOptedConsents);
+
+        // return true only if the current consents gets update after merging the newConsents
+        return !existingConsents.equalsIgnoreTimeStamp(getCurrentConsents());
     }
 
     /**
