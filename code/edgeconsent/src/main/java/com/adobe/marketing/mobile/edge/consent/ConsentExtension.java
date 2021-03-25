@@ -133,7 +133,7 @@ class ConsentExtension extends Extension {
         // set the timestamp and merge with existing consents
         newConsents.setTimestamp(event.getTimestamp());
         if (consentManager.mergeAndPersist(newConsents)) {
-            // share and dispatch the updated consents
+            // share and dispatch the updated consents to edge only when there is a change in current consent
             shareCurrentConsents(event);
             dispatchEdgeConsentUpdateEvent(newConsents); // dispatches only the newly updated consents
         }
@@ -176,9 +176,11 @@ class ConsentExtension extends Extension {
 
         // update the timestamp and share the updatedConsents as XDMSharedState and dispatch the consent response event
         newConsents.setTimestamp(event.getTimestamp());
-        consentManager.mergeAndPersist(newConsents);
 
-        shareCurrentConsents(event);
+        if (consentManager.mergeAndPersist(newConsents)) {
+            // share and dispatch the consents response only when there is a change
+            shareCurrentConsents(event);
+        }
     }
 
     /**
