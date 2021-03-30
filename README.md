@@ -13,7 +13,7 @@ Integrate the Consent extension into your app by including the following in your
 ```
 implementation 'com.adobe.marketing.mobile:edgeconsent:1.+'
 implementation 'com.adobe.marketing.mobile:edge:1.+'
-implementation 'com.adobe.marketing.mobile:sdk-core:1.+'
+implementation 'com.adobe.marketing.mobile:core:1.+'
 ```
 
 ### Development
