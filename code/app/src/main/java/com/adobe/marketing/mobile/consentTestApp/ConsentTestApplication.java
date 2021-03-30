@@ -14,15 +14,12 @@ package com.adobe.marketing.mobile.consentTestApp;
 import android.app.Application;
 import android.util.Log;
 
+import com.adobe.marketing.mobile.edge.consent.Consent;
 import com.adobe.marketing.mobile.AdobeCallback;
 import com.adobe.marketing.mobile.Assurance;
-import com.adobe.marketing.mobile.edge.consent.Consent;
 import com.adobe.marketing.mobile.Edge;
-import com.adobe.marketing.mobile.Identity;
-import com.adobe.marketing.mobile.InvalidInitException;
 import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
-import com.adobe.marketing.mobile.Signal;
 
 public class ConsentTestApplication extends Application {
     private static final String LOG_TAG = "ConsentTestApplication";
@@ -44,16 +41,10 @@ public class ConsentTestApplication extends Application {
 		*/
         MobileCore.configureWithAppID(LAUNCH_ENVIRONMENT_ID);
 
-        // register Adobe core extensions
-        try {
-            Identity.registerExtension();
-            Signal.registerExtension();
-            Consent.registerExtension();
-            Edge.registerExtension();
-            Assurance.registerExtension();
-        } catch (InvalidInitException e) {
-            e.printStackTrace();
-        }
+        // register AEP Mobile extensions
+        Consent.registerExtension();
+        Edge.registerExtension();
+        Assurance.registerExtension();
 
         // once all the extensions are registered, call MobileCore.start(...) to start processing the events
         MobileCore.start(new AdobeCallback() {
