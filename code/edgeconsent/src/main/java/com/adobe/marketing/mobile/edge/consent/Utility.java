@@ -29,117 +29,117 @@ import static com.adobe.marketing.mobile.edge.consent.ConsentConstants.LOG_TAG;
 
 final class Utility {
 
-    /**
-     * Method to serialize jsonObject to Map.
-     *
-     * @param jsonObject the {@link JSONObject} to be serialized
-     * @return a {@link Map} representing the serialized JSONObject
-     */
+	/**
+	 * Method to serialize jsonObject to Map.
+	 *
+	 * @param jsonObject the {@link JSONObject} to be serialized
+	 * @return a {@link Map} representing the serialized JSONObject
+	 */
 
-    static Map<String, Object> toMap(final JSONObject jsonObject) {
-        if (jsonObject == null) {
-            return null;
-        }
+	static Map<String, Object> toMap(final JSONObject jsonObject) {
+		if (jsonObject == null) {
+			return null;
+		}
 
-        final Map<String, Object> jsonAsMap = new HashMap<>();
-        final Iterator<String> keysIterator = jsonObject.keys();
+		final Map<String, Object> jsonAsMap = new HashMap<>();
+		final Iterator<String> keysIterator = jsonObject.keys();
 
-        while (keysIterator.hasNext()) {
-            String nextKey = keysIterator.next();
-            Object value = null;
-            Object returnValue;
+		while (keysIterator.hasNext()) {
+			String nextKey = keysIterator.next();
+			Object value = null;
+			Object returnValue;
 
-            try {
-                value = jsonObject.get(nextKey);
-            } catch (JSONException e) {
-                MobileCore.log(LoggingMode.DEBUG, LOG_TAG,
-                        "Utility(toMap) - Unable to convert jsonObject to Map for key " + nextKey + ", skipping.");
-            }
+			try {
+				value = jsonObject.get(nextKey);
+			} catch (JSONException e) {
+				MobileCore.log(LoggingMode.DEBUG, LOG_TAG,
+							   "Utility(toMap) - Unable to convert jsonObject to Map for key " + nextKey + ", skipping.");
+			}
 
-            if (value == null) {
-                continue;
-            }
+			if (value == null) {
+				continue;
+			}
 
-            if (value instanceof JSONObject) {
-                returnValue = toMap((JSONObject) value);
-            } else if (value instanceof JSONArray) {
-                returnValue = toList((JSONArray) value);
-            } else {
-                returnValue = value;
-            }
+			if (value instanceof JSONObject) {
+				returnValue = toMap((JSONObject) value);
+			} else if (value instanceof JSONArray) {
+				returnValue = toList((JSONArray) value);
+			} else {
+				returnValue = value;
+			}
 
-            jsonAsMap.put(nextKey, returnValue);
-        }
+			jsonAsMap.put(nextKey, returnValue);
+		}
 
-        return jsonAsMap;
-    }
+		return jsonAsMap;
+	}
 
-    /**
-     * Converts provided {@link JSONArray} into {@link List} for any number of levels which can be used as event data
-     * This method is recursive.
-     * The elements for which the conversion fails will be skipped.
-     *
-     * @param jsonArray to be converted
-     * @return {@link List} containing the elements from the provided json, null if {@code jsonArray} is null
-     */
-    static List<Object> toList(final JSONArray jsonArray) {
-        if (jsonArray == null) {
-            return null;
-        }
+	/**
+	 * Converts provided {@link JSONArray} into {@link List} for any number of levels which can be used as event data
+	 * This method is recursive.
+	 * The elements for which the conversion fails will be skipped.
+	 *
+	 * @param jsonArray to be converted
+	 * @return {@link List} containing the elements from the provided json, null if {@code jsonArray} is null
+	 */
+	static List<Object> toList(final JSONArray jsonArray) {
+		if (jsonArray == null) {
+			return null;
+		}
 
-        final List<Object> jsonArrayAsList = new ArrayList<>();
-        int size = jsonArray.length();
+		final List<Object> jsonArrayAsList = new ArrayList<>();
+		int size = jsonArray.length();
 
-        for (int i = 0; i < size; i++) {
-            Object value = null;
-            Object returnValue = null;
+		for (int i = 0; i < size; i++) {
+			Object value = null;
+			Object returnValue = null;
 
-            try {
-                value = jsonArray.get(i);
-            } catch (JSONException e) {
-                MobileCore.log(LoggingMode.DEBUG, LOG_TAG,
-                        "Utility(toList) - Unable to convert jsonObject to List for index " + i + ", skipping.");
-            }
+			try {
+				value = jsonArray.get(i);
+			} catch (JSONException e) {
+				MobileCore.log(LoggingMode.DEBUG, LOG_TAG,
+							   "Utility(toList) - Unable to convert jsonObject to List for index " + i + ", skipping.");
+			}
 
-            if (value == null) {
-                continue;
-            }
+			if (value == null) {
+				continue;
+			}
 
-            if (value instanceof JSONObject) {
-                returnValue = toMap((JSONObject) value);
-            } else if (value instanceof JSONArray) {
-                returnValue = toList((JSONArray) value);
-            } else {
-                returnValue = value;
-            }
+			if (value instanceof JSONObject) {
+				returnValue = toMap((JSONObject) value);
+			} else if (value instanceof JSONArray) {
+				returnValue = toList((JSONArray) value);
+			} else {
+				returnValue = value;
+			}
 
-            jsonArrayAsList.add(returnValue);
-        }
+			jsonArrayAsList.add(returnValue);
+		}
 
-        return jsonArrayAsList;
-    }
+		return jsonArrayAsList;
+	}
 
-    /**
-     * Creates a deep copy of the provided {@link Map}.
-     *
-     * @param map to be copied
-     * @return {@link Map} containing a deep copy of all the elements in {@code map}
-     */
-    static Map<String, Object> deepCopy(final Map<String, Object> map) {
-        if (map == null) {
-            return null;
-        }
+	/**
+	 * Creates a deep copy of the provided {@link Map}.
+	 *
+	 * @param map to be copied
+	 * @return {@link Map} containing a deep copy of all the elements in {@code map}
+	 */
+	static Map<String, Object> deepCopy(final Map<String, Object> map) {
+		if (map == null) {
+			return null;
+		}
 
-        try {
-            return toMap(new JSONObject(map));
-        } catch (NullPointerException e) {
-            MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Utility(deepCopy) - Unable to deep copy map, json string invalid.");
-        }
+		try {
+			return toMap(new JSONObject(map));
+		} catch (NullPointerException e) {
+			MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Utility(deepCopy) - Unable to deep copy map, json string invalid.");
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    private Utility() {
-    }
+	private Utility() {
+	}
 
 }

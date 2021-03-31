@@ -27,56 +27,57 @@ import static org.mockito.Mockito.verify;
 
 public class ListenerConsentRequestContentTest {
 
-    @Mock
-    private ConsentExtension mockConsentExtension;
+	@Mock
+	private ConsentExtension mockConsentExtension;
 
-    private ListenerConsentRequestContent listener;
+	private ListenerConsentRequestContent listener;
 
-    @Before
-    public void setup() {
-        mockConsentExtension = Mockito.mock(ConsentExtension.class);
-        MobileCore.start(null);
-        listener = spy(new ListenerConsentRequestContent(null, ConsentConstants.EventType.CONSENT, ConsentConstants.EventSource.REQUEST_CONTENT));
-    }
+	@Before
+	public void setup() {
+		mockConsentExtension = Mockito.mock(ConsentExtension.class);
+		MobileCore.start(null);
+		listener = spy(new ListenerConsentRequestContent(null, ConsentConstants.EventType.CONSENT,
+					   ConsentConstants.EventSource.REQUEST_CONTENT));
+	}
 
-    @Test
-    public void testHear() {
-        // setup
-        Event event = new Event.Builder("Consent request content event", ConsentConstants.EventType.CONSENT,
-                ConsentConstants.EventSource.REQUEST_CONTENT).build();
-        doReturn(mockConsentExtension).when(listener).getConsentExtension();
+	@Test
+	public void testHear() {
+		// setup
+		Event event = new Event.Builder("Consent request content event", ConsentConstants.EventType.CONSENT,
+										ConsentConstants.EventSource.REQUEST_CONTENT).build();
+		doReturn(mockConsentExtension).when(listener).getConsentExtension();
 
-        // test
-        listener.hear(event);
+		// test
+		listener.hear(event);
 
-        // verify
-        verify(mockConsentExtension, times(1)).handleRequestContent(event);
-    }
+		// verify
+		verify(mockConsentExtension, times(1)).handleRequestContent(event);
+	}
 
-    @Test
-    public void testHear_WhenParentExtensionNull() {
-        // setup
-        Event event = new Event.Builder("Consent request content event", ConsentConstants.EventType.CONSENT,
-                ConsentConstants.EventSource.REQUEST_CONTENT).build();
-        doReturn(null).when(listener).getConsentExtension();
+	@Test
+	public void testHear_WhenParentExtensionNull() {
+		// setup
+		Event event = new Event.Builder("Consent request content event", ConsentConstants.EventType.CONSENT,
+										ConsentConstants.EventSource.REQUEST_CONTENT).build();
+		doReturn(null).when(listener).getConsentExtension();
 
-        // test
-        listener.hear(event);
+		// test
+		listener.hear(event);
 
-        // verify
-        verify(mockConsentExtension, times(0)).handleRequestContent(any(Event.class));
-    }
+		// verify
+		verify(mockConsentExtension, times(0)).handleRequestContent(any(Event.class));
+	}
 
-    @Test
-    public void testHear_WhenEventNull() {
-        // setup
-        doReturn(null).when(listener).getConsentExtension();
-        doReturn(mockConsentExtension).when(listener).getConsentExtension();
+	@Test
+	public void testHear_WhenEventNull() {
+		// setup
+		doReturn(null).when(listener).getConsentExtension();
+		doReturn(mockConsentExtension).when(listener).getConsentExtension();
 
-        // test
-        listener.hear(null);
+		// test
+		listener.hear(null);
 
-        // verify
-        verify(mockConsentExtension, times(0)).handleRequestContent(any(Event.class));
-    }
+		// verify
+		verify(mockConsentExtension, times(0)).handleRequestContent(any(Event.class));
+	}
 }

@@ -19,47 +19,48 @@ import com.adobe.marketing.mobile.MobileCore;
 
 class ListenerEdgeConsentPreference extends ExtensionListener {
 
-    /**
-     * Constructor.
-     *
-     * @param extensionApi an instance of {@link ExtensionApi}
-     * @param type         the {@link String} eventType this listener is registered to handle
-     * @param source       the {@link String} eventSource this listener is registered to handle
-     */
-    ListenerEdgeConsentPreference(final ExtensionApi extensionApi, final String type, final String source) {
-        super(extensionApi, type, source);
-    }
+	/**
+	 * Constructor.
+	 *
+	 * @param extensionApi an instance of {@link ExtensionApi}
+	 * @param type         the {@link String} eventType this listener is registered to handle
+	 * @param source       the {@link String} eventSource this listener is registered to handle
+	 */
+	ListenerEdgeConsentPreference(final ExtensionApi extensionApi, final String type, final String source) {
+		super(extensionApi, type, source);
+	}
 
-    /**
-     * Method that gets called when event with event type {@link ConsentConstants.EventType#EDGE}
-     * and with event source {@link ConsentConstants.EventSource#CONSENT_PREFERENCE}  is dispatched through eventHub.
-     *
-     * @param event the edge request {@link Event} to be processed
-     */
-    @Override
-    public void hear(final Event event) {
-        if (event == null || event.getEventData() == null || event.getEventData().isEmpty()) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG, "ListenerEdgeConsentPreference - Event or Event data is null. Ignoring the event.");
-            return;
-        }
+	/**
+	 * Method that gets called when event with event type {@link ConsentConstants.EventType#EDGE}
+	 * and with event source {@link ConsentConstants.EventSource#CONSENT_PREFERENCE}  is dispatched through eventHub.
+	 *
+	 * @param event the edge request {@link Event} to be processed
+	 */
+	@Override
+	public void hear(final Event event) {
+		if (event == null || event.getEventData() == null || event.getEventData().isEmpty()) {
+			MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
+						   "ListenerEdgeConsentPreference - Event or Event data is null. Ignoring the event.");
+			return;
+		}
 
-        final ConsentExtension parentExtension = getConsentExtension();
+		final ConsentExtension parentExtension = getConsentExtension();
 
-        if (parentExtension == null) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
-                    "ListenerEdgeConsentPreference - The parent extension associated with this listener is null, ignoring the event.");
-            return;
-        }
+		if (parentExtension == null) {
+			MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
+						   "ListenerEdgeConsentPreference - The parent extension associated with this listener is null, ignoring the event.");
+			return;
+		}
 
-        parentExtension.handleEdgeConsentPreferenceHandle(event);
-    }
+		parentExtension.handleEdgeConsentPreferenceHandle(event);
+	}
 
-    /**
-     * Returns the parent extension associated with the listener.
-     *
-     * @return a {@link ConsentExtension} object registered with the eventHub
-     */
-    ConsentExtension getConsentExtension() {
-        return (ConsentExtension) getParentExtension();
-    }
+	/**
+	 * Returns the parent extension associated with the listener.
+	 *
+	 * @return a {@link ConsentExtension} object registered with the eventHub
+	 */
+	ConsentExtension getConsentExtension() {
+		return (ConsentExtension) getParentExtension();
+	}
 }

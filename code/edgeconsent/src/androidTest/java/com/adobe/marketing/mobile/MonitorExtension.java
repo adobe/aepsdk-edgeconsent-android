@@ -61,8 +61,8 @@ class MonitorExtension extends Extension {
 	 */
 	public static void unregisterExtension() {
 		Event event = new Event.Builder("Unregister Monitor Extension Request", TestConstants.EventType.MONITOR,
-				TestConstants.EventSource.UNREGISTER)
-				.build();
+										TestConstants.EventSource.UNREGISTER)
+		.build();
 		MobileCore.dispatchEvent(event, new ExtensionErrorCallback<ExtensionError>() {
 			@Override
 			public void error(ExtensionError extensionError) {
@@ -167,10 +167,10 @@ class MonitorExtension extends Extension {
 		EventData sharedState = getApi().getXDMSharedEventState(stateOwner, event);
 
 		Event responseEvent = new Event.Builder("Get Shared State Response", TestConstants.EventType.MONITOR,
-				TestConstants.EventSource.XDM_SHARED_STATE_RESPONSE)
-				.setEventData(sharedState == null ? null : sharedState.toObjectMap())
-				.setPairID(event.getResponsePairID())
-				.build();
+												TestConstants.EventSource.XDM_SHARED_STATE_RESPONSE)
+		.setEventData(sharedState == null ? null : sharedState.toObjectMap())
+		.setPairID(event.getResponsePairID())
+		.build();
 
 		MobileCore.dispatchResponseEvent(responseEvent, event, null);
 	}
@@ -196,10 +196,10 @@ class MonitorExtension extends Extension {
 		EventData sharedState = getApi().getSharedEventState(stateOwner, event);
 
 		Event responseEvent = new Event.Builder("Get Shared State Response", TestConstants.EventType.MONITOR,
-				TestConstants.EventSource.SHARED_STATE_RESPONSE)
-				.setEventData(sharedState == null ? null : sharedState.toObjectMap())
-				.setPairID(event.getResponsePairID())
-				.build();
+												TestConstants.EventSource.SHARED_STATE_RESPONSE)
+		.setEventData(sharedState == null ? null : sharedState.toObjectMap())
+		.setPairID(event.getResponsePairID())
+		.build();
 
 		MobileCore.dispatchResponseEvent(responseEvent, event, null);
 	}

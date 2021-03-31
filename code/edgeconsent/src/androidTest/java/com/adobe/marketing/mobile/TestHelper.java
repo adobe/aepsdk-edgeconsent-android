@@ -92,6 +92,7 @@ public class TestHelper {
 							core.eventHub.shutdown();
 							core.eventHub = null;
 						}
+
 						MobileCore.setCore(null);
 						TestPersistenceHelper.resetKnownPersistence();
 						resetTestExpectations();
@@ -369,7 +370,7 @@ public class TestHelper {
 	 * @throws IllegalArgumentException if {@code type} or {@code source} are null or empty strings
 	 */
 	public static List<Event> getDispatchedEventsWith(final String type, final String source,
-													  int timeout) throws InterruptedException {
+			int timeout) throws InterruptedException {
 		EventSpec eventSpec = new EventSpec(source, type);
 
 		Map<EventSpec, List<Event>> receivedEvents = MonitorExtension.getReceivedEvents();
@@ -398,33 +399,33 @@ public class TestHelper {
 	 */
 	public static Map<String, Object> getSharedStateFor(final String stateOwner, int timeout) throws InterruptedException {
 		Event event = new Event.Builder("Get Shared State Request", TestConstants.EventType.MONITOR,
-				TestConstants.EventSource.SHARED_STATE_REQUEST)
-				.setEventData(new HashMap<String, Object>() {
-					{
-						put(TestConstants.EventDataKey.STATE_OWNER, stateOwner);
-					}
-				})
-				.build();
+										TestConstants.EventSource.SHARED_STATE_REQUEST)
+		.setEventData(new HashMap<String, Object>() {
+			{
+				put(TestConstants.EventDataKey.STATE_OWNER, stateOwner);
+			}
+		})
+		.build();
 
 		final ADBCountDownLatch latch = new ADBCountDownLatch(1);
 		final Map<String, Object> sharedState = new HashMap<>();
 		MobileCore.dispatchEventWithResponseCallback(event,
-				new AdobeCallback<Event>() {
-					@Override
-					public void call(Event event) {
-						if (event.getEventData() != null) {
-							sharedState.putAll(event.getEventData());
-						}
+		new AdobeCallback<Event>() {
+			@Override
+			public void call(Event event) {
+				if (event.getEventData() != null) {
+					sharedState.putAll(event.getEventData());
+				}
 
-						latch.countDown();
-					}
-				},
-				new ExtensionErrorCallback<ExtensionError>() {
-					@Override
-					public void error(ExtensionError extensionError) {
-						MobileCore.log(LoggingMode.ERROR, TAG, "Failed to get shared state for " + stateOwner + ": " + extensionError);
-					}
-				});
+				latch.countDown();
+			}
+		},
+		new ExtensionErrorCallback<ExtensionError>() {
+			@Override
+			public void error(ExtensionError extensionError) {
+				MobileCore.log(LoggingMode.ERROR, TAG, "Failed to get shared state for " + stateOwner + ": " + extensionError);
+			}
+		});
 
 		assertTrue("Timeout waiting for shared state " + stateOwner, latch.await(timeout, TimeUnit.MILLISECONDS));
 		return sharedState.isEmpty() ? null : sharedState;
@@ -438,35 +439,36 @@ public class TestHelper {
 	 * @return latest shared state of the given {@code stateOwner} or null if no shared state was found
 	 * @throws InterruptedException
 	 */
-	public static Map<String, Object> getXDMSharedStateFor(final String stateOwner, int timeout) throws InterruptedException {
+	public static Map<String, Object> getXDMSharedStateFor(final String stateOwner,
+			int timeout) throws InterruptedException {
 		Event event = new Event.Builder("Get Shared State Request", TestConstants.EventType.MONITOR,
-				TestConstants.EventSource.XDM_SHARED_STATE_REQUEST)
-				.setEventData(new HashMap<String, Object>() {
-					{
-						put(TestConstants.EventDataKey.STATE_OWNER, stateOwner);
-					}
-				})
-				.build();
+										TestConstants.EventSource.XDM_SHARED_STATE_REQUEST)
+		.setEventData(new HashMap<String, Object>() {
+			{
+				put(TestConstants.EventDataKey.STATE_OWNER, stateOwner);
+			}
+		})
+		.build();
 
 		final ADBCountDownLatch latch = new ADBCountDownLatch(1);
 		final Map<String, Object> sharedState = new HashMap<>();
 		MobileCore.dispatchEventWithResponseCallback(event,
-				new AdobeCallback<Event>() {
-					@Override
-					public void call(Event event) {
-						if (event.getEventData() != null) {
-							sharedState.putAll(event.getEventData());
-						}
+		new AdobeCallback<Event>() {
+			@Override
+			public void call(Event event) {
+				if (event.getEventData() != null) {
+					sharedState.putAll(event.getEventData());
+				}
 
-						latch.countDown();
-					}
-				},
-				new ExtensionErrorCallback<ExtensionError>() {
-					@Override
-					public void error(ExtensionError extensionError) {
-						MobileCore.log(LoggingMode.ERROR, TAG, "Failed to get shared state for " + stateOwner + ": " + extensionError);
-					}
-				});
+				latch.countDown();
+			}
+		},
+		new ExtensionErrorCallback<ExtensionError>() {
+			@Override
+			public void error(ExtensionError extensionError) {
+				MobileCore.log(LoggingMode.ERROR, TAG, "Failed to get shared state for " + stateOwner + ": " + extensionError);
+			}
+		});
 
 		assertTrue("Timeout waiting for shared state " + stateOwner, latch.await(timeout, TimeUnit.MILLISECONDS));
 		return sharedState.isEmpty() ? null : sharedState;

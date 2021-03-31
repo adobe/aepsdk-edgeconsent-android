@@ -19,43 +19,43 @@ import com.adobe.marketing.mobile.MobileCore;
 
 class ListenerEventHubBoot extends ExtensionListener {
 
-    /**
-     * Constructor.
-     *
-     * @param extensionApi an instance of {@link ExtensionApi}
-     * @param type         the {@link String} eventType this listener is registered to handle
-     * @param source       the {@link String} eventSource this listener is registered to handle
-     */
-    ListenerEventHubBoot(final ExtensionApi extensionApi, final String type, final String source) {
-        super(extensionApi, type, source);
-    }
+	/**
+	 * Constructor.
+	 *
+	 * @param extensionApi an instance of {@link ExtensionApi}
+	 * @param type         the {@link String} eventType this listener is registered to handle
+	 * @param source       the {@link String} eventSource this listener is registered to handle
+	 */
+	ListenerEventHubBoot(final ExtensionApi extensionApi, final String type, final String source) {
+		super(extensionApi, type, source);
+	}
 
-    /**
-     * Method that gets called when event with event type {@link ConsentConstants.EventType#HUB}
-     * and with event source {@link ConsentConstants.EventSource#BOOTED}  is dispatched through eventHub.
-     *
-     * @param event the boot {@link Event}
-     */
-    @Override
-    public void hear(final Event event) {
+	/**
+	 * Method that gets called when event with event type {@link ConsentConstants.EventType#HUB}
+	 * and with event source {@link ConsentConstants.EventSource#BOOTED}  is dispatched through eventHub.
+	 *
+	 * @param event the boot {@link Event}
+	 */
+	@Override
+	public void hear(final Event event) {
 
-        final ConsentExtension parentExtension = getConsentExtension();
+		final ConsentExtension parentExtension = getConsentExtension();
 
-        if (parentExtension == null) {
-            MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
-                    "ListenerEventHubBoot - The parent extension associated with this listener is null, ignoring the event.");
-            return;
-        }
+		if (parentExtension == null) {
+			MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
+						   "ListenerEventHubBoot - The parent extension associated with this listener is null, ignoring the event.");
+			return;
+		}
 
-        parentExtension.handleEventHubBoot(event);
-    }
+		parentExtension.handleEventHubBoot(event);
+	}
 
-    /**
-     * Returns the parent extension associated with the listener.
-     *
-     * @return a {@link ConsentExtension} object registered with the eventHub
-     */
-    ConsentExtension getConsentExtension() {
-        return (ConsentExtension) getParentExtension();
-    }
+	/**
+	 * Returns the parent extension associated with the listener.
+	 *
+	 * @return a {@link ConsentExtension} object registered with the eventHub
+	 */
+	ConsentExtension getConsentExtension() {
+		return (ConsentExtension) getParentExtension();
+	}
 }

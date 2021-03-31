@@ -29,59 +29,62 @@ import static org.mockito.Mockito.verify;
 
 public class ListenerEdgeConsentPreferenceTest {
 
-    @Mock
-    private ConsentExtension mockConsentExtension;
+	@Mock
+	private ConsentExtension mockConsentExtension;
 
-    private ListenerEdgeConsentPreference listener;
+	private ListenerEdgeConsentPreference listener;
 
-    @Before
-    public void setup() {
-        mockConsentExtension = Mockito.mock(ConsentExtension.class);
-        MobileCore.start(null);
-        listener = spy(new ListenerEdgeConsentPreference(null, ConsentConstants.EventType.EDGE, ConsentConstants.EventSource.CONSENT_PREFERENCE));
-    }
+	@Before
+	public void setup() {
+		mockConsentExtension = Mockito.mock(ConsentExtension.class);
+		MobileCore.start(null);
+		listener = spy(new ListenerEdgeConsentPreference(null, ConsentConstants.EventType.EDGE,
+					   ConsentConstants.EventSource.CONSENT_PREFERENCE));
+	}
 
-    @Test
-    public void testHear() {
-        // setup
-        Event event = new Event.Builder("Edge consent preference response event", ConsentConstants.EventType.EDGE,
-                ConsentConstants.EventSource.CONSENT_PREFERENCE).setEventData(new HashMap<String, Object>() {{
-            put("somekey", "somevalue");
-        }}).build();
-        doReturn(mockConsentExtension).when(listener).getConsentExtension();
+	@Test
+	public void testHear() {
+		// setup
+		Event event = new Event.Builder("Edge consent preference response event", ConsentConstants.EventType.EDGE,
+		ConsentConstants.EventSource.CONSENT_PREFERENCE).setEventData(new HashMap<String, Object>() {
+			{
+				put("somekey", "somevalue");
+			}
+		}).build();
+		doReturn(mockConsentExtension).when(listener).getConsentExtension();
 
-        // test
-        listener.hear(event);
+		// test
+		listener.hear(event);
 
-        // verify
-        verify(mockConsentExtension, times(1)).handleEdgeConsentPreferenceHandle(event);
-    }
+		// verify
+		verify(mockConsentExtension, times(1)).handleEdgeConsentPreferenceHandle(event);
+	}
 
-    @Test
-    public void testHear_WhenParentExtensionNull() {
-        // setup
-        Event event = new Event.Builder("Edge consent preference response event", ConsentConstants.EventType.EDGE,
-                ConsentConstants.EventSource.CONSENT_PREFERENCE).build();
-        doReturn(null).when(listener).getConsentExtension();
+	@Test
+	public void testHear_WhenParentExtensionNull() {
+		// setup
+		Event event = new Event.Builder("Edge consent preference response event", ConsentConstants.EventType.EDGE,
+										ConsentConstants.EventSource.CONSENT_PREFERENCE).build();
+		doReturn(null).when(listener).getConsentExtension();
 
-        // test
-        listener.hear(event);
+		// test
+		listener.hear(event);
 
-        // verify
-        verify(mockConsentExtension, times(0)).handleEdgeConsentPreferenceHandle(any(Event.class));
-    }
+		// verify
+		verify(mockConsentExtension, times(0)).handleEdgeConsentPreferenceHandle(any(Event.class));
+	}
 
-    @Test
-    public void testHear_WhenEventNull() {
-        // setup
-        doReturn(null).when(listener).getConsentExtension();
-        doReturn(mockConsentExtension).when(listener).getConsentExtension();
+	@Test
+	public void testHear_WhenEventNull() {
+		// setup
+		doReturn(null).when(listener).getConsentExtension();
+		doReturn(mockConsentExtension).when(listener).getConsentExtension();
 
-        // test
-        listener.hear(null);
+		// test
+		listener.hear(null);
 
-        // verify
-        verify(mockConsentExtension, times(0)).handleEdgeConsentPreferenceHandle(any(Event.class));
-    }
+		// verify
+		verify(mockConsentExtension, times(0)).handleEdgeConsentPreferenceHandle(any(Event.class));
+	}
 
 }

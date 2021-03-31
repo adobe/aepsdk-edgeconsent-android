@@ -20,26 +20,26 @@ import static junit.framework.TestCase.assertEquals;
 
 public class DateUtilityTest {
 
-    @Test
-    public void dateToISO8601String_onValidTimestamp_returnsFormattedString() {
-        Calendar cal = new Calendar.Builder()
-                .set(Calendar.YEAR, 2019)
-                .set(Calendar.MONTH, Calendar.SEPTEMBER)
-                .set(Calendar.DAY_OF_MONTH, 23)
-                .set(Calendar.HOUR, 11)
-                .set(Calendar.MINUTE, 15)
-                .set(Calendar.SECOND, 45)
-                .setTimeZone(TimeZone.getTimeZone("America/Los_Angeles"))
-                .build();
+	@Test
+	public void dateToISO8601String_onValidTimestamp_returnsFormattedString() {
+		Calendar cal = new Calendar.Builder()
+		.set(Calendar.YEAR, 2019)
+		.set(Calendar.MONTH, Calendar.SEPTEMBER)
+		.set(Calendar.DAY_OF_MONTH, 23)
+		.set(Calendar.HOUR, 11)
+		.set(Calendar.MINUTE, 15)
+		.set(Calendar.SECOND, 45)
+		.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles"))
+		.build();
 
-        String serializedDate = DateUtility.dateToISO8601String(cal.getTime());
-        // Expected time in UTC which is +7 hours from America/Los_Angeles during Daylight Savings
-        assertEquals("2019-09-23T18:15:45Z", serializedDate);
-    }
+		String serializedDate = DateUtility.dateToISO8601String(cal.getTime());
+		// Expected time in UTC which is +7 hours from America/Los_Angeles during Daylight Savings
+		assertEquals("2019-09-23T18:15:45Z", serializedDate);
+	}
 
-    @Test
-    public void dateToISO8601String_onNull_returnsEmptyString() {
-        String serializedDate = DateUtility.dateToISO8601String(null);
-        assertEquals("", serializedDate);
-    }
+	@Test
+	public void dateToISO8601String_onNull_returnsEmptyString() {
+		String serializedDate = DateUtility.dateToISO8601String(null);
+		assertEquals("", serializedDate);
+	}
 }

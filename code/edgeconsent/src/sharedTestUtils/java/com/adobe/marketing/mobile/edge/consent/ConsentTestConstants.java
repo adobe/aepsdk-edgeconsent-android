@@ -14,27 +14,27 @@ package com.adobe.marketing.mobile.edge.consent;
 
 public class ConsentTestConstants {
 
-    public static String SAMPLE_METADATA_TIMESTAMP = "2019-09-23T18:15:45Z";
+	public static String SAMPLE_METADATA_TIMESTAMP = "2019-09-23T18:15:45Z";
 
-    public final class DataStoreKey {
-        public static final String CONFIG_DATASTORE = "AdobeMobile_ConfigState";
-        public static final String CONSENT_DATASTORE = "com.adobe.edge.consent";
-        public static final String CONSENT_PREFERENCES = "consent:preferences";
-        private DataStoreKey() { }
-    }
+	public final class DataStoreKey {
+		public static final String CONFIG_DATASTORE = "AdobeMobile_ConfigState";
+		public static final String CONSENT_DATASTORE = "com.adobe.edge.consent";
+		public static final String CONSENT_PREFERENCES = "consent:preferences";
+		private DataStoreKey() { }
+	}
 
-    public final class SharedStateName {
-        public static final String CONFIG = "com.adobe.module.configuration";
-        public static final String EVENT_HUB = "com.adobe.module.eventhub";
-        private SharedStateName() { }
-    }
+	public final class SharedStateName {
+		public static final String CONFIG = "com.adobe.module.configuration";
+		public static final String EVENT_HUB = "com.adobe.module.eventhub";
+		private SharedStateName() { }
+	}
 
-    public final class GetConsentHelper {
-        public static final String VALUE = "getConsentValue";
-        public static final String ERROR = "getConsentError";
-        private GetConsentHelper() { }
-    }
+	public final class GetConsentHelper {
+		public static final String VALUE = "getConsentValue";
+		public static final String ERROR = "getConsentError";
+		private GetConsentHelper() { }
+	}
 
-    private ConsentTestConstants() { }
+	private ConsentTestConstants() { }
 }
 

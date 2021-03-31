@@ -18,27 +18,27 @@ import java.util.TimeZone;
 
 final class DateUtility {
 
-    private DateUtility() {
-    }
+	private DateUtility() {
+	}
 
-    private static final String TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+	private static final String TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
-    /**
-     * Formats a {@code Date} to an ISO 8601 date-time string in UTC as defined in
-     * <a href="https://tools.ietf.org/html/rfc3339#section-5.6">RFC 3339, section 5.6</a>
-     * For example, 2017-09-26T15:52:25Z
-     *
-     * @param timestamp a timestamp
-     * @return {@code timestamp} formatted to a string in the format of 'yyyy-MM-dd'T'HH:mm:ss'Z'',
-     * or an empty string if {@code timestamp} is null
-     */
-    static String dateToISO8601String(final Date timestamp) {
-        if (timestamp == null) {
-            return "";
-        }
+	/**
+	 * Formats a {@code Date} to an ISO 8601 date-time string in UTC as defined in
+	 * <a href="https://tools.ietf.org/html/rfc3339#section-5.6">RFC 3339, section 5.6</a>
+	 * For example, 2017-09-26T15:52:25Z
+	 *
+	 * @param timestamp a timestamp
+	 * @return {@code timestamp} formatted to a string in the format of 'yyyy-MM-dd'T'HH:mm:ss'Z'',
+	 * or an empty string if {@code timestamp} is null
+	 */
+	static String dateToISO8601String(final Date timestamp) {
+		if (timestamp == null) {
+			return "";
+		}
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(TIMESTAMP_FORMAT, Locale.US);
-        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        return simpleDateFormat.format(timestamp);
-    }
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(TIMESTAMP_FORMAT, Locale.US);
+		simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+		return simpleDateFormat.format(timestamp);
+	}
 }

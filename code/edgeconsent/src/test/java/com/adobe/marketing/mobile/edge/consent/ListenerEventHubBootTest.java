@@ -27,42 +27,45 @@ import static org.mockito.Mockito.verify;
 
 public class ListenerEventHubBootTest {
 
-    @Mock
-    private ConsentExtension mockConsentExtension;
+	@Mock
+	private ConsentExtension mockConsentExtension;
 
-    private ListenerEventHubBoot listener;
+	private ListenerEventHubBoot listener;
 
-    @Before
-    public void setup() {
-        mockConsentExtension = Mockito.mock(ConsentExtension.class);
-        MobileCore.start(null);
-        listener = spy(new ListenerEventHubBoot(null, ConsentConstants.EventType.EDGE, ConsentConstants.EventSource.CONSENT_PREFERENCE));
-    }
+	@Before
+	public void setup() {
+		mockConsentExtension = Mockito.mock(ConsentExtension.class);
+		MobileCore.start(null);
+		listener = spy(new ListenerEventHubBoot(null, ConsentConstants.EventType.EDGE,
+												ConsentConstants.EventSource.CONSENT_PREFERENCE));
+	}
 
-    @Test
-    public void testHear() {
-        // setup
-        Event event = new Event.Builder("Event Hub Boot", ConsentConstants.EventType.HUB, ConsentConstants.EventSource.BOOTED).build();
-        doReturn(mockConsentExtension).when(listener).getConsentExtension();
+	@Test
+	public void testHear() {
+		// setup
+		Event event = new Event.Builder("Event Hub Boot", ConsentConstants.EventType.HUB,
+										ConsentConstants.EventSource.BOOTED).build();
+		doReturn(mockConsentExtension).when(listener).getConsentExtension();
 
-        // test
-        listener.hear(event);
+		// test
+		listener.hear(event);
 
-        // verify
-        verify(mockConsentExtension, times(1)).handleEventHubBoot(event);
-    }
+		// verify
+		verify(mockConsentExtension, times(1)).handleEventHubBoot(event);
+	}
 
-    @Test
-    public void testHear_WhenParentExtensionNull() {
-        // setup
-        Event event = new Event.Builder("Event Hub Boot", ConsentConstants.EventType.HUB, ConsentConstants.EventSource.BOOTED).build();
-        doReturn(null).when(listener).getConsentExtension();
+	@Test
+	public void testHear_WhenParentExtensionNull() {
+		// setup
+		Event event = new Event.Builder("Event Hub Boot", ConsentConstants.EventType.HUB,
+										ConsentConstants.EventSource.BOOTED).build();
+		doReturn(null).when(listener).getConsentExtension();
 
-        // test
-        listener.hear(event);
+		// test
+		listener.hear(event);
 
-        // verify
-        verify(mockConsentExtension, times(0)).handleEventHubBoot(any(Event.class));
-    }
+		// verify
+		verify(mockConsentExtension, times(0)).handleEventHubBoot(any(Event.class));
+	}
 
 }
