@@ -36,8 +36,26 @@ jobs:
       - run:
           name: UnitTests
           command: make ci-unit-test
+
+            # code coverage
+      - run:
+          name: Upload Code Coverage Report
+          command: |
+            curl -s https://codecov.io/bash > codecov;
+            VERSION=$(grep 'VERSION=\".*\"' codecov | cut -d'"' -f2);
+            SHAVERSION=$(shasum -v);
+            echo "Using CodeCov version '$VERSION'"
+            echo "Using shasum '$SHAVERSION'"
+            for i in 1 256 512
+            do
+              shasum -a $i -c --ignore-missing <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM") ||
+              shasum -a $i -c <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM" | head -n 1)
+            done
+            bash ./codecov -v -X s3 -c -D "./ci/unit-test/build/reports" -F unit-tests
+
       - store_artifacts:
           path: ci/unit-test/build/reports
+
       - store_test_results:
           path: ci/unit-test/build/test-results
 
@@ -55,8 +73,25 @@ jobs:
           #   The test command
           test-command: make ci-functional-test
 
+      # code coverage
+      - run:
+          name: Upload Code Coverage Report
+          command: |
+            curl -s https://codecov.io/bash > codecov;
+            VERSION=$(grep 'VERSION=\".*\"' codecov | cut -d'"' -f2);
+            SHAVERSION=$(shasum -v);
+            echo "Using CodeCov version '$VERSION'"
+            echo "Using shasum '$SHAVERSION'"
+            for i in 1 256 512
+            do
+              shasum -a $i -c --ignore-missing <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM") ||
+              shasum -a $i -c <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM" | head -n 1)
+            done
+            bash ./codecov -v -X s3 -c -D "./ci/functional-test/build/reports" -F functional-tests
+
       - store_artifacts:
           path: ci/functional-test/build/reports
+          
       - store_test_results:
           path: ci/functional-test/build/outputs/androidTest-results
 
