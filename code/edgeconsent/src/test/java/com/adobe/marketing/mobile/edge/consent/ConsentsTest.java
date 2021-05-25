@@ -1,10 +1,15 @@
+/*
+  Copyright 2021 Adobe. All rights reserved.
+  This file is licensed to you under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License. You may obtain a copy
+  of the License at http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software distributed under
+  the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+  OF ANY KIND, either express or implied. See the License for the specific language
+  governing permissions and limitations under the License.
+*/
+
 package com.adobe.marketing.mobile.edge.consent;
-
-import org.junit.Test;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.CreateConsentXDMMap;
 import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.SAMPLE_METADATA_TIMESTAMP;
@@ -12,6 +17,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import org.junit.Test;
 
 public class ConsentsTest {
 
@@ -51,7 +61,6 @@ public class ConsentsTest {
 		assertNull(ConsentTestUtil.readTimestamp(consents));
 	}
 
-
 	@Test
 	public void test_ConsentsCreation_With_NoConsentDetailsInMap() {
 		// setup
@@ -86,11 +95,13 @@ public class ConsentsTest {
 	@Test
 	public void test_ConsentsCreation_With_InvalidMap() {
 		// test
-		Consents consents = new Consents(new HashMap<String, Object>() {
-			{
-				put("invalidKey", 30034);
+		Consents consents = new Consents(
+			new HashMap<String, Object>() {
+				{
+					put("invalidKey", 30034);
+				}
 			}
-		});
+		);
 
 		// verify
 		assertTrue(consents.isEmpty());
@@ -99,16 +110,17 @@ public class ConsentsTest {
 	@Test
 	public void test_ConsentsCreation_With_InvalidConsentMap() {
 		// test
-		Consents consents = new Consents(new HashMap<String, Object>() {
-			{
-				put("consents", 30034);
+		Consents consents = new Consents(
+			new HashMap<String, Object>() {
+				{
+					put("consents", 30034);
+				}
 			}
-		});
+		);
 
 		// verify
 		assertTrue(consents.isEmpty());
 	}
-
 
 	// ========================================================================================
 	// Test Scenarios   : All possible Consent object values
@@ -374,5 +386,4 @@ public class ConsentsTest {
 		assertFalse(first.equalsIgnoreTimestamp(second));
 		assertFalse(second.equalsIgnoreTimestamp(first));
 	}
-
 }

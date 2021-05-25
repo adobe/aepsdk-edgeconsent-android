@@ -38,12 +38,14 @@ class ListenerEventHubBoot extends ExtensionListener {
 	 */
 	@Override
 	public void hear(final Event event) {
-
 		final ConsentExtension parentExtension = getConsentExtension();
 
 		if (parentExtension == null) {
-			MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
-						   "ListenerEventHubBoot - The parent extension associated with this listener is null, ignoring the event.");
+			MobileCore.log(
+				LoggingMode.DEBUG,
+				ConsentConstants.LOG_TAG,
+				"ListenerEventHubBoot - The parent extension associated with this listener is null, ignoring the event."
+			);
 			return;
 		}
 

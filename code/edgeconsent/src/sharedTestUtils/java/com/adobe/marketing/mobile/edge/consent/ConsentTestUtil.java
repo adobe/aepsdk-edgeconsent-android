@@ -21,10 +21,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,6 +29,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 class ConsentTestUtil {
 
@@ -79,15 +77,26 @@ class ConsentTestUtil {
 		return CreateConsentsXDMJSONString(collectConsentString, adIDConsentString, null);
 	}
 
-	static String CreateConsentsXDMJSONString(final String collectConsentString, final String adIDConsentString,
-			final String time) {
+	static String CreateConsentsXDMJSONString(
+		final String collectConsentString,
+		final String adIDConsentString,
+		final String time
+	) {
 		return CreateConsentsXDMJSONString(collectConsentString, adIDConsentString, null, time);
 	}
 
-	static String CreateConsentsXDMJSONString(final String collectConsentString, final String adIDConsentString,
-			final String personalizeConsentString, final String time) {
-		Map<String, Object> consentDataMap = CreateConsentXDMMap(collectConsentString, adIDConsentString,
-											 personalizeConsentString, time);
+	static String CreateConsentsXDMJSONString(
+		final String collectConsentString,
+		final String adIDConsentString,
+		final String personalizeConsentString,
+		final String time
+	) {
+		Map<String, Object> consentDataMap = CreateConsentXDMMap(
+			collectConsentString,
+			adIDConsentString,
+			personalizeConsentString,
+			time
+		);
 		JSONObject jsonObject = new JSONObject(consentDataMap);
 		return jsonObject.toString();
 	}
@@ -100,42 +109,61 @@ class ConsentTestUtil {
 		return CreateConsentXDMMap(collectConsentString, adIDConsentString, null);
 	}
 
-	static Map<String, Object> CreateConsentXDMMap(final String collectConsentString, final String adIDConsentString,
-			final String time) {
+	static Map<String, Object> CreateConsentXDMMap(
+		final String collectConsentString,
+		final String adIDConsentString,
+		final String time
+	) {
 		return CreateConsentXDMMap(collectConsentString, adIDConsentString, null, time);
 	}
 
-	static Map<String, Object> CreateConsentXDMMap(final String collectConsentString, final String adIDConsentString,
-			final String personalizeConsentString, final String time) {
+	static Map<String, Object> CreateConsentXDMMap(
+		final String collectConsentString,
+		final String adIDConsentString,
+		final String personalizeConsentString,
+		final String time
+	) {
 		Map<String, Object> consentData = new HashMap<String, Object>();
 		Map<String, Object> consents = new HashMap<String, Object>();
 
 		if (collectConsentString != null) {
-			consents.put(COLLECT, new HashMap<String, String>() {
-				{
-					put(ConsentConstants.EventDataKey.VALUE, collectConsentString);
+			consents.put(
+				COLLECT,
+				new HashMap<String, String>() {
+					{
+						put(ConsentConstants.EventDataKey.VALUE, collectConsentString);
+					}
 				}
-			});
+			);
 		}
 
 		if (adIDConsentString != null) {
-			consents.put(ADID, new HashMap<String, String>() {
-				{
-					put(ConsentConstants.EventDataKey.VALUE, adIDConsentString);
+			consents.put(
+				ADID,
+				new HashMap<String, String>() {
+					{
+						put(ConsentConstants.EventDataKey.VALUE, adIDConsentString);
+					}
 				}
-			});
+			);
 		}
 
 		if (personalizeConsentString != null) {
-			consents.put(PERSONALIZE, new HashMap<String, Object>() {
-				{
-					put(CONTENT, new HashMap<String, String>() {
-						{
-							put(ConsentConstants.EventDataKey.VALUE, personalizeConsentString);
-						}
-					});
+			consents.put(
+				PERSONALIZE,
+				new HashMap<String, Object>() {
+					{
+						put(
+							CONTENT,
+							new HashMap<String, String>() {
+								{
+									put(ConsentConstants.EventDataKey.VALUE, personalizeConsentString);
+								}
+							}
+						);
+					}
 				}
-			});
+			);
 		}
 
 		if (time != null) {
@@ -155,7 +183,9 @@ class ConsentTestUtil {
 			return null;
 		}
 
-		Map<String, Object> collectMap = (Map<String, Object>) allConsentMap.get(ConsentConstants.EventDataKey.METADATA);
+		Map<String, Object> collectMap = (Map<String, Object>) allConsentMap.get(
+			ConsentConstants.EventDataKey.METADATA
+		);
 
 		if (isNullOrEmpty(collectMap)) {
 			return null;
@@ -222,22 +252,24 @@ class ConsentTestUtil {
 		try {
 			final HashMap<String, Object> getConsentResponse = new HashMap<String, Object>();
 			final CountDownLatch latch = new CountDownLatch(1);
-			Consent.getConsents(new AdobeCallbackWithError<Map<String, Object>>() {
-				@Override
-				public void call(Map<String, Object> consents) {
-					getConsentResponse.put(ConsentTestConstants.GetConsentHelper.VALUE, consents);
-					latch.countDown();
-				}
+			Consent.getConsents(
+				new AdobeCallbackWithError<Map<String, Object>>() {
+					@Override
+					public void call(Map<String, Object> consents) {
+						getConsentResponse.put(ConsentTestConstants.GetConsentHelper.VALUE, consents);
+						latch.countDown();
+					}
 
-				@Override
-				public void fail(AdobeError adobeError) {
-					getConsentResponse.put(ConsentTestConstants.GetConsentHelper.ERROR, adobeError);
-					latch.countDown();
+					@Override
+					public void fail(AdobeError adobeError) {
+						getConsentResponse.put(ConsentTestConstants.GetConsentHelper.ERROR, adobeError);
+						latch.countDown();
+					}
 				}
-			});
+			);
 			latch.await();
 
-			return  getConsentResponse;
+			return getConsentResponse;
 		} catch (Exception exp) {
 			return null;
 		}
@@ -254,18 +286,28 @@ class ConsentTestUtil {
 
 	static Event buildEdgeConsentPreferenceEventWithConsents(final Map<String, Object> consents) {
 		List<Map<String, Object>> payload = new ArrayList<>();
-		payload.add((Map)(consents.get("consents")));
+		payload.add((Map) (consents.get("consents")));
 		Map<String, Object> eventData = new HashMap<>();
 		eventData.put("payload", payload);
 		eventData.put("type", "consent:preferences");
-		return new Event.Builder("Edge Consent Preference", ConsentConstants.EventType.EDGE,
-								 ConsentConstants.EventSource.CONSENT_PREFERENCE).setEventData(eventData).build();
+		return new Event.Builder(
+			"Edge Consent Preference",
+			ConsentConstants.EventType.EDGE,
+			ConsentConstants.EventSource.CONSENT_PREFERENCE
+		)
+			.setEventData(eventData)
+			.build();
 	}
 
 	static Event buildEdgeConsentPreferenceEvent(final String jsonString) throws JSONException {
 		Map<String, Object> eventData = Utility.toMap(new JSONObject(jsonString));
-		return new Event.Builder("Edge Consent Preference", ConsentConstants.EventType.EDGE,
-								 ConsentConstants.EventSource.CONSENT_PREFERENCE).setEventData(eventData).build();
+		return new Event.Builder(
+			"Edge Consent Preference",
+			ConsentConstants.EventType.EDGE,
+			ConsentConstants.EventSource.CONSENT_PREFERENCE
+		)
+			.setEventData(eventData)
+			.build();
 	}
 
 	/**

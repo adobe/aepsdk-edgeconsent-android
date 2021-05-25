@@ -13,11 +13,14 @@ package com.adobe.marketing.mobile.edge.consent;
 
 final class ConsentConstants {
 
-    static final String LOG_TAG = "Consent";
-    static final String EXTENSION_VERSION = "1.0.0";
-    static final String EXTENSION_NAME = "com.adobe.edge.consent";
+	static final String LOG_TAG = "Consent";
+	static final String EXTENSION_VERSION = "1.0.0";
+	static final String EXTENSION_NAME = "com.adobe.edge.consent";
+
+	private ConsentConstants() {}
 
 	final class EventDataKey {
+
 		static final String CONSENTS = "consents";
 		static final String METADATA = "metadata";
 		static final String PAYLOAD = "payload";
@@ -29,6 +32,7 @@ final class ConsentConstants {
 	}
 
 	final class EventSource {
+
 		static final String CONSENT_PREFERENCE = "consent:preferences";
 		static final String UPDATE_CONSENT = "com.adobe.eventSource.updateConsent";
 		static final String REQUEST_CONTENT = "com.adobe.eventSource.requestContent";
@@ -39,6 +43,7 @@ final class ConsentConstants {
 	}
 
 	final class EventType {
+
 		static final String CONSENT = "com.adobe.eventType.edgeConsent";
 		static final String EDGE = "com.adobe.eventType.edge";
 		static final String CONFIGURATION = "com.adobe.eventType.configuration";
@@ -48,6 +53,7 @@ final class ConsentConstants {
 	}
 
 	final class DataStoreKey {
+
 		static final String DATASTORE_NAME = EXTENSION_NAME;
 		static final String CONSENT_PREFERENCES = "consent:preferences";
 
@@ -55,6 +61,7 @@ final class ConsentConstants {
 	}
 
 	final class EventNames {
+
 		static final String EDGE_CONSENT_UPDATE = "Edge Consent Update Request";
 		static final String CONSENT_UPDATE_REQUEST = "Consent Update Request";
 		static final String GET_CONSENTS_REQUEST = "Get Consents Request";
@@ -65,10 +72,9 @@ final class ConsentConstants {
 	}
 
 	final class ConfigurationKey {
+
 		static final String DEFAULT_CONSENT = "consent.default";
 
 		private ConfigurationKey() {}
 	}
-
-	private ConsentConstants() {}
 }

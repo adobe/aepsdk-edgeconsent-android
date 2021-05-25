@@ -11,26 +11,25 @@
 
 package com.adobe.marketing.mobile.edge.consent;
 
-import org.junit.Test;
+import static junit.framework.TestCase.assertEquals;
 
 import java.util.Calendar;
 import java.util.TimeZone;
-
-import static junit.framework.TestCase.assertEquals;
+import org.junit.Test;
 
 public class DateUtilityTest {
 
 	@Test
 	public void dateToISO8601String_onValidTimestamp_returnsFormattedString() {
 		Calendar cal = new Calendar.Builder()
-		.set(Calendar.YEAR, 2019)
-		.set(Calendar.MONTH, Calendar.SEPTEMBER)
-		.set(Calendar.DAY_OF_MONTH, 23)
-		.set(Calendar.HOUR, 11)
-		.set(Calendar.MINUTE, 15)
-		.set(Calendar.SECOND, 45)
-		.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles"))
-		.build();
+			.set(Calendar.YEAR, 2019)
+			.set(Calendar.MONTH, Calendar.SEPTEMBER)
+			.set(Calendar.DAY_OF_MONTH, 23)
+			.set(Calendar.HOUR, 11)
+			.set(Calendar.MINUTE, 15)
+			.set(Calendar.SECOND, 45)
+			.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles"))
+			.build();
 
 		String serializedDate = DateUtility.dateToISO8601String(cal.getTime());
 		// Expected time in UTC which is +7 hours from America/Los_Angeles during Daylight Savings

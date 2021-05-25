@@ -15,8 +15,7 @@ import java.util.HashMap;
 
 final class ConsentManager {
 
-	private Consents
-	userOptedConsents; // holds on to consents that are updated using PublicAPI or from Edge Consent Response
+	private Consents userOptedConsents; // holds on to consents that are updated using PublicAPI or from Edge Consent Response
 	private Consents defaultConsents; // holds on to default consents obtained from configuration response
 
 	/**
@@ -80,5 +79,4 @@ final class ConsentManager {
 
 		return currentConsents;
 	}
-
 }

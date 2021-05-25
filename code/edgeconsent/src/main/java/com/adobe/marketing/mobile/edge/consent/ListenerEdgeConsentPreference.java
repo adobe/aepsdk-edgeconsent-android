@@ -39,16 +39,22 @@ class ListenerEdgeConsentPreference extends ExtensionListener {
 	@Override
 	public void hear(final Event event) {
 		if (event == null || event.getEventData() == null || event.getEventData().isEmpty()) {
-			MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
-						   "ListenerEdgeConsentPreference - Event or Event data is null. Ignoring the event.");
+			MobileCore.log(
+				LoggingMode.DEBUG,
+				ConsentConstants.LOG_TAG,
+				"ListenerEdgeConsentPreference - Event or Event data is null. Ignoring the event."
+			);
 			return;
 		}
 
 		final ConsentExtension parentExtension = getConsentExtension();
 
 		if (parentExtension == null) {
-			MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
-						   "ListenerEdgeConsentPreference - The parent extension associated with this listener is null, ignoring the event.");
+			MobileCore.log(
+				LoggingMode.DEBUG,
+				ConsentConstants.LOG_TAG,
+				"ListenerEdgeConsentPreference - The parent extension associated with this listener is null, ignoring the event."
+			);
 			return;
 		}
 

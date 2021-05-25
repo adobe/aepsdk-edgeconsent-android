@@ -11,19 +11,18 @@
 
 package com.adobe.marketing.mobile.edge.consent;
 
-import com.adobe.marketing.mobile.Event;
-import com.adobe.marketing.mobile.MobileCore;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import com.adobe.marketing.mobile.Event;
+import com.adobe.marketing.mobile.MobileCore;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 
 public class ListenerEventHubBootTest {
 
@@ -36,15 +35,25 @@ public class ListenerEventHubBootTest {
 	public void setup() {
 		mockConsentExtension = Mockito.mock(ConsentExtension.class);
 		MobileCore.start(null);
-		listener = spy(new ListenerEventHubBoot(null, ConsentConstants.EventType.EDGE,
-												ConsentConstants.EventSource.CONSENT_PREFERENCE));
+		listener =
+			spy(
+				new ListenerEventHubBoot(
+					null,
+					ConsentConstants.EventType.EDGE,
+					ConsentConstants.EventSource.CONSENT_PREFERENCE
+				)
+			);
 	}
 
 	@Test
 	public void testHear() {
 		// setup
-		Event event = new Event.Builder("Event Hub Boot", ConsentConstants.EventType.HUB,
-										ConsentConstants.EventSource.BOOTED).build();
+		Event event = new Event.Builder(
+			"Event Hub Boot",
+			ConsentConstants.EventType.HUB,
+			ConsentConstants.EventSource.BOOTED
+		)
+			.build();
 		doReturn(mockConsentExtension).when(listener).getConsentExtension();
 
 		// test
@@ -57,8 +66,12 @@ public class ListenerEventHubBootTest {
 	@Test
 	public void testHear_WhenParentExtensionNull() {
 		// setup
-		Event event = new Event.Builder("Event Hub Boot", ConsentConstants.EventType.HUB,
-										ConsentConstants.EventSource.BOOTED).build();
+		Event event = new Event.Builder(
+			"Event Hub Boot",
+			ConsentConstants.EventType.HUB,
+			ConsentConstants.EventSource.BOOTED
+		)
+			.build();
 		doReturn(null).when(listener).getConsentExtension();
 
 		// test
@@ -67,5 +80,4 @@ public class ListenerEventHubBootTest {
 		// verify
 		verify(mockConsentExtension, times(0)).handleEventHubBoot(any(Event.class));
 	}
-
 }

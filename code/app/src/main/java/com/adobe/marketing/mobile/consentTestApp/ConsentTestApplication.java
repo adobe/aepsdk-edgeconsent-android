@@ -13,15 +13,15 @@ package com.adobe.marketing.mobile.consentTestApp;
 
 import android.app.Application;
 import android.util.Log;
-
-import com.adobe.marketing.mobile.edge.consent.Consent;
 import com.adobe.marketing.mobile.AdobeCallback;
 import com.adobe.marketing.mobile.Assurance;
 import com.adobe.marketing.mobile.Edge;
 import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
+import com.adobe.marketing.mobile.edge.consent.Consent;
 
 public class ConsentTestApplication extends Application {
+
 	private static final String LOG_TAG = "ConsentTestApplication";
 
 	// TODO: fill in your Launch environment ID here
@@ -41,18 +41,19 @@ public class ConsentTestApplication extends Application {
 		*/
 		MobileCore.configureWithAppID(LAUNCH_ENVIRONMENT_ID);
 
-        // register AEP Mobile extensions
-        Consent.registerExtension();
-        Edge.registerExtension();
-        Assurance.registerExtension();
+		// register AEP Mobile extensions
+		Consent.registerExtension();
+		Edge.registerExtension();
+		Assurance.registerExtension();
 
 		// once all the extensions are registered, call MobileCore.start(...) to start processing the events
-		MobileCore.start(new AdobeCallback() {
-			@Override
-			public void call(final Object o) {
-				Log.d(LOG_TAG, "Mobile SDK was initialized");
+		MobileCore.start(
+			new AdobeCallback() {
+				@Override
+				public void call(final Object o) {
+					Log.d(LOG_TAG, "Mobile SDK was initialized");
+				}
 			}
-		});
+		);
 	}
-
 }

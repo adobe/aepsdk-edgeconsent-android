@@ -18,10 +18,9 @@ import java.util.TimeZone;
 
 final class DateUtility {
 
-	private DateUtility() {
-	}
-
 	private static final String TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+
+	private DateUtility() {}
 
 	/**
 	 * Formats a {@code Date} to an ISO 8601 date-time string in UTC as defined in

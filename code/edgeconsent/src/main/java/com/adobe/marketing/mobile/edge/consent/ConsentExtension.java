@@ -18,7 +18,6 @@ import com.adobe.marketing.mobile.ExtensionError;
 import com.adobe.marketing.mobile.ExtensionErrorCallback;
 import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,27 +51,50 @@ class ConsentExtension extends Extension {
 	 */
 	protected ConsentExtension(final ExtensionApi extensionApi) {
 		super(extensionApi);
-
 		ExtensionErrorCallback<ExtensionError> listenerErrorCallback = new ExtensionErrorCallback<ExtensionError>() {
 			@Override
 			public void error(final ExtensionError extensionError) {
-				MobileCore.log(LoggingMode.ERROR, ConsentConstants.LOG_TAG,
-							   String.format("ConsentExtension - Failed to register listener, error: %s",
-											 extensionError.getErrorName()));
+				MobileCore.log(
+					LoggingMode.ERROR,
+					ConsentConstants.LOG_TAG,
+					String.format(
+						"ConsentExtension - Failed to register listener, error: %s",
+						extensionError.getErrorName()
+					)
+				);
 			}
 		};
-		extensionApi.registerEventListener(ConsentConstants.EventType.EDGE, ConsentConstants.EventSource.CONSENT_PREFERENCE,
-										   ListenerEdgeConsentPreference.class, listenerErrorCallback);
-		extensionApi.registerEventListener(ConsentConstants.EventType.CONSENT, ConsentConstants.EventSource.UPDATE_CONSENT,
-										   ListenerConsentUpdateConsent.class, listenerErrorCallback);
-		extensionApi.registerEventListener(ConsentConstants.EventType.CONSENT, ConsentConstants.EventSource.REQUEST_CONTENT,
-										   ListenerConsentRequestContent.class, listenerErrorCallback);
-		extensionApi.registerEventListener(ConsentConstants.EventType.CONFIGURATION,
-										   ConsentConstants.EventSource.RESPONSE_CONTENT, ListenerConfigurationResponseContent.class, listenerErrorCallback);
-		extensionApi.registerEventListener(ConsentConstants.EventType.HUB, ConsentConstants.EventSource.BOOTED,
-										   ListenerEventHubBoot.class, listenerErrorCallback);
+		extensionApi.registerEventListener(
+			ConsentConstants.EventType.EDGE,
+			ConsentConstants.EventSource.CONSENT_PREFERENCE,
+			ListenerEdgeConsentPreference.class,
+			listenerErrorCallback
+		);
+		extensionApi.registerEventListener(
+			ConsentConstants.EventType.CONSENT,
+			ConsentConstants.EventSource.UPDATE_CONSENT,
+			ListenerConsentUpdateConsent.class,
+			listenerErrorCallback
+		);
+		extensionApi.registerEventListener(
+			ConsentConstants.EventType.CONSENT,
+			ConsentConstants.EventSource.REQUEST_CONTENT,
+			ListenerConsentRequestContent.class,
+			listenerErrorCallback
+		);
+		extensionApi.registerEventListener(
+			ConsentConstants.EventType.CONFIGURATION,
+			ConsentConstants.EventSource.RESPONSE_CONTENT,
+			ListenerConfigurationResponseContent.class,
+			listenerErrorCallback
+		);
+		extensionApi.registerEventListener(
+			ConsentConstants.EventType.HUB,
+			ConsentConstants.EventSource.BOOTED,
+			ListenerEventHubBoot.class,
+			listenerErrorCallback
+		);
 		consentManager = new ConsentManager();
-
 	}
 
 	/**
@@ -126,8 +148,11 @@ class ConsentExtension extends Extension {
 		final Map<String, Object> consentData = event.getEventData();
 
 		if (consentData == null || consentData.isEmpty()) {
-			MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
-						   "ConsentExtension - Consent data not found in consent update event. Dropping event.");
+			MobileCore.log(
+				LoggingMode.DEBUG,
+				ConsentConstants.LOG_TAG,
+				"ConsentExtension - Consent data not found in consent update event. Dropping event."
+			);
 			return;
 		}
 
@@ -135,8 +160,11 @@ class ConsentExtension extends Extension {
 		final Consents newConsents = new Consents(consentData);
 
 		if (newConsents.isEmpty()) {
-			MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
-						   "ConsentExtension - Unable to find valid data from consent update event. Dropping event.");
+			MobileCore.log(
+				LoggingMode.DEBUG,
+				ConsentConstants.LOG_TAG,
+				"ConsentExtension - Unable to find valid data from consent update event. Dropping event."
+			);
 			return;
 		}
 
@@ -168,14 +196,20 @@ class ConsentExtension extends Extension {
 		try {
 			payload = (List<Map<String, Object>>) eventData.get(ConsentConstants.EventDataKey.PAYLOAD);
 		} catch (ClassCastException exp) {
-			MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
-						   "ConsentExtension - Ignoring the consent:preferences handle event from Edge Network, invalid payload.");
+			MobileCore.log(
+				LoggingMode.DEBUG,
+				ConsentConstants.LOG_TAG,
+				"ConsentExtension - Ignoring the consent:preferences handle event from Edge Network, invalid payload."
+			);
 			return;
 		}
 
 		if (payload == null || payload.isEmpty()) {
-			MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
-						   "ConsentExtension - Ignoring the consent:preferences handle event from Edge Network, empty/missing payload.");
+			MobileCore.log(
+				LoggingMode.DEBUG,
+				ConsentConstants.LOG_TAG,
+				"ConsentExtension - Ignoring the consent:preferences handle event from Edge Network, empty/missing payload."
+			);
 			return;
 		}
 
@@ -183,11 +217,13 @@ class ConsentExtension extends Extension {
 		final Consents newConsents = new Consents(prepareConsentXDMMapWithPayload(payload.get(0)));
 
 		if (newConsents.isEmpty()) {
-			MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
-						   "ConsentExtension - Ignoring the consent:preferences handle event from Edge Network, no valid consent data found.");
+			MobileCore.log(
+				LoggingMode.DEBUG,
+				ConsentConstants.LOG_TAG,
+				"ConsentExtension - Ignoring the consent:preferences handle event from Edge Network, no valid consent data found."
+			);
 			return;
 		}
-
 
 		// If the consentPreferences handle has
 		// 1. same consent as current and without timestamp
@@ -197,11 +233,13 @@ class ConsentExtension extends Extension {
 		final Consents currentConsent = consentManager.getCurrentConsents();
 
 		if (newConsents.getTimestamp() == null || newConsents.getTimestamp().equals(currentConsent.getTimestamp())) {
-
 			// compare the consents ignoring the timestamp
 			if (newConsents.equalsIgnoreTimestamp(currentConsent)) {
-				MobileCore.log(LoggingMode.VERBOSE, ConsentConstants.LOG_TAG,
-							   "ConsentExtension - Ignoring the consent:preferences handle event from Edge Network. There is no modification from existing consent data");
+				MobileCore.log(
+					LoggingMode.VERBOSE,
+					ConsentConstants.LOG_TAG,
+					"ConsentExtension - Ignoring the consent:preferences handle event from Edge Network. There is no modification from existing consent data"
+				);
 				return;
 			}
 		}
@@ -224,15 +262,24 @@ class ConsentExtension extends Extension {
 		ExtensionErrorCallback<ExtensionError> errorCallback = new ExtensionErrorCallback<ExtensionError>() {
 			@Override
 			public void error(final ExtensionError extensionError) {
-				MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
-							   String.format("ConsentExtension - Failed to dispatch %s event: Error : %s.",
-											 ConsentConstants.EventNames.GET_CONSENTS_RESPONSE,
-											 extensionError.getErrorName()));
+				MobileCore.log(
+					LoggingMode.DEBUG,
+					ConsentConstants.LOG_TAG,
+					String.format(
+						"ConsentExtension - Failed to dispatch %s event: Error : %s.",
+						ConsentConstants.EventNames.GET_CONSENTS_RESPONSE,
+						extensionError.getErrorName()
+					)
+				);
 			}
 		};
-		final Event responseEvent = new Event.Builder(ConsentConstants.EventNames.GET_CONSENTS_RESPONSE,
-				ConsentConstants.EventType.CONSENT, ConsentConstants.EventSource.RESPONSE_CONTENT).setEventData(
-			consentManager.getCurrentConsents().asXDMMap()).build();
+		final Event responseEvent = new Event.Builder(
+			ConsentConstants.EventNames.GET_CONSENTS_RESPONSE,
+			ConsentConstants.EventType.CONSENT,
+			ConsentConstants.EventSource.RESPONSE_CONTENT
+		)
+			.setEventData(consentManager.getCurrentConsents().asXDMMap())
+			.build();
 		MobileCore.dispatchResponseEvent(responseEvent, event, errorCallback);
 	}
 
@@ -245,17 +292,24 @@ class ConsentExtension extends Extension {
 		final Map<String, Object> configData = event.getEventData();
 
 		if (configData == null || configData.isEmpty()) {
-			MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
-						   "ConsentExtension - Event data configuration response event is empty, unable to read configuration consent.default. Dropping event.");
+			MobileCore.log(
+				LoggingMode.DEBUG,
+				ConsentConstants.LOG_TAG,
+				"ConsentExtension - Event data configuration response event is empty, unable to read configuration consent.default. Dropping event."
+			);
 			return;
 		}
 
 		final Map<String, Object> defaultConsentMap = (Map<String, Object>) configData.get(
-					ConsentConstants.ConfigurationKey.DEFAULT_CONSENT);
+			ConsentConstants.ConfigurationKey.DEFAULT_CONSENT
+		);
 
 		if (defaultConsentMap == null || defaultConsentMap.isEmpty()) {
-			MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
-						   "ConsentExtension - consent.default not found in configuration. Make sure Consent extension is installed in your mobile property");
+			MobileCore.log(
+				LoggingMode.DEBUG,
+				ConsentConstants.LOG_TAG,
+				"ConsentExtension - consent.default not found in configuration. Make sure Consent extension is installed in your mobile property"
+			);
 			// do not return here, even with empty default consent go ahead and update the defaultConsent in ConsentManager
 			// This handles the case where if ConsentExtension was installed and then removed from launch property. Then the defaults should be updated.
 		}
@@ -280,23 +334,39 @@ class ConsentExtension extends Extension {
 		ExtensionErrorCallback<ExtensionError> errorCallback = new ExtensionErrorCallback<ExtensionError>() {
 			@Override
 			public void error(final ExtensionError extensionError) {
-				MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
-							   String.format("ConsentExtension - Failed create XDM shared state. Error : %s.", extensionError.getErrorName()));
+				MobileCore.log(
+					LoggingMode.DEBUG,
+					ConsentConstants.LOG_TAG,
+					String.format(
+						"ConsentExtension - Failed create XDM shared state. Error : %s.",
+						extensionError.getErrorName()
+					)
+				);
 			}
 		};
 
 		getApi().setXDMSharedEventState(xdmConsents, event, errorCallback);
 
-
 		// create and dispatch an consent response event
-		final Event responseEvent = new Event.Builder(ConsentConstants.EventNames.CONSENT_PREFERENCES_UPDATED,
-				ConsentConstants.EventType.CONSENT, ConsentConstants.EventSource.RESPONSE_CONTENT).setEventData(xdmConsents).build();
+		final Event responseEvent = new Event.Builder(
+			ConsentConstants.EventNames.CONSENT_PREFERENCES_UPDATED,
+			ConsentConstants.EventType.CONSENT,
+			ConsentConstants.EventSource.RESPONSE_CONTENT
+		)
+			.setEventData(xdmConsents)
+			.build();
 		ExtensionErrorCallback<ExtensionError> dispatchErrorCallback = new ExtensionErrorCallback<ExtensionError>() {
 			@Override
 			public void error(final ExtensionError extensionError) {
-				MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
-							   String.format("ConsentExtension - Failed to dispatch %s event: Error : %s.", responseEvent.getName(),
-											 extensionError.getErrorName()));
+				MobileCore.log(
+					LoggingMode.DEBUG,
+					ConsentConstants.LOG_TAG,
+					String.format(
+						"ConsentExtension - Failed to dispatch %s event: Error : %s.",
+						responseEvent.getName(),
+						extensionError.getErrorName()
+					)
+				);
 			}
 		};
 		MobileCore.dispatchEvent(responseEvent, dispatchErrorCallback);
@@ -312,20 +382,34 @@ class ConsentExtension extends Extension {
 	private void dispatchEdgeConsentUpdateEvent(final Consents consents) {
 		// do not send an event if the consent data is empty
 		if (consents == null || consents.isEmpty()) {
-			MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
-						   "ConsentExtension - Consent data is null/empty, not dispatching Edge Consent Update event.");
+			MobileCore.log(
+				LoggingMode.DEBUG,
+				ConsentConstants.LOG_TAG,
+				"ConsentExtension - Consent data is null/empty, not dispatching Edge Consent Update event."
+			);
 			return;
 		}
 
 		// create and dispatch an edge consent update event
-		final Event edgeConsentUpdateEvent = new Event.Builder(ConsentConstants.EventNames.EDGE_CONSENT_UPDATE,
-				ConsentConstants.EventType.EDGE, ConsentConstants.EventSource.UPDATE_CONSENT).setEventData(consents.asXDMMap()).build();
+		final Event edgeConsentUpdateEvent = new Event.Builder(
+			ConsentConstants.EventNames.EDGE_CONSENT_UPDATE,
+			ConsentConstants.EventType.EDGE,
+			ConsentConstants.EventSource.UPDATE_CONSENT
+		)
+			.setEventData(consents.asXDMMap())
+			.build();
 		ExtensionErrorCallback<ExtensionError> errorCallback = new ExtensionErrorCallback<ExtensionError>() {
 			@Override
 			public void error(final ExtensionError extensionError) {
-				MobileCore.log(LoggingMode.DEBUG, ConsentConstants.LOG_TAG,
-							   String.format("ConsentExtension - Failed to dispatch %s event: Error : %s.", edgeConsentUpdateEvent.getName(),
-											 extensionError.getErrorName()));
+				MobileCore.log(
+					LoggingMode.DEBUG,
+					ConsentConstants.LOG_TAG,
+					String.format(
+						"ConsentExtension - Failed to dispatch %s event: Error : %s.",
+						edgeConsentUpdateEvent.getName(),
+						extensionError.getErrorName()
+					)
+				);
 			}
 		};
 		MobileCore.dispatchEvent(edgeConsentUpdateEvent, errorCallback);

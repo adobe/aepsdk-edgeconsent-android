@@ -11,14 +11,21 @@
 
 package com.adobe.marketing.mobile.edge.consent;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+
 import com.adobe.marketing.mobile.AdobeCallback;
 import com.adobe.marketing.mobile.AdobeCallbackWithError;
 import com.adobe.marketing.mobile.AdobeError;
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.ExtensionErrorCallback;
 import com.adobe.marketing.mobile.MobileCore;
-
-import org.junit.Assert;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,19 +36,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-
-
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({MobileCore.class})
+@PrepareForTest({ MobileCore.class })
 public class ConsentTest {
 
 	private static Map<String, Object> SAMPLE_CONSENTS_MAP = ConsentTestUtil.CreateConsentXDMMap("y");
@@ -59,8 +55,11 @@ public class ConsentTest {
 	public void test_extensionVersionAPI() {
 		// test
 		String extensionVersion = Consent.extensionVersion();
-		assertEquals("The Extension version API returns the correct value", ConsentConstants.EXTENSION_VERSION,
-					 extensionVersion);
+		assertEquals(
+			"The Extension version API returns the correct value",
+			ConsentConstants.EXTENSION_VERSION,
+			extensionVersion
+		);
 	}
 
 	// ========================================================================================
@@ -70,7 +69,9 @@ public class ConsentTest {
 	public void testRegistration() {
 		// test
 		Consent.registerExtension();
-		final ArgumentCaptor<ExtensionErrorCallback> callbackCaptor = ArgumentCaptor.forClass(ExtensionErrorCallback.class);
+		final ArgumentCaptor<ExtensionErrorCallback> callbackCaptor = ArgumentCaptor.forClass(
+			ExtensionErrorCallback.class
+		);
 
 		// The consent extension should register with core
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
@@ -79,7 +80,6 @@ public class ConsentTest {
 		// verify the callback
 		ExtensionErrorCallback extensionErrorCallback = callbackCaptor.getValue();
 		assertNotNull("The extension callback should not be null", extensionErrorCallback);
-
 		// TODO - enable when ExtensionError creation is available
 		// should not crash on calling the callback
 		//extensionErrorCallback.error(ExtensionError.UNEXPECTED_ERROR);
@@ -92,7 +92,9 @@ public class ConsentTest {
 	public void testUpdate() {
 		// setup
 		final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
-		final ArgumentCaptor<ExtensionErrorCallback> callbackCaptor = ArgumentCaptor.forClass(ExtensionErrorCallback.class);
+		final ArgumentCaptor<ExtensionErrorCallback> callbackCaptor = ArgumentCaptor.forClass(
+			ExtensionErrorCallback.class
+		);
 
 		// test
 		Consent.update(SAMPLE_CONSENTS_MAP);
@@ -106,7 +108,6 @@ public class ConsentTest {
 		assertEquals(ConsentConstants.EventType.CONSENT.toLowerCase(), dispatchedEvent.getType());
 		assertEquals(ConsentConstants.EventSource.UPDATE_CONSENT.toLowerCase(), dispatchedEvent.getSource());
 		assertEquals(SAMPLE_CONSENTS_MAP, dispatchedEvent.getEventData());
-
 		// TODO - enable when ExtensionError creation is available
 		// should not crash on calling the callback
 		//extensionErrorCallback.error(ExtensionError.UNEXPECTED_ERROR);
@@ -131,21 +132,27 @@ public class ConsentTest {
 		final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
 		final ArgumentCaptor<AdobeCallback> adobeCallbackCaptor = ArgumentCaptor.forClass(AdobeCallback.class);
 		final ArgumentCaptor<ExtensionErrorCallback> extensionErrorCallbackCaptor = ArgumentCaptor.forClass(
-					ExtensionErrorCallback.class);
+			ExtensionErrorCallback.class
+		);
 		final List<Map<String, Object>> callbackReturnValues = new ArrayList<>();
 
 		// test
-		Consent.getConsents(new AdobeCallback<Map<String, Object>>() {
-			@Override
-			public void call(Map<String, Object> stringObjectMap) {
-				callbackReturnValues.add(stringObjectMap);
+		Consent.getConsents(
+			new AdobeCallback<Map<String, Object>>() {
+				@Override
+				public void call(Map<String, Object> stringObjectMap) {
+					callbackReturnValues.add(stringObjectMap);
+				}
 			}
-		});
+		);
 
 		// verify
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
-		MobileCore.dispatchEventWithResponseCallback(eventCaptor.capture(), adobeCallbackCaptor.capture(),
-				extensionErrorCallbackCaptor.capture());
+		MobileCore.dispatchEventWithResponseCallback(
+			eventCaptor.capture(),
+			adobeCallbackCaptor.capture(),
+			extensionErrorCallbackCaptor.capture()
+		);
 
 		// verify the dispatched event details
 		Event dispatchedEvent = eventCaptor.getValue();
@@ -157,7 +164,6 @@ public class ConsentTest {
 		//verify callback responses
 		adobeCallbackCaptor.getValue().call(buildConsentResponseEvent(SAMPLE_CONSENTS_MAP));
 		assertEquals(SAMPLE_CONSENTS_MAP, callbackReturnValues.get(0));
-
 		// TODO - enable when ExtensionError creation is available
 		// should not crash on calling the callback
 		//extensionErrorCallback.error(ExtensionError.UNEXPECTED_ERROR);
@@ -170,10 +176,12 @@ public class ConsentTest {
 
 		// verify
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(0));
-		MobileCore.dispatchEventWithResponseCallback(any(Event.class), any(AdobeCallback.class),
-				any(ExtensionErrorCallback.class));
+		MobileCore.dispatchEventWithResponseCallback(
+			any(Event.class),
+			any(AdobeCallback.class),
+			any(ExtensionErrorCallback.class)
+		);
 	}
-
 
 	@Test
 	public void testGetConsents_NullResponseEvent() {
@@ -190,8 +198,7 @@ public class ConsentTest {
 			}
 
 			@Override
-			public void call(Object o) {
-			}
+			public void call(Object o) {}
 		};
 
 		// test
@@ -199,8 +206,11 @@ public class ConsentTest {
 
 		// verify if the event is dispatched
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
-		MobileCore.dispatchEventWithResponseCallback(any(Event.class), adobeCallbackCaptor.capture(),
-				any(ExtensionErrorCallback.class));
+		MobileCore.dispatchEventWithResponseCallback(
+			any(Event.class),
+			adobeCallbackCaptor.capture(),
+			any(ExtensionErrorCallback.class)
+		);
 
 		// set response event to null
 		adobeCallbackCaptor.getValue().call(null);
@@ -208,14 +218,18 @@ public class ConsentTest {
 		// verify
 		assertTrue((boolean) errorCapture.get(KEY_IS_ERRORCALLBACK_CALLED));
 		assertEquals(AdobeError.UNEXPECTED_ERROR, errorCapture.get(KEY_CAPTUREDERRORCALLBACK));
-
 	}
 
 	// ========================================================================================
 	// Private method
 	// ========================================================================================
 	private Event buildConsentResponseEvent(final Map<String, Object> eventData) {
-		return new Event.Builder(ConsentConstants.EventNames.GET_CONSENTS_RESPONSE, ConsentConstants.EventType.CONSENT,
-								 ConsentConstants.EventSource.RESPONSE_CONTENT).setEventData(eventData).build();
+		return new Event.Builder(
+			ConsentConstants.EventNames.GET_CONSENTS_RESPONSE,
+			ConsentConstants.EventType.CONSENT,
+			ConsentConstants.EventSource.RESPONSE_CONTENT
+		)
+			.setEventData(eventData)
+			.build();
 	}
 }

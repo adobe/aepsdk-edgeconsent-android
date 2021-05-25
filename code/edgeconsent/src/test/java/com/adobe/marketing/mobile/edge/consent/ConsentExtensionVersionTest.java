@@ -11,18 +11,18 @@
 
 package com.adobe.marketing.mobile.edge.consent;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 
 public class ConsentExtensionVersionTest {
+
 	private static String GRADLE_PROPERTIES_PATH = "../gradle.properties";
 	private static String PROPERTY_MODULE_VERSION = "moduleVersion";
 
@@ -37,9 +37,15 @@ public class ConsentExtensionVersionTest {
 		assertNotNull(moduleVersion);
 		assertFalse(moduleVersion.isEmpty());
 
-		assertEquals(String.format("Expected version to match in gradle.properties (%s) and extensionVersion API (%s)",
-								   moduleVersion, Consent.extensionVersion()),
-					 moduleVersion, Consent.extensionVersion());
+		assertEquals(
+			String.format(
+				"Expected version to match in gradle.properties (%s) and extensionVersion API (%s)",
+				moduleVersion,
+				Consent.extensionVersion()
+			),
+			moduleVersion,
+			Consent.extensionVersion()
+		);
 	}
 
 	// ========================================================================================
@@ -68,5 +74,4 @@ public class ConsentExtensionVersionTest {
 
 		return properties;
 	}
-
 }

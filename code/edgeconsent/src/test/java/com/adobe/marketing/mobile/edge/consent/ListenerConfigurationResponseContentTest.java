@@ -11,21 +11,21 @@
 
 package com.adobe.marketing.mobile.edge.consent;
 
-import com.adobe.marketing.mobile.Event;
-import com.adobe.marketing.mobile.MobileCore;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.adobe.marketing.mobile.Event;
+import com.adobe.marketing.mobile.MobileCore;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+
 public class ListenerConfigurationResponseContentTest {
+
 	@Mock
 	private ConsentExtension mockConsentExtension;
 
@@ -35,15 +35,25 @@ public class ListenerConfigurationResponseContentTest {
 	public void setup() {
 		mockConsentExtension = Mockito.mock(ConsentExtension.class);
 		MobileCore.start(null);
-		listener = spy(new ListenerConfigurationResponseContent(null, ConsentConstants.EventType.CONFIGURATION,
-					   ConsentConstants.EventSource.RESPONSE_CONTENT));
+		listener =
+			spy(
+				new ListenerConfigurationResponseContent(
+					null,
+					ConsentConstants.EventType.CONFIGURATION,
+					ConsentConstants.EventSource.RESPONSE_CONTENT
+				)
+			);
 	}
 
 	@Test
 	public void testHear() {
 		// setup
-		Event event = new Event.Builder("Configuration response content event", ConsentConstants.EventType.CONFIGURATION,
-										ConsentConstants.EventSource.RESPONSE_CONTENT).build();
+		Event event = new Event.Builder(
+			"Configuration response content event",
+			ConsentConstants.EventType.CONFIGURATION,
+			ConsentConstants.EventSource.RESPONSE_CONTENT
+		)
+			.build();
 		doReturn(mockConsentExtension).when(listener).getConsentExtension();
 
 		// test
@@ -56,8 +66,12 @@ public class ListenerConfigurationResponseContentTest {
 	@Test
 	public void testHear_WhenParentExtensionNull() {
 		// setup
-		Event event = new Event.Builder("Configuration response content event", ConsentConstants.EventType.CONFIGURATION,
-										ConsentConstants.EventSource.RESPONSE_CONTENT).build();
+		Event event = new Event.Builder(
+			"Configuration response content event",
+			ConsentConstants.EventType.CONFIGURATION,
+			ConsentConstants.EventSource.RESPONSE_CONTENT
+		)
+			.build();
 		doReturn(null).when(listener).getConsentExtension();
 
 		// test

@@ -9,23 +9,7 @@
   governing permissions and limitations under the License.
 */
 
-
 package com.adobe.marketing.mobile.edge.consent;
-
-import com.adobe.marketing.mobile.AdobeCallback;
-import com.adobe.marketing.mobile.Event;
-import com.adobe.marketing.mobile.MobileCore;
-import com.adobe.marketing.mobile.TestHelper;
-import com.adobe.marketing.mobile.TestPersistenceHelper;
-
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.RuleChain;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 
 import static com.adobe.marketing.mobile.TestHelper.getDispatchedEventsWith;
 import static com.adobe.marketing.mobile.TestHelper.getXDMSharedStateFor;
@@ -36,11 +20,25 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import com.adobe.marketing.mobile.AdobeCallback;
+import com.adobe.marketing.mobile.Event;
+import com.adobe.marketing.mobile.MobileCore;
+import com.adobe.marketing.mobile.TestHelper;
+import com.adobe.marketing.mobile.TestPersistenceHelper;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.RuleChain;
+
 public class ConsentDefaultsTests {
 
 	@Rule
-	public RuleChain rule = RuleChain.outerRule(new TestHelper.SetupCoreRule())
-							.around(new TestHelper.RegisterMonitorExtensionRule());
+	public RuleChain rule = RuleChain
+		.outerRule(new TestHelper.SetupCoreRule())
+		.around(new TestHelper.RegisterMonitorExtensionRule());
 
 	@Test
 	public void test_ConsentExtension_UsesDefaultConsent() throws Exception {
@@ -59,8 +57,10 @@ public class ConsentDefaultsTests {
 		waitForThreads(1000);
 
 		// verify consent response event dispatched
-		List<Event> consentResponseEvents = getDispatchedEventsWith(ConsentConstants.EventType.CONSENT,
-											ConsentConstants.EventSource.RESPONSE_CONTENT);
+		List<Event> consentResponseEvents = getDispatchedEventsWith(
+			ConsentConstants.EventType.CONSENT,
+			ConsentConstants.EventSource.RESPONSE_CONTENT
+		);
 		assertEquals(1, consentResponseEvents.size());
 		Map<String, String> consentResponseData = flattenMap(consentResponseEvents.get(0).getEventData());
 		assertEquals(1, consentResponseData.size()); // verify that only collect consent is updated
@@ -73,7 +73,9 @@ public class ConsentDefaultsTests {
 
 		// verify Public API Call
 		Map<String, Object> getConsentResponse = getConsentsSync();
-		Map<String, String> responseMap = flattenMap((Map) getConsentResponse.get(ConsentTestConstants.GetConsentHelper.VALUE));
+		Map<String, String> responseMap = flattenMap(
+			(Map) getConsentResponse.get(ConsentTestConstants.GetConsentHelper.VALUE)
+		);
 		assertEquals("y", responseMap.get("consents.collect.val"));
 	}
 
@@ -139,15 +141,16 @@ public class ConsentDefaultsTests {
 		waitForThreads(1000);
 
 		// verify edge event for only collectConsent data
-		List<Event> edgeRequestEvents = getDispatchedEventsWith(ConsentConstants.EventType.EDGE,
-										ConsentConstants.EventSource.UPDATE_CONSENT);
+		List<Event> edgeRequestEvents = getDispatchedEventsWith(
+			ConsentConstants.EventType.EDGE,
+			ConsentConstants.EventSource.UPDATE_CONSENT
+		);
 		assertEquals(1, edgeRequestEvents.size());
 		Map<String, String> edgeRequestData = flattenMap(edgeRequestEvents.get(0).getEventData());
 		assertEquals(2, edgeRequestData.size()); // verify that only collect consent and metadata are updated
 		assertEquals("n", edgeRequestData.get("consents.collect.val"));
 		assertNotNull(edgeRequestData.get("consents.metadata.time"));
 	}
-
 
 	@Test
 	public void test_DefaultConsent_NotSavedInPersistence() throws Exception {
@@ -156,8 +159,10 @@ public class ConsentDefaultsTests {
 		waitForThreads(2000);
 
 		// verify persisted Data
-		final String persistedJson = TestPersistenceHelper.readPersistedData(ConsentConstants.DataStoreKey.DATASTORE_NAME,
-									 ConsentConstants.DataStoreKey.CONSENT_PREFERENCES);
+		final String persistedJson = TestPersistenceHelper.readPersistedData(
+			ConsentConstants.DataStoreKey.DATASTORE_NAME,
+			ConsentConstants.DataStoreKey.CONSENT_PREFERENCES
+		);
 		assertNull(persistedJson);
 	}
 
@@ -176,12 +181,14 @@ public class ConsentDefaultsTests {
 		Consent.registerExtension();
 
 		final CountDownLatch latch = new CountDownLatch(1);
-		MobileCore.start(new AdobeCallback() {
-			@Override
-			public void call(Object o) {
-				latch.countDown();
+		MobileCore.start(
+			new AdobeCallback() {
+				@Override
+				public void call(Object o) {
+					latch.countDown();
+				}
 			}
-		});
+		);
 
 		latch.await();
 		resetTestExpectations();

@@ -20,7 +20,7 @@ final class Consents {
 	private Map<String, Object> consentsMap = new HashMap<>();
 
 	// Suppresses default constructor.
-	private Consents() { }
+	private Consents() {}
 
 	/**
 	 * Copy Constructor.
@@ -48,10 +48,37 @@ final class Consents {
 		Object allConsents = xdmMap.get(ConsentConstants.EventDataKey.CONSENTS);
 
 		try {
-			consentsMap = (allConsents instanceof HashMap) ? Utility.deepCopy((Map<String, Object>) allConsents) : new
-						  HashMap<String, Object>();
+			consentsMap =
+				(allConsents instanceof HashMap)
+					? Utility.deepCopy((Map<String, Object>) allConsents)
+					: new HashMap<String, Object>();
 		} catch (final ClassCastException exp) {
 			consentsMap = new HashMap<>();
+		}
+	}
+
+	/**
+	 * Retrieves the timestamp for this {@link Consents}.
+	 *
+	 * @return timestamp in ISO 8601 date-time string, null if consents does not have timestamp in its metadata
+	 */
+	String getTimestamp() {
+		if (isEmpty()) {
+			return null;
+		}
+
+		try {
+			final Map<String, Object> metaDataContents = (Map<String, Object>) consentsMap.get(
+				ConsentConstants.EventDataKey.METADATA
+			);
+
+			if (metaDataContents == null) {
+				return null;
+			}
+
+			return (String) metaDataContents.get(ConsentConstants.EventDataKey.TIME);
+		} catch (final ClassCastException exp) {
+			return null;
 		}
 	}
 
@@ -82,30 +109,6 @@ final class Consents {
 	}
 
 	/**
-	 * Retrieves the timestamp for this {@link Consents}.
-	 *
-	 * @return timestamp in ISO 8601 date-time string, null if consents does not have timestamp in its metadata
-	 */
-	String getTimestamp() {
-		if (isEmpty()) {
-			return null;
-		}
-
-		try {
-			final Map<String, Object> metaDataContents = (Map<String, Object>) consentsMap.get(
-						ConsentConstants.EventDataKey.METADATA);
-
-			if (metaDataContents == null) {
-				return null;
-			}
-
-			return (String) metaDataContents.get(ConsentConstants.EventDataKey.TIME);
-		} catch (final ClassCastException exp) {
-			return null;
-		}
-	}
-
-	/**
 	 * Verifies if the consents associated with the current object is empty.
 	 * Returns true if at least one consent is found, false otherwise.
 	 *
@@ -114,7 +117,6 @@ final class Consents {
 	boolean isEmpty() {
 		return consentsMap == null || consentsMap.isEmpty();
 	}
-
 
 	/**
 	 * Merges the provided {@link Consents} with the current object.
@@ -144,8 +146,9 @@ final class Consents {
 	 * @return {@link Map} representing the Consents in XDM format
 	 */
 	Map<String, Object> asXDMMap() {
-		final Map<String, Object> internalConsentMap = consentsMap != null ? Utility.deepCopy(
-					consentsMap) : new HashMap<String, Object>();
+		final Map<String, Object> internalConsentMap = consentsMap != null
+			? Utility.deepCopy(consentsMap)
+			: new HashMap<String, Object>();
 
 		final Map<String, Object> xdmFormattedMap = new HashMap<>();
 		xdmFormattedMap.put(ConsentConstants.EventDataKey.CONSENTS, internalConsentMap);
@@ -207,7 +210,9 @@ final class Consents {
 	 * Private helper method to remove metadata timestamp from this {@link Consents}
 	 */
 	private void removeTimeStamp() {
-		Map<String, Object> metaDataContents = (Map<String, Object>) consentsMap.get(ConsentConstants.EventDataKey.METADATA);
+		Map<String, Object> metaDataContents = (Map<String, Object>) consentsMap.get(
+			ConsentConstants.EventDataKey.METADATA
+		);
 
 		if (metaDataContents == null || metaDataContents.isEmpty()) {
 			return;
@@ -221,6 +226,4 @@ final class Consents {
 			consentsMap.put(ConsentConstants.EventDataKey.METADATA, metaDataContents);
 		}
 	}
-
 }
-
