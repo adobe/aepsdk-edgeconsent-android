@@ -1,4 +1,5 @@
 EXTENSION-LIBRARY-FOLDER-NAME = edgeconsent
+TEST-APP-FOLDER-NAME = app
 
 BUILD-ASSEMBLE-LOCATION = ./ci/assemble
 ROOT_DIR=$(shell git rev-parse --show-toplevel)
@@ -9,6 +10,16 @@ MODULE_NAME = $(shell cat $(ROOT_DIR)/code/gradle.properties | grep "moduleName"
 LIB_VERSION = $(shell cat $(ROOT_DIR)/code/gradle.properties | grep "moduleVersion" | cut -d'=' -f2)
 SOURCE_FILE_DIR =  $(ROOT_DIR)/code/$(PROJECT_NAME)
 AAR_FILE_DIR =  $(ROOT_DIR)/code/$(PROJECT_NAME)/build/outputs/aar
+
+init:
+	git config core.hooksPath .githooks
+
+format:
+	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) spotlessApply)
+	(./code/gradlew -p code/$(TEST-APP-FOLDER-NAME) spotlessApply)
+
+format-check:
+	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) spotlessCheck)
 
 create-ci: clean
 	(mkdir -p ci)
