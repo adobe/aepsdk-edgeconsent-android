@@ -8,6 +8,7 @@ buildscript {
     }
     dependencies {
         classpath "com.android.tools.build:gradle:4.0.1"
+        classpath "com.diffplug.spotless:spotless-plugin-gradle:5.12.5"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -45,4 +46,8 @@ ext {
     buildToolsVersion = "29.0.3"
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     jacocoVersion = "0.8.5"
+
+    // spotless config
+    prettierVersion = "2.3.0"
+    prettierPluginJavaVersion = "1.1.0"
 }

@@ -2,9 +2,24 @@ apply plugin: 'com.android.library'
 apply plugin: 'jacoco'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
+apply plugin: "com.diffplug.spotless"
 
 jacoco {
     toolVersion = rootProject.ext.jacocoVersion
+}
+
+preBuild.dependsOn spotlessApply
+
+spotless {
+    java {
+        toggleOffOn("format:off", "format:on")
+        target "src/*/java/**/*.java"
+        removeUnusedImports()
+        prettier(['prettier': rootProject.ext.prettierVersion, 'prettier-plugin-java': rootProject.ext.prettierPluginJavaVersion])
+                .config(['parser': 'java', 'tabWidth': 4, 'useTabs': false, 'printWidth': 120])
+        endWithNewline()
+        licenseHeaderFile "../../config/formatter/adobe.header.txt"
+    }
 }
 
 android {
