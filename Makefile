@@ -20,6 +20,7 @@ format:
 
 format-check:
 	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) spotlessCheck)
+	(./code/gradlew -p code/$(TEST-APP-FOLDER-NAME) spotlessCheck)
 
 create-ci: clean
 	(mkdir -p ci)
@@ -38,7 +39,7 @@ ci-build: create-ci
 	(cp -r ./code/$(EXTENSION-LIBRARY-FOLDER-NAME)/build $(BUILD-ASSEMBLE-LOCATION))
 
 ci-build-app:
-	(./code/gradlew -p code/app assemble)
+	(./code/gradlew -p code/$(TEST-APP-FOLDER-NAME) assemble)
 
 ci-unit-test: create-ci
 	(mkdir -p ci/unit-test)
