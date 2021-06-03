@@ -32,48 +32,46 @@ public class MainActivity extends AppCompatActivity {
 
 	// Implement the OnClickListener callback
 	public void btnCollectNoClicked(View v) {
-		Map<String, Object> consents = new HashMap<String, Object>() {
+		final Map<String, String> collectValue = new HashMap<String, String>() {
 			{
-				put(
-					"consents",
-					new HashMap<String, Object>() {
-						{
-							put(
-								"collect",
-								new HashMap<String, String>() {
-									{
-										put("val", "n");
-									}
-								}
-							);
-						}
-					}
-				);
+				put("val", "n");
 			}
 		};
+
+		final Map<String, Object> consentCollect = new HashMap<String, Object>() {
+			{
+				put("collect", collectValue);
+			}
+		};
+
+		final Map<String, Object> consents = new HashMap<String, Object>() {
+			{
+				put("consents", consentCollect);
+			}
+		};
+
 		Consent.update(consents);
 	}
 
 	public void btnCollectYESClicked(View v) {
-		Map<String, Object> consents = new HashMap<String, Object>() {
+		final Map<String, String> collectValue = new HashMap<String, String>() {
 			{
-				put(
-					"consents",
-					new HashMap<String, Object>() {
-						{
-							put(
-								"collect",
-								new HashMap<String, String>() {
-									{
-										put("val", "y");
-									}
-								}
-							);
-						}
-					}
-				);
+				put("val", "y");
 			}
 		};
+
+		final Map<String, Object> consentCollect = new HashMap<String, Object>() {
+			{
+				put("collect", collectValue);
+			}
+		};
+
+		final Map<String, Object> consents = new HashMap<String, Object>() {
+			{
+				put("consents", consentCollect);
+			}
+		};
+
 		Consent.update(consents);
 	}
 
