@@ -28,12 +28,13 @@ public class DateUtilityTest {
 			.set(Calendar.HOUR, 11)
 			.set(Calendar.MINUTE, 15)
 			.set(Calendar.SECOND, 45)
+			.set(Calendar.MILLISECOND, 301)
 			.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles"))
 			.build();
 
 		String serializedDate = DateUtility.dateToISO8601String(cal.getTime());
 		// Expected time in UTC which is +7 hours from America/Los_Angeles during Daylight Savings
-		assertEquals("2019-09-23T18:15:45Z", serializedDate);
+		assertEquals("2019-09-23T18:15:45.301Z", serializedDate);
 	}
 
 	@Test
