@@ -24,7 +24,7 @@ import java.util.Map;
 
 class ConsentExtension extends Extension {
 
-	private ConsentManager consentManager;
+	private final ConsentManager consentManager;
 
 	/**
 	 * Constructor.
@@ -180,8 +180,8 @@ class ConsentExtension extends Extension {
 	/**
 	 * Handles the event with eventType {@link ConsentConstants.EventType#EDGE} and EventSource {@link ConsentConstants.EventSource#CONSENT_PREFERENCE}.
 	 * <p>
-	 * 1. Reads the event data and extract newconsents from the edge response in XDM Format.
-	 * 2. Merge with the existing consents.
+	 * 1. Reads the event data and extracts new consents from the edge response in XDM Format.
+	 * 2. Merges with the existing consents.
 	 * 3. Creates XDMSharedState and dispatches a Consent response event for other modules to notify the consent change.
 	 *
 	 * @param event the Edge consent preferences response {@link Event} to be processed
@@ -375,7 +375,7 @@ class ConsentExtension extends Extension {
 	/**
 	 * Dispatches an {@link ConsentConstants.EventNames#EDGE_CONSENT_UPDATE} event with the latest consents in the event data.
 	 * <p>
-	 * Does not dispatch the event if the latests consents is null/empty.
+	 * Does not dispatch the event if the latest consents are null/empty.
 	 *
 	 * @param consents {@link Consents} object representing the updated consents of AEP SDK
 	 */

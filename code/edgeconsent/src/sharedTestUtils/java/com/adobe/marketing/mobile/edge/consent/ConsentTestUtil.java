@@ -40,6 +40,7 @@ class ConsentTestUtil {
 	private static final String COLLECT = "collect";
 	private static final String PERSONALIZE = "personalize";
 	private static final String CONTENT = "content";
+	private static final String VALUE = "val";
 
 	/**
 	 * A fully prepared valid consent JSON looks like :
@@ -131,7 +132,7 @@ class ConsentTestUtil {
 				COLLECT,
 				new HashMap<String, String>() {
 					{
-						put(ConsentConstants.EventDataKey.VALUE, collectConsentString);
+						put(VALUE, collectConsentString);
 					}
 				}
 			);
@@ -142,7 +143,7 @@ class ConsentTestUtil {
 				ADID,
 				new HashMap<String, String>() {
 					{
-						put(ConsentConstants.EventDataKey.VALUE, adIDConsentString);
+						put(VALUE, adIDConsentString);
 					}
 				}
 			);
@@ -157,7 +158,7 @@ class ConsentTestUtil {
 							CONTENT,
 							new HashMap<String, String>() {
 								{
-									put(ConsentConstants.EventDataKey.VALUE, personalizeConsentString);
+									put(VALUE, personalizeConsentString);
 								}
 							}
 						);

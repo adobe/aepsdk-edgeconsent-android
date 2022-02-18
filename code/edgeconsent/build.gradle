@@ -251,14 +251,12 @@ task platformFunctionalTestJacocoReport(type: JacocoReport, dependsOn: "createPh
 
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-
     // Adobe Mobile SDK Core
     implementation "com.adobe.marketing.mobile:core:${rootProject.mavenCoreVersion}"
 
     testImplementation "androidx.test.ext:junit:${rootProject.ext.junitVersion}"
     testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoCoreVersion}"
-    testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9'
+    testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.10.5'
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.0'
     testImplementation 'org.powermock:powermock-module-junit4:2.0.0'
     testImplementation 'org.json:json:20180813'
@@ -269,8 +267,7 @@ dependencies {
     // the root issue appears to be a dependency with Objenesis in Mockito-Core
     // where Objenesis 2 requires minimum Android API 26
     androidTestImplementation 'org.powermock:powermock-module-junit4:1+'
-    androidTestImplementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9'
-
+    androidTestImplementation 'com.fasterxml.jackson.core:jackson-databind:2.10.5'
 }
 
 tasks.withType(Test) {

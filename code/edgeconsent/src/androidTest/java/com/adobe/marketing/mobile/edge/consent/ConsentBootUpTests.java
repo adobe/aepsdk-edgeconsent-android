@@ -81,7 +81,7 @@ public class ConsentBootUpTests {
 		assertEquals(SAMPLE_METADATA_TIMESTAMP, responseMap.get("consents.metadata.time"));
 
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000));
+		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000));
 		assertEquals(4, xdmSharedState.size());
 		assertEquals("p", xdmSharedState.get("consents.collect.val"));
 		assertEquals("n", xdmSharedState.get("consents.adID.val"));
@@ -124,7 +124,7 @@ public class ConsentBootUpTests {
 		assertEquals("y", responseMap.get("consents.collect.val"));
 
 		// verify xdm shared state //
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000));
+		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000));
 		assertEquals(1, xdmSharedState.size());
 		assertEquals("y", xdmSharedState.get("consents.collect.val"));
 	}
@@ -164,7 +164,7 @@ public class ConsentBootUpTests {
 		assertEquals("n", responseMap.get("consents.collect.val"));
 
 		// verify xdm shared state //
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000));
+		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000));
 		assertEquals(1, xdmSharedState.size());
 		assertEquals("n", xdmSharedState.get("consents.collect.val"));
 	}
@@ -228,7 +228,7 @@ public class ConsentBootUpTests {
 		assertNotNull(consentResponseData.get("consents.metadata.time"));
 
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000));
+		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000));
 		assertEquals(4, xdmSharedState.size());
 		assertEquals("n", xdmSharedState.get("consents.collect.val"));
 		assertEquals("n", xdmSharedState.get("consents.adID.val"));

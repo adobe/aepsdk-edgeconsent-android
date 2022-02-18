@@ -210,9 +210,12 @@ final class Consents {
 	 * Private helper method to remove metadata timestamp from this {@link Consents}
 	 */
 	private void removeTimeStamp() {
-		Map<String, Object> metaDataContents = (Map<String, Object>) consentsMap.get(
-			ConsentConstants.EventDataKey.METADATA
-		);
+		Map<String, Object> metaDataContents;
+		try {
+			metaDataContents = (Map<String, Object>) consentsMap.get(ConsentConstants.EventDataKey.METADATA);
+		} catch (final ClassCastException exp) {
+			return;
+		}
 
 		if (metaDataContents == null || metaDataContents.isEmpty()) {
 			return;

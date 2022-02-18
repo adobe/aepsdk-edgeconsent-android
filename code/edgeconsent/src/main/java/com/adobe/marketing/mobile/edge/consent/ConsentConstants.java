@@ -19,19 +19,18 @@ final class ConsentConstants {
 
 	private ConsentConstants() {}
 
-	final class EventDataKey {
+	static final class EventDataKey {
 
 		static final String CONSENTS = "consents";
 		static final String METADATA = "metadata";
 		static final String PAYLOAD = "payload";
 
 		static final String TIME = "time";
-		static final String VALUE = "val";
 
 		private EventDataKey() {}
 	}
 
-	final class EventSource {
+	static final class EventSource {
 
 		static final String CONSENT_PREFERENCE = "consent:preferences";
 		static final String UPDATE_CONSENT = "com.adobe.eventSource.updateConsent";
@@ -42,7 +41,7 @@ final class ConsentConstants {
 		private EventSource() {}
 	}
 
-	final class EventType {
+	static final class EventType {
 
 		static final String CONSENT = "com.adobe.eventType.edgeConsent";
 		static final String EDGE = "com.adobe.eventType.edge";
@@ -52,7 +51,7 @@ final class ConsentConstants {
 		private EventType() {}
 	}
 
-	final class DataStoreKey {
+	static final class DataStoreKey {
 
 		static final String DATASTORE_NAME = EXTENSION_NAME;
 		static final String CONSENT_PREFERENCES = "consent:preferences";
@@ -60,7 +59,7 @@ final class ConsentConstants {
 		private DataStoreKey() {}
 	}
 
-	final class EventNames {
+	static final class EventNames {
 
 		static final String EDGE_CONSENT_UPDATE = "Edge Consent Update Request";
 		static final String CONSENT_UPDATE_REQUEST = "Consent Update Request";
@@ -71,7 +70,7 @@ final class ConsentConstants {
 		private EventNames() {}
 	}
 
-	final class ConfigurationKey {
+	static final class ConfigurationKey {
 
 		static final String DEFAULT_CONSENT = "consent.default";
 

@@ -24,7 +24,7 @@ import java.util.ArrayList;
  */
 public class TestPersistenceHelper {
 
-	private static ArrayList<String> knownDatastoreName = new ArrayList<String>() {
+	private static final ArrayList<String> knownDatastoreName = new ArrayList<String>() {
 		{
 			add(ConsentTestConstants.DataStoreKey.CONSENT_DATASTORE);
 			add(ConsentTestConstants.DataStoreKey.CONFIG_DATASTORE);

@@ -28,7 +28,7 @@ final class DateUtility {
 	 * For example, 2017-09-26T15:52:25.301Z
 	 *
 	 * @param timestamp a timestamp
-	 * @return {@code timestamp} formatted to a string in the format of 'yyyy-MM-dd'T'HH:mm:ss.SSS'Z'',
+	 * @return {@code timestamp} formatted to a string in the format of {@code yyyy-MM-dd'T'HH:mm:ss.SSS'Z'},
 	 * or an empty string if {@code timestamp} is null
 	 */
 	static String dateToISO8601String(final Date timestamp) {

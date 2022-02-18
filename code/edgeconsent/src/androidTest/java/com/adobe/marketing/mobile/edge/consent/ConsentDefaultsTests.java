@@ -67,7 +67,7 @@ public class ConsentDefaultsTests {
 		assertEquals("y", consentResponseData.get("consents.collect.val"));
 
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000));
+		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000));
 		assertEquals(1, xdmSharedState.size()); // verify that only collect consent is set
 		assertEquals("y", xdmSharedState.get("consents.collect.val"));
 
@@ -98,7 +98,7 @@ public class ConsentDefaultsTests {
 		waitForThreads(1000);
 
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000));
+		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000));
 		assertEquals(3, xdmSharedState.size()); // verify that only collect consent is set
 		assertEquals("n", xdmSharedState.get("consents.collect.val"));
 		assertEquals("n", xdmSharedState.get("consents.adID.val"));
@@ -128,7 +128,7 @@ public class ConsentDefaultsTests {
 		waitForThreads(1000);
 
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000));
+		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000));
 		assertEquals(1, xdmSharedState.size()); // verify that only collect consent is set
 		assertEquals("n", xdmSharedState.get("consents.collect.val"));
 	}
@@ -182,7 +182,7 @@ public class ConsentDefaultsTests {
 
 		final CountDownLatch latch = new CountDownLatch(1);
 		MobileCore.start(
-			new AdobeCallback() {
+			new AdobeCallback<Object>() {
 				@Override
 				public void call(Object o) {
 					latch.countDown();

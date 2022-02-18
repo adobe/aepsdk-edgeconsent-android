@@ -16,18 +16,18 @@ package com.adobe.marketing.mobile;
  */
 public class TestConstants {
 
-	public class EventType {
+	public static class EventType {
 
 		static final String MONITOR = "com.adobe.functional.eventType.monitor";
 
 		private EventType() {}
 	}
 
-	public class EventSource {
+	public static class EventSource {
 
 		// Used by Monitor Extension
-		static final String XDM_SHARED_STATE_REQUEST = "com.adobe.eventSource.xdmsharedStateRequest";
-		static final String XDM_SHARED_STATE_RESPONSE = "com.adobe.eventSource.xdmsharedStateResponse";
+		static final String XDM_SHARED_STATE_REQUEST = "com.adobe.eventSource.xdmSharedStateRequest";
+		static final String XDM_SHARED_STATE_RESPONSE = "com.adobe.eventSource.xdmSharedStateResponse";
 		static final String SHARED_STATE_REQUEST = "com.adobe.eventSource.sharedStateRequest";
 		static final String SHARED_STATE_RESPONSE = "com.adobe.eventSource.sharedStateResponse";
 		static final String UNREGISTER = "com.adobe.eventSource.unregister";
@@ -35,7 +35,7 @@ public class TestConstants {
 		private EventSource() {}
 	}
 
-	public class EventDataKey {
+	public static class EventDataKey {
 
 		static final String STATE_OWNER = "stateowner";
 

@@ -43,7 +43,7 @@ public class TestHelper {
 	static Application defaultApplication;
 
 	// List of threads to wait for after test execution
-	private static List<String> knownThreads = new ArrayList<String>();
+	private static final List<String> knownThreads = new ArrayList<>();
 
 	static {
 		knownThreads.add("pool"); // used for threads that execute the listeners code
@@ -212,7 +212,7 @@ public class TestHelper {
 	 */
 	private static Set<Thread> getEligibleThreads() {
 		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-		Set<Thread> eligibleThreads = new HashSet<Thread>();
+		Set<Thread> eligibleThreads = new HashSet<>();
 
 		for (Thread t : threadSet) {
 			if (

@@ -94,7 +94,7 @@ final class Utility {
 
 		for (int i = 0; i < size; i++) {
 			Object value = null;
-			Object returnValue = null;
+			Object returnValue;
 
 			try {
 				value = jsonArray.get(i);

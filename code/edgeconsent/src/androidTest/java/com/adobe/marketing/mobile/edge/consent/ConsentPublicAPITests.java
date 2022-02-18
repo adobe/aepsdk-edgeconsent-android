@@ -175,7 +175,7 @@ public class ConsentPublicAPITests {
 	}
 
 	@Test
-	public void testUpdateAPI_NonXDMComplaintData() throws InterruptedException {
+	public void testUpdateAPI_NonXDMCompliantData() throws InterruptedException {
 		// test
 		Consent.update(
 			new HashMap<String, Object>() {
