@@ -14,7 +14,7 @@ package com.adobe.marketing.mobile.edge.consent;
 final class ConsentConstants {
 
 	static final String LOG_TAG = "Consent";
-	static final String EXTENSION_VERSION = "1.0.0";
+	static final String EXTENSION_VERSION = "1.0.1";
 	static final String EXTENSION_NAME = "com.adobe.edge.consent";
 
 	private ConsentConstants() {}
