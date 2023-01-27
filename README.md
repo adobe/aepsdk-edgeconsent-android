@@ -1,9 +1,9 @@
 # Adobe Experience Platform Consent Collection Mobile Extension
-
+[![Maven Central](https://img.shields.io/maven-metadata/v.svg?label=edgeconsent&logo=android&logoColor=white&metadataUrl=https%3A%2F%2Frepo1.maven.org%2Fmaven2%2Fcom%2Fadobe%2Fmarketing%2Fmobile%2Fedgeconsent%2Fmaven-metadata.xml)](https://mvnrepository.com/artifact/com.adobe.marketing.mobile/edgeconsent)
 
 ## About this project
 
-The AEP Consent Collection mobile extension enables consent preferences collection from your mobile app when using the [Adobe Experience Platform Mobile SDK](https://developer.adobe.com/client-sdks) and the Edge Network extension.
+The Adobe Experience Platform Edge Consent Collection mobile extension enables consent preferences collection from your mobile app when using the [Adobe Experience Platform Mobile SDK](https://developer.adobe.com/client-sdks) and the Edge Network extension.
 
 ### Installation
 
