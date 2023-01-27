@@ -20,7 +20,7 @@
 
 The Consent for Edge Network extension depends on the following extensions:
 * [Mobile Core](https://github.com/adobe/aepsdk-core-android)
-* [Edge Network](https://github.com/adobe/aepsdk-edge-android) (required for handling request to Adobe Edge Network, including consent preferences updates)
+* [Edge Network](https://github.com/adobe/aepsdk-edge-android) (required for handling requests to Adobe Edge Network, including consent preferences updates)
 * [Identity for Edge Network](https://github.com/adobe/aepsdk-edgeidentity-android) (peer dependency for the Edge Network extension)
 
 1. Add the Mobile Core and Edge extensions to your project using the app's Gradle file:
