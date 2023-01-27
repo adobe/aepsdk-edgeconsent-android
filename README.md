@@ -35,9 +35,9 @@ make init
 | Project                                                      | Description                                                  |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | [Core extensions](https://github.com/adobe/aepsdk-core-android)                      | The Mobile Core represents the foundation of the Adobe Experience Platform mobile SDK.               |
-| [Edge Network extension](https://github.com/adobe/aepsdk-edge-android)                      | The Edge Network extension allows you to send data to the Adobe Edge Network from a mobile application.               |
+| [Edge Network](https://github.com/adobe/aepsdk-edge-android)                      | The Edge Network extension allows you to send data to the Adobe Edge Network from a mobile application.               |
 | [Identity for Edge Network](https://github.com/adobe/aepsdk-edgeidentity-android) | The Identity extension enable identity management from your mobile app when using the Edge Network extension. |
-| [Assurance extension](https://github.com/adobe/aepsdk-assurance-android)                      | The Assurance extension enables validation workflows for your SDK implementation.              |
+| [Assurance](https://github.com/adobe/aepsdk-assurance-android)                      | The Assurance extension enables validation workflows for your SDK implementation.              |
 | [AEP SDK Sample App for Android](https://github.com/adobe/aepsdk-sample-app-android) | Contains Android sample app for the AEP SDKs.                 |
 
 ## Documentation

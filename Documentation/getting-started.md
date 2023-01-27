@@ -61,7 +61,7 @@ public class MainApp extends Application {
 
   private final String ENVIRONMENT_FILE_ID = "YOUR_APP_ENVIRONMENT_ID";
 
-  @Override
+	@Override
 	public void onCreate() {
 		super.onCreate();
 
@@ -83,8 +83,9 @@ class MainApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
         MobileCore.setApplication(this)
-        MobileCore.configureWithAppID("ENVIRONMENT_FILE_ID")
+        MobileCore.configureWithAppID("YOUR_APP_ENVIRONMENT_ID")
 
         val extensions = listOf(Consent.EXTENSION, Identity.EXTENSION, Edge.EXTENSION)
         MobileCore.registerExtensions(extensions) {
