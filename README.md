@@ -3,42 +3,23 @@
 
 ## About this project
 
-The AEP Consent Collection mobile extension enables consent preferences collection from your mobile app when using the [Adobe Experience Platform Mobile SDK](https://github.com/Adobe-Marketing-Cloud/acp-sdks) and the Edge Network extension.
-
+The AEP Consent Collection mobile extension enables consent preferences collection from your mobile app when using the [Adobe Experience Platform Mobile SDK](https://developer.adobe.com/client-sdks) and the Edge Network extension.
 
 ### Installation
 
-Integrate the Consent extension into your app by including the following in your gradle file's `dependencies`:
-
-```
-implementation 'com.adobe.marketing.mobile:edgeconsent:1.+'
-implementation 'com.adobe.marketing.mobile:edge:1.+'
-implementation 'com.adobe.marketing.mobile:core:1.+'
-```
+Integrate the Consent mobile extension into your app by following the [getting started guide](Documentation/getting-started.md).
 
 ### Development
 
-**Open the project**
+#### Open the project
 
-To open and run the project, open the `code/settings.gradle` file in Android Studio
+To open and run the project, open the `code/settings.gradle` file in Android Studio.
 
-**Run demo application**
+#### Run the test application
 
-Once you opened the project in Android Studio (see above), select the `app` runnable and your favorite simulator and run the program.
+To configure and run the test app for this project, follow the [getting started guide for the test app](Documentation/getting-started-test-app.md).
 
-**View the platform events with Assurance**
-
-Configure a new Assurance session by setting the Base URL to `testapp://main` and launch Assurance in the demo app by running the following command in your terminal:
-
-```bash
-$ adb shell am start -W -a  android.intent.action.VIEW -d "testapp://main?adb_validation_sessionid=ADD_YOUR_SESSION_ID_HERE" com.adobe.marketing.mobile.consenttestapp
-```
-
-Note: replace ADD_YOUR_SESSION_ID_HERE with your Assurance session identifier.
-
-Once the connection is established and the events list starts getting populated, you can filter the Edge Consent extension events by typing `Consent` in the `Search Events` search box.
-
-### Code Format
+#### Code Format
 
 This project uses the code formatting tools [Spotless](https://github.com/diffplug/spotless/tree/main/plugin-gradle) with [Prettier](https://prettier.io/). Formatting is applied when the project is built from Gradle and is checked when changes are submitted to the CI build system.
 
@@ -53,7 +34,15 @@ make init
 
 | Project                                                      | Description                                                  |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [AEP SDK Sample App for Android](https://github.com/adobe/aepsdk-sample-app-android) | Contains Android sample app for the AEP SDK.                 |
+| [Core extensions](https://github.com/adobe/aepsdk-core-android)                      | The Mobile Core represents the foundation of the Adobe Experience Platform mobile SDK.               |
+| [Edge Network extension](https://github.com/adobe/aepsdk-edge-android)                      | The Edge Network extension allows you to send data to the Adobe Edge Network from a mobile application.               |
+| [Identity for Edge Network](https://github.com/adobe/aepsdk-edgeidentity-android) | The Identity extension enable identity management from your mobile app when using the Edge Network extension. |
+| [Assurance extension](https://github.com/adobe/aepsdk-assurance-android)                      | The Assurance extension enables validation workflows for your SDK implementation.              |
+| [AEP SDK Sample App for Android](https://github.com/adobe/aepsdk-sample-app-android) | Contains Android sample app for the AEP SDKs.                 |
+
+## Documentation
+
+Additional documentation for usage and SDK architecture can be found under the [Documentation](Documentation) directory.
 
 ## Contributing
 
@@ -62,4 +51,3 @@ Contributions are welcomed! Read the [Contributing Guide](./.github/CONTRIBUTING
 ## Licensing
 
 This project is licensed under the Apache V2 License. See [LICENSE](LICENSE) for more information.
-
