@@ -19,7 +19,7 @@ To open and run the project, open the `code/settings.gradle` file in Android Stu
 
 To configure and run the test app for this project, follow the [getting started guide for the test app](Documentation/getting-started-test-app.md).
 
-#### Code Format
+#### Code format
 
 This project uses the code formatting tools [Spotless](https://github.com/diffplug/spotless/tree/main/plugin-gradle) with [Prettier](https://prettier.io/). Formatting is applied when the project is built from Gradle and is checked when changes are submitted to the CI build system.
 
@@ -34,15 +34,15 @@ make init
 
 | Project                                                      | Description                                                  |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [Core extensions](https://github.com/adobe/aepsdk-core-android)                      | The Mobile Core represents the foundation of the Adobe Experience Platform mobile SDK.               |
-| [Edge Network](https://github.com/adobe/aepsdk-edge-android)                      | The Edge Network extension allows you to send data to the Adobe Edge Network from a mobile application.               |
-| [Identity for Edge Network](https://github.com/adobe/aepsdk-edgeidentity-android) | The Identity extension enable identity management from your mobile app when using the Edge Network extension. |
-| [Assurance](https://github.com/adobe/aepsdk-assurance-android)                      | The Assurance extension enables validation workflows for your SDK implementation.              |
-| [AEP SDK Sample App for Android](https://github.com/adobe/aepsdk-sample-app-android) | Contains Android sample app for the AEP SDKs.                 |
+| [Core extensions](https://github.com/adobe/aepsdk-core-android)                      | The Mobile Core represents the foundation of the Adobe Experience Platform Mobile SDK.               |
+| [Edge Network](https://github.com/adobe/aepsdk-edge-android)                      | This extension allows you to send data to Edge Network from a mobile application.               |
+| [Identity for Edge Network](https://github.com/adobe/aepsdk-edgeidentity-android) | The Identity for Edge Network extension enables identity management from a mobile app when using the Edge Network extension. |
+| [Assurance extension](https://github.com/adobe/aepsdk-assurance-android)                      | The Assurance extension enables validation workflows for your Mobile SDK implementation.              |
+| [Adobe Experience Platform Mobile SDK Android sample app](https://github.com/adobe/aepsdk-sample-app-android) | Contains Android sample app for the Mobile SDKs.                 |
 
 ## Documentation
 
-Additional documentation for usage and SDK architecture can be found under the [Documentation](Documentation) directory.
+Additional documentation for usage and Mobile SDK architecture can be found under the [Documentation](Documentation) directory.
 
 ## Contributing
 

@@ -1,8 +1,8 @@
-# Adobe Experience Platform Consent for Edge Network Extension - Android
+# Adobe Experience Platform Consent for Edge Network extension
 
 ## Prerequisites
 
-Refer to the [Getting Started Guide](getting-started.md)
+Refer to the [Getting started guide](getting-started.md).
 
 ## API reference
 

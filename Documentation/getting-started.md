@@ -1,6 +1,8 @@
-# Getting started
+# Adobe Experience Platform Consent for Edge Network
 
-## Configure the Adobe Experience Platform Consent for Edge Network extension in Data Collection UI
+The Consent for Edge Network mobile extension enables consent preferences collection from your mobile app when using the Adobe Experience Platform Mobile SDK and the Edge Network extension.
+
+## Configure the Consent extension in Data Collection UI
 
 1. Log into [Adobe Experience Platform Data Collection](https://experience.adobe.com/data-collection).
 2. From **Tags**, locate or search for your Tag mobile property.
@@ -14,7 +16,7 @@
 > In order to ingest and use the data collected by this extension, follow the guide on [ingesting data using the Consents and Preferences data type](https://experienceleague.adobe.com/docs/experience-platform/xdm/data-types/consents.html#ingest).
 
 > **Warning**
-> The use of this extension is currently limited to the setting (and enforcement) of client-side, macro consent flags. While SDK APIs allow for granular and global consent preference collection, flags are not consistently enforced with upstream applications and therefore will not accommodate use cases that rely on global/granular consent preferences.
+> The use of this extension is currently limited to the setting (and enforcement) of client-side, macro consent flags. While the Mobile SDK APIs allow for granular and global consent preference collection, flags are not consistently enforced with upstream applications and therefore will not accommodate use cases that rely on global/granular consent preferences.
 
 ## Add Consent to your app
 
@@ -33,7 +35,7 @@ implementation 'com.adobe.marketing.mobile:edgeconsent:2.+'
 ```
 
 > **Warning**
-> Using dynamic dependency versions is not recommended for production apps. Refer to this [page](https://github.com/adobe/aepsdk-core-android/blob/main/Documentation/GradleDependencies.md) for managing gradle dependencies.
+> Using dynamic dependency versions is not recommended for production apps. Refer to this [page](https://github.com/adobe/aepsdk-core-android/blob/main/Documentation/MobileCore/gradle-dependencies.md) for managing Gradle dependencies.
 
 2. Import the libraries:
 
@@ -70,7 +72,7 @@ public class MainApp extends Application {
 
 		MobileCore.registerExtensions(
 			Arrays.asList(Consent.EXTENSION, Identity.EXTENSION, Edge.EXTENSION),
-			o -> Log.d("MainApp", "AEP Mobile SDK was initialized")
+			o -> Log.d("MainApp", "Adobe Experience Platform Mobile SDK was initialized")
 		);
 	}
 }
@@ -89,7 +91,7 @@ class MainApp : Application() {
 
         val extensions = listOf(Consent.EXTENSION, Identity.EXTENSION, Edge.EXTENSION)
         MobileCore.registerExtensions(extensions) {
-            Log.d("MainApp", "AEP Mobile SDK was initialized")
+            Log.d("MainApp", "Adobe Experience Platform Mobile SDK was initialized")
         }
     }
 
