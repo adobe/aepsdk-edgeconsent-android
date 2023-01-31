@@ -20,7 +20,7 @@ The extensionVersion() API returns the version of the client-side Consent extens
 
 ##### Syntax
 ```java
-public static String extensionVersion()
+public static String extensionVersion();
 ```
 
 ##### Example
@@ -32,7 +32,7 @@ String extensionVersion = Consent.extensionVersion();
 
 ##### Syntax
 ```kotlin
-fun String extensionVersion()
+fun extensionVersion(): String
 ```
 
 ##### Example
