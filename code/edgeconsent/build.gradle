@@ -228,7 +228,7 @@ configurations.all {
 dependencies {
     implementation "com.adobe.marketing.mobile:core:${rootProject.mavenCoreVersion}"
     implementation "com.adobe.marketing.mobile:edge:${rootProject.mavenEdgeVersion}"
-    implementation 'androidx.annotation:annotation:1.5.0'
+    implementation "androidx.annotation:annotation:${rootProject.androidxAnnotationVersion}"
 
     testImplementation "androidx.test.ext:junit:${rootProject.ext.junitVersion}"
     testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoVersion}"
