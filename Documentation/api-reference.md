@@ -85,7 +85,7 @@ Consent.getConsents { currentConsents ->
 Registers the Consent extension with the Mobile Core SDK.
 
 > **Warning**
-> Deprecated as of 2.0.0. Use the [MobileCore.registerExtensions API](https://github.com/adobe/aepsdk-core-android) instead.
+> Deprecated as of 2.0.0. Use the [MobileCore.registerExtensions API](https://github.com/adobe/aepsdk-core-android/blob/main/Documentation/MobileCore/api-reference.md) instead.
 
 #### Java
 
@@ -169,7 +169,7 @@ fun update(consents: Map<String, Object>)
 ```kotlin
 // example 1, updating users collect consent to 'yes'
 val collectConsents = mutableMapOf<String, Any>()
-collectConsents["val"] = "y"
+collectConsents["collect"] = mutableMapOf("val" to "y")
 
 val consents = mutableMapOf<String, Any>()
 consents["consents"] = collectConsents
@@ -180,7 +180,7 @@ Consent.update(consents)
 ```kotlin
 // example 2, updating users collect consent to 'no'
 val collectConsents = mutableMapOf<String, Any>()
-collectConsents["val"] = "n"
+collectConsents["collect"] = mutableMapOf("val" to "n")
 
 val consents = mutableMapOf<String, Any>()
 consents["consents"] = collectConsents
