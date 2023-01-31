@@ -28,6 +28,18 @@ public static String extensionVersion()
 String extensionVersion = Consent.extensionVersion();
 ```
 
+#### Kotlin
+
+##### Syntax
+```kotlin
+fun String extensionVersion()
+```
+
+##### Example
+```kotlin
+val extensionVersion = Consent.extensionVersion()
+```
+
 ------
 
 ### getConsents
@@ -52,6 +64,20 @@ Consent.getConsents(new AdobeCallback<Map<String, Object>>() {
 });
 ```
 
+#### Kotlin
+
+##### Syntax
+```kotlin
+fun getConsents(callback: AdobeCallback<Map<String, Object>>)
+```
+
+##### Example
+```kotlin
+Consent.getConsents { currentConsents ->
+    // handle currentConsents
+}
+```
+
 ------
 
 ### registerExtension
@@ -71,6 +97,18 @@ public static void registerExtension()
 ##### Example
 ```java
 Consent.registerExtension();
+```
+
+#### Kotlin
+
+##### Syntax
+```kotlin
+fun registerExtension()
+```
+
+##### Example
+```kotlin
+Consent.registerExtension()
 ```
 
 ------
@@ -116,4 +154,32 @@ final Map<String, Object> consents = new HashMap<>();
 consents.put("consents", collectConsents);
 
 Consent.update(consents);
+```
+
+#### Kotlin
+
+##### Syntax
+```kotlin
+fun update(consents: Map<String, Object>)
+```
+
+##### Example
+```kotlin
+// example 1, updating users collect consent to 'yes'
+val collectConsents = mutableMapOf<String, Any>()
+collectConsents["val"] = "y"
+
+val consents = mutableMapOf<String, Any>()
+consents["consents"] = collectConsents
+
+Consent.update(consents)
+
+// example 2, updating users collect consent to 'no'
+val collectConsents = mutableMapOf<String, Any>()
+collectConsents["val"] = "n"
+
+val consents = mutableMapOf<String, Any>()
+consents["consents"] = collectConsents
+
+Consent.update(consents)
 ```
