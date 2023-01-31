@@ -141,7 +141,9 @@ final Map<String, Object> consents = new HashMap<>();
 consents.put("consents", collectConsents);
 
 Consent.update(consents);
+```
 
+```java
 // example 2, updating users collect consent to 'no'
 final Map<String, Object> collectConsents = new HashMap<>();
 collectConsents.put("collect", new HashMap<String, String>() {
@@ -173,7 +175,9 @@ val consents = mutableMapOf<String, Any>()
 consents["consents"] = collectConsents
 
 Consent.update(consents)
+```
 
+```kotlin
 // example 2, updating users collect consent to 'no'
 val collectConsents = mutableMapOf<String, Any>()
 collectConsents["val"] = "n"
