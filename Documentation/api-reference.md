@@ -1,4 +1,4 @@
-# Adobe Experience Platform Consent for Edge Network extension
+# Adobe Experience Platform Consent for Edge Network extension API reference
 
 ## Prerequisites
 
