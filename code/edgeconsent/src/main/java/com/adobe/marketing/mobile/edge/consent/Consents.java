@@ -12,6 +12,7 @@
 package com.adobe.marketing.mobile.edge.consent;
 
 import com.adobe.marketing.mobile.util.DataReader;
+import com.adobe.marketing.mobile.util.MapUtils;
 import com.adobe.marketing.mobile.util.TimeUtils;
 import java.util.Date;
 import java.util.HashMap;
@@ -74,7 +75,7 @@ final class Consents {
 			null
 		);
 
-		if (metaDataContents == null) {
+		if (MapUtils.isNullOrEmpty(metaDataContents)) {
 			return null;
 		}
 
@@ -98,7 +99,7 @@ final class Consents {
 			null
 		);
 
-		if (metaDataContents == null || metaDataContents.isEmpty()) {
+		if (MapUtils.isNullOrEmpty(metaDataContents)) {
 			metaDataContents = new HashMap<>();
 		}
 
@@ -116,7 +117,7 @@ final class Consents {
 	 * @return {@code true} if there are no consents
 	 */
 	boolean isEmpty() {
-		return consentsMap == null || consentsMap.isEmpty();
+		return MapUtils.isNullOrEmpty(consentsMap);
 	}
 
 	/**
@@ -216,7 +217,7 @@ final class Consents {
 			null
 		);
 
-		if (metaDataContents == null || metaDataContents.isEmpty()) {
+		if (MapUtils.isNullOrEmpty(metaDataContents)) {
 			return;
 		}
 
