@@ -1,4 +1,4 @@
-# Adobe Experience Platform Consent for Edge Network extension
+# Adobe Experience Platform Consent for Edge Network extension API reference
 
 ## Prerequisites
 
@@ -20,12 +20,24 @@ The extensionVersion() API returns the version of the client-side Consent extens
 
 ##### Syntax
 ```java
-public static String extensionVersion()
+public static String extensionVersion();
 ```
 
 ##### Example
 ```java
 String extensionVersion = Consent.extensionVersion();
+```
+
+#### Kotlin
+
+##### Syntax
+```kotlin
+fun extensionVersion(): String
+```
+
+##### Example
+```kotlin
+val extensionVersion = Consent.extensionVersion()
 ```
 
 ------
@@ -52,6 +64,20 @@ Consent.getConsents(new AdobeCallback<Map<String, Object>>() {
 });
 ```
 
+#### Kotlin
+
+##### Syntax
+```kotlin
+fun getConsents(callback: AdobeCallback<Map<String, Object>>)
+```
+
+##### Example
+```kotlin
+Consent.getConsents { currentConsents ->
+    // handle currentConsents
+}
+```
+
 ------
 
 ### registerExtension
@@ -71,6 +97,18 @@ public static void registerExtension()
 ##### Example
 ```java
 Consent.registerExtension();
+```
+
+#### Kotlin
+
+##### Syntax
+```kotlin
+fun registerExtension()
+```
+
+##### Example
+```kotlin
+Consent.registerExtension()
 ```
 
 ------
@@ -103,7 +141,9 @@ final Map<String, Object> consents = new HashMap<>();
 consents.put("consents", collectConsents);
 
 Consent.update(consents);
+```
 
+```java
 // example 2, updating users collect consent to 'no'
 final Map<String, Object> collectConsents = new HashMap<>();
 collectConsents.put("collect", new HashMap<String, String>() {
@@ -116,4 +156,34 @@ final Map<String, Object> consents = new HashMap<>();
 consents.put("consents", collectConsents);
 
 Consent.update(consents);
+```
+
+#### Kotlin
+
+##### Syntax
+```kotlin
+fun update(consents: Map<String, Object>)
+```
+
+##### Example
+```kotlin
+// example 1, updating users collect consent to 'yes'
+val collectConsents = mutableMapOf<String, Any>()
+collectConsents["collect"] = mutableMapOf("val" to "y")
+
+val consents = mutableMapOf<String, Any>()
+consents["consents"] = collectConsents
+
+Consent.update(consents)
+```
+
+```kotlin
+// example 2, updating users collect consent to 'no'
+val collectConsents = mutableMapOf<String, Any>()
+collectConsents["collect"] = mutableMapOf("val" to "n")
+
+val consents = mutableMapOf<String, Any>()
+consents["consents"] = collectConsents
+
+Consent.update(consents)
 ```
