@@ -13,7 +13,7 @@ Integrate the Consent mobile extension into your app by following the [getting s
 
 #### Open the project
 
-To open and run the project, open the `code/settings.gradle` file in Android Studio.
+To open and run the project, open the `code/settings.gradle.kt` file in Android Studio.
 
 #### Run the test application
 
