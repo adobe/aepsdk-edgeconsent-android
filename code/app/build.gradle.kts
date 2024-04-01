@@ -53,11 +53,8 @@ android {
 
 dependencies {
     implementation(project(":edgeconsent"))
-    implementation("com.adobe.marketing.mobile:core:$mavenCoreVersion-SNAPSHOT")
-    implementation("com.adobe.marketing.mobile:edge:$mavenEdgeVersion-SNAPSHOT") {
-        exclude(group = "com.adobe.marketing.mobile", module = "core")
-        exclude(group = "com.adobe.marketing.mobile", module = "edgeidentity")
-    }
+    implementation("com.adobe.marketing.mobile:core:$mavenCoreVersion")
+    implementation("com.adobe.marketing.mobile:edge:$mavenEdgeVersion")
     implementation("androidx.appcompat:appcompat:1.5.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 }

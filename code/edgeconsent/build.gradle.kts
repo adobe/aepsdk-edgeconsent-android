@@ -29,12 +29,8 @@ aepLibrary {
 }
 
 dependencies {
-    // TODO: change to release Core and Edge version
-    implementation("com.adobe.marketing.mobile:core:$mavenCoreVersion-SNAPSHOT")
-    implementation("com.adobe.marketing.mobile:edge:$mavenEdgeVersion-SNAPSHOT"){
-        exclude(group = "com.adobe.marketing.mobile", module = "core")
-        exclude(group = "com.adobe.marketing.mobile", module = "edgeidentity")
-    }
+    implementation("com.adobe.marketing.mobile:core:$mavenCoreVersion")
+    implementation("com.adobe.marketing.mobile:edge:$mavenEdgeVersion")
 
     // testImplementation dependencies provided by aep-library:
     // MOCKITO_CORE, MOCKITO_INLINE, JSON
