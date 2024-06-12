@@ -12,9 +12,9 @@
 package com.adobe.marketing.mobile.edge.consent;
 
 import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.CreateConsentXDMMap;
+import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.getConsentsSync;
 import static com.adobe.marketing.mobile.util.JSONAsserts.assertExactMatch;
 import static com.adobe.marketing.mobile.util.NodeConfig.Scope.Subtree;
-import static com.adobe.marketing.mobile.util.TestHelper.*;
 import static com.adobe.marketing.mobile.util.TestHelper.getDispatchedEventsWith;
 import static com.adobe.marketing.mobile.util.TestHelper.getXDMSharedStateFor;
 import static com.adobe.marketing.mobile.util.TestHelper.registerExtensions;
@@ -46,58 +46,57 @@ public class ConsentDefaultsTests {
 	public TestRule rule = new TestHelper.SetupCoreRule();
 
 	// TODO: this test is failing with testUtils
-	//	@Test
-	//	public void test_ConsentExtension_UsesDefaultConsent() throws Exception {
-	//		// test summary
-	//		// -----------------------------------------
-	//		// Type         collect   AdID    Metadata
-	//		// -----------------------------------------
-	//		// Default        yes      -        -
-	//		// -------------------------------------------
-	//		// Final          yes      -       -
-	//		// -------------------------------------------
-	//		// verify in (ConsentResponse and XDMSharedState)
-	//
-	//		// setup
-	//		initWithDefaultConsent(CreateConsentXDMMap("y"));
-	//		waitForThreads(1000);
-	//
-	//		// verify consent response event dispatched
-	//		List<Event> consentResponseEvents = getDispatchedEventsWith(EventType.CONSENT, EventSource.RESPONSE_CONTENT);
-	//		assertEquals(1, consentResponseEvents.size());
-	//
-	//		Map<String, Object> consentResponseData = consentResponseEvents.get(0).getEventData();
-	//
-	//        String expected = "{" +
-	//                "\"consents\": {" +
-	//                "\"collect\": {" +
-	//                "\"val\": \"y\"" +
-	//                "}" +
-	//                "}" +
-	//                "}";
-	//
-	//        assertExactMatch(
-	//                expected,
-	//                consentResponseData,
-	//				new CollectionEqualCount(Subtree)
-	//        );
-	//
-	//		// verify xdm shared state
-	//		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000);
-	//        assertExactMatch(
-	//                expected,
-	//                xdmSharedState,
-	//				new CollectionEqualCount(Subtree)
-	//        );
-	//
-	//		// verify Public API Call
-	//		Map<String, Object> getConsentResponse = getConsentsSync();
-	//		Map<String, Object> responseMap = (Map) getConsentResponse.get(ConsentTestConstants.GetConsentHelper.VALUE);
-	//        assertExactMatch(
-	//                expected,
-	//                responseMap
-	//        );
-	//	}
+		@Test
+		public void test_ConsentExtension_UsesDefaultConsent() throws Exception {
+			// test summary
+			// -----------------------------------------
+			// Type         collect   AdID    Metadata
+			// -----------------------------------------
+			// Default        yes      -        -
+			// -------------------------------------------
+			// Final          yes      -       -
+			// -------------------------------------------
+			// verify in (ConsentResponse and XDMSharedState)
+
+			// setup
+			initWithDefaultConsent(CreateConsentXDMMap("y"));
+
+			// verify consent response event dispatched
+			List<Event> consentResponseEvents = getDispatchedEventsWith(EventType.CONSENT, EventSource.RESPONSE_CONTENT);
+			assertEquals(1, consentResponseEvents.size());
+
+			Map<String, Object> consentResponseData = consentResponseEvents.get(0).getEventData();
+
+	        String expected = "{" +
+	                "\"consents\": {" +
+	                "\"collect\": {" +
+	                "\"val\": \"y\"" +
+	                "}" +
+	                "}" +
+	                "}";
+
+	        assertExactMatch(
+	                expected,
+	                consentResponseData,
+					new CollectionEqualCount(Subtree)
+	        );
+
+			// verify xdm shared state
+			Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000);
+	        assertExactMatch(
+	                expected,
+	                xdmSharedState,
+					new CollectionEqualCount(Subtree)
+	        );
+
+			// verify Public API Call
+			Map<String, Object> getConsentResponse = getConsentsSync();
+			Map<String, Object> responseMap = (Map) getConsentResponse.get(ConsentTestConstants.GetConsentHelper.VALUE);
+	        assertExactMatch(
+	                expected,
+	                responseMap
+	        );
+		}
 
 	@Test
 	public void test_DefaultConsent_GetsOverridden() throws Exception {
@@ -232,6 +231,5 @@ public class ConsentDefaultsTests {
 		MobileCore.updateConfiguration(config);
 
 		registerExtensions(Arrays.asList(MonitorExtension.EXTENSION, Consent.EXTENSION), config);
-		resetTestExpectations();
 	}
 }
