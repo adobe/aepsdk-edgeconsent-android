@@ -88,17 +88,17 @@ public class ConsentEdgeResponseHandlingTests {
 
 		String expected =
 			"{" +
-			"\"consents\": {" +
-			"\"collect\": {" +
-			"\"val\": \"n\"" +
-			"}," +
-			"\"adID\": {" +
-			"\"val\": \"n\"" +
-			"}," +
-			"\"metadata\": {" +
-			"\"time\": \"STRING_TYPE\"" +
-			"}" +
-			"}" +
+			"  \"consents\": {" +
+			"    \"collect\": {" +
+			"      \"val\": \"n\"" +
+			"    }," +
+			"    \"adID\": {" +
+			"      \"val\": \"n\"" +
+			"    }," +
+			"    \"metadata\": {" +
+			"      \"time\": \"STRING_TYPE\"" +
+			"    }" +
+			"  }" +
 			"}";
 
 		assertTypeMatch(
@@ -126,14 +126,14 @@ public class ConsentEdgeResponseHandlingTests {
 
 		String expectedPersistedData =
 			"{" +
-			"\"consents\": {" +
-			"\"collect\": {" +
-			"\"val\": \"n\"" +
-			"}," +
-			"\"metadata\": {" +
-			"\"time\": \"STRING_TYPE\"" +
-			"}" +
-			"}" +
+			"  \"consents\": {" +
+			"    \"collect\": {" +
+			"      \"val\": \"n\"" +
+			"    }," +
+			"    \"metadata\": {" +
+			"      \"time\": \"STRING_TYPE\"" +
+			"    }" +
+			"  }" +
 			"}";
 
 		assertExactMatch(
@@ -174,14 +174,14 @@ public class ConsentEdgeResponseHandlingTests {
 
 		String expected =
 			"{" +
-			"\"consents\": {" +
-			"\"collect\": {" +
-			"\"val\": \"y\"" +
-			"}," +
-			"\"metadata\": {" +
-			"\"time\": \"STRING_TYPE\"" +
-			"}" +
-			"}" +
+			"  \"consents\": {" +
+			"    \"collect\": {" +
+			"      \"val\": \"y\"" +
+			"    }," +
+			"    \"metadata\": {" +
+			"      \"time\": \"STRING_TYPE\"" +
+			"    }" +
+			"  }" +
 			"}";
 
 		assertExactMatch(
@@ -200,14 +200,14 @@ public class ConsentEdgeResponseHandlingTests {
 
 		String expectedPersistedData =
 			"{" +
-			"\"consents\": {" +
-			"\"collect\": {" +
-			"\"val\": \"y\"" +
-			"}," +
-			"\"metadata\": {" +
-			"\"time\": \"STRING_TYPE\"" +
-			"}" +
-			"}" +
+			"  \"consents\": {" +
+			"    \"collect\": {" +
+			"      \"val\": \"y\"" +
+			"    }," +
+			"    \"metadata\": {" +
+			"      \"time\": \"STRING_TYPE\"" +
+			"    }" +
+			"  }" +
 			"}";
 
 		assertExactMatch(
@@ -252,8 +252,7 @@ public class ConsentEdgeResponseHandlingTests {
 
 		// verify timestamp has not changed
 		xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000);
-		String expected =
-			"{" + "\"consents\": {" + "\"metadata\": {" + "\"time\": \"" + timestamp + "\"" + "}" + "}" + "}";
+		String expected = "{\"consents\": {\"metadata\": {\"time\": \"" + timestamp + "\"}}}";
 
 		assertExactMatch(expected, xdmSharedState);
 	}
@@ -292,8 +291,7 @@ public class ConsentEdgeResponseHandlingTests {
 
 		// verify timestamp has not changed
 		xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000);
-		String expected =
-			"{" + "\"consents\": {" + "\"metadata\": {" + "\"time\": \"" + timestamp + "\"" + "}" + "}" + "}";
+		String expected = "{\"consents\": {\"metadata\": {\"time\": \"" + timestamp + "\"}}}";
 		assertExactMatch(expected, xdmSharedState);
 	}
 }

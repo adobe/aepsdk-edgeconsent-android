@@ -28,6 +28,7 @@ import com.adobe.marketing.mobile.EventType;
 import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.edge.consent.util.ConsentTestConstants;
 import com.adobe.marketing.mobile.util.CollectionEqualCount;
+import com.adobe.marketing.mobile.util.JSONAsserts;
 import com.adobe.marketing.mobile.util.MonitorExtension;
 import com.adobe.marketing.mobile.util.TestHelper;
 import com.adobe.marketing.mobile.util.TestPersistenceHelper;
@@ -67,18 +68,18 @@ public class ConsentDefaultsTests {
 
 		Map<String, Object> consentResponseData = consentResponseEvents.get(0).getEventData();
 
-		String expected = "{" + "\"consents\": {" + "\"collect\": {" + "\"val\": \"y\"" + "}" + "}" + "}";
+		String expected = "{\"consents\": {\"collect\": {\"val\": \"y\"}}}";
 
-		assertExactMatch(expected, consentResponseData, new CollectionEqualCount(Subtree));
+		JSONAsserts.assertEquals(expected, consentResponseData);
 
 		// verify xdm shared state
 		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000);
-		assertExactMatch(expected, xdmSharedState, new CollectionEqualCount(Subtree));
+		JSONAsserts.assertEquals(expected, xdmSharedState);
 
 		// verify Public API Call
 		Map<String, Object> getConsentResponse = getConsentsSync();
 		Map<String, Object> responseMap = (Map) getConsentResponse.get(ConsentTestConstants.GetConsentHelper.VALUE);
-		assertExactMatch(expected, responseMap);
+		JSONAsserts.assertEquals(expected, responseMap);
 	}
 
 	@Test
@@ -104,17 +105,17 @@ public class ConsentDefaultsTests {
 
 		String expected =
 			"{" +
-			"\"consents\": {" +
-			"\"collect\": {" +
-			"\"val\": \"n\"" +
-			"}," +
-			"\"adID\": {" +
-			"\"val\": \"n\"" +
-			"}," +
-			"\"metadata\": {" +
-			"\"time\": \"STRING_TYPE\"" +
-			"}" +
-			"}" +
+			"  \"consents\": {" +
+			"    \"collect\": {" +
+			"      \"val\": \"n\"" +
+			"    }," +
+			"    \"adID\": {" +
+			"      \"val\": \"n\"" +
+			"    }," +
+			"    \"metadata\": {" +
+			"      \"time\": \"STRING_TYPE\"" +
+			"    }" +
+			"  }" +
 			"}";
 
 		assertExactMatch(
@@ -150,9 +151,9 @@ public class ConsentDefaultsTests {
 		// verify xdm shared state
 		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000);
 
-		String expected = "{" + "\"consents\": {" + "\"collect\": {" + "\"val\": \"n\"" + "}" + "}" + "}";
+		String expected = "{\"consents\": {\"collect\": {\"val\": \"n\"}}}";
 
-		assertExactMatch(expected, xdmSharedState, new CollectionEqualCount(Subtree));
+		JSONAsserts.assertEquals(expected, xdmSharedState);
 	}
 
 	@Test
@@ -169,14 +170,14 @@ public class ConsentDefaultsTests {
 		Map<String, Object> edgeRequestData = edgeRequestEvents.get(0).getEventData();
 		String expected =
 			"{" +
-			"\"consents\": {" +
-			"\"collect\": {" +
-			"\"val\": \"n\"" +
-			"}," +
-			"\"metadata\": {" +
-			"\"time\": \"STRING_TYPE\"" +
-			"}" +
-			"}" +
+			"  \"consents\": {" +
+			"    \"collect\": {" +
+			"      \"val\": \"n\"" +
+			"    }," +
+			"    \"metadata\": {" +
+			"      \"time\": \"STRING_TYPE\"" +
+			"    }" +
+			"  }" +
 			"}";
 
 		assertExactMatch(

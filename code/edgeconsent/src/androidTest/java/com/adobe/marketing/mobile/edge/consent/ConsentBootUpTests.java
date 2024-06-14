@@ -93,7 +93,7 @@ public class ConsentBootUpTests {
 			"  }" +
 			"}";
 
-		assertExactMatch(expected, consentResponseData, new CollectionEqualCount(Subtree));
+		JSONAsserts.assertEquals(expected, consentResponseData);
 
 		//  verify getConsent API
 		Map<String, Object> getConsentResponse = getConsentsSync();
@@ -104,7 +104,7 @@ public class ConsentBootUpTests {
 		// verify xdm shared state
 		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000);
 
-		assertExactMatch(expected, xdmSharedState, new CollectionEqualCount(Subtree));
+		JSONAsserts.assertEquals(expected, xdmSharedState);
 	}
 
 	@Test
@@ -128,10 +128,9 @@ public class ConsentBootUpTests {
 		List<Event> consentResponseEvents = getDispatchedEventsWith(EventType.CONSENT, EventSource.RESPONSE_CONTENT);
 		assertEquals(1, consentResponseEvents.size());
 		Map<String, Object> consentResponseData = consentResponseEvents.get(0).getEventData();
-		String expected =
-			"{" + "  \"consents\": {" + "    \"collect\": {" + "      \"val\": \"y\"" + "    }" + "  }" + "}";
+		String expected = "{\"consents\": {\"collect\": {\"val\": \"y\"}}}";
 
-		assertExactMatch(expected, consentResponseData, new CollectionEqualCount(Subtree));
+		JSONAsserts.assertEquals(expected, consentResponseData);
 
 		//  verify getConsent API
 		Map<String, Object> getConsentResponse = getConsentsSync();
@@ -141,7 +140,7 @@ public class ConsentBootUpTests {
 
 		// verify xdm shared state //
 		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000);
-		assertExactMatch(expected, xdmSharedState, new CollectionEqualCount(Subtree));
+		JSONAsserts.assertEquals(expected, xdmSharedState);
 	}
 
 	@Test
@@ -166,10 +165,9 @@ public class ConsentBootUpTests {
 		assertEquals(1, consentResponseEvents.size());
 		Map<String, Object> consentResponseData = consentResponseEvents.get(0).getEventData();
 
-		String expected =
-			"{" + "  \"consents\": {" + "    \"collect\": {" + "      \"val\": \"n\"" + "    }" + "  }" + "}";
+		String expected = "{\"consents\": {\"collect\": {\"val\": \"n\"}}}";
 
-		JSONAsserts.assertExactMatch(expected, consentResponseData, new CollectionEqualCount(Subtree));
+		JSONAsserts.assertExactMatch(expected, consentResponseData);
 
 		//  verify getConsent API
 		Map<String, Object> getConsentResponse = getConsentsSync();
@@ -182,7 +180,7 @@ public class ConsentBootUpTests {
 		// verify xdm shared state //
 		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000);
 
-		JSONAsserts.assertExactMatch(expected, xdmSharedState, new CollectionEqualCount(Subtree));
+		JSONAsserts.assertEquals(expected, xdmSharedState);
 	}
 
 	@Test
@@ -264,7 +262,7 @@ public class ConsentBootUpTests {
 
 		// verify xdm shared state
 		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000);
-		JSONAsserts.assertExactMatch(
+		assertExactMatch(
 			expected,
 			xdmSharedState,
 			new CollectionEqualCount(Subtree),

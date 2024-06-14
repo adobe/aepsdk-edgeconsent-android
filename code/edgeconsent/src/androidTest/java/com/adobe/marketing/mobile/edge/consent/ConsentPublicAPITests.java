@@ -41,7 +41,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -95,11 +94,7 @@ public class ConsentPublicAPITests {
 			"    } " +
 			"  } " +
 			"}";
-		JSONAsserts.assertExactMatch(
-			expected,
-			sharedStateMap,
-			new ValueExactMatch("extensions.com.adobe.edge.consent.version")
-		);
+		assertExactMatch(expected, sharedStateMap, new ValueExactMatch("extensions.com.adobe.edge.consent.version"));
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -175,7 +170,7 @@ public class ConsentPublicAPITests {
 
 		assertExactMatch(
 			expected,
-			new JSONObject(persistedJson),
+			persistedJson,
 			new CollectionEqualCount(Subtree),
 			new ValueTypeMatch("consents.metadata.time") // verify that only collect consent and metadata are updated
 		);
@@ -314,7 +309,7 @@ public class ConsentPublicAPITests {
 
 		assertExactMatch(
 			expected,
-			new JSONObject(responseMap),
+			responseMap,
 			new ValueTypeMatch("consents.metadata.time") // verify that only collect consent and metadata are updated
 		);
 	}
