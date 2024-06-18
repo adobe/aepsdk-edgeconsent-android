@@ -94,7 +94,7 @@ public class ConsentPublicAPITests {
 			"    } " +
 			"  } " +
 			"}";
-		assertExactMatch(expected, sharedStateMap, new ValueExactMatch("extensions.com.adobe.edge.consent.version"));
+		assertExactMatch(expected, sharedStateMap);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -132,11 +132,12 @@ public class ConsentPublicAPITests {
 			"  }" +
 			"}";
 
+		// verify that only collect consent and metadata are updated
 		assertExactMatch(
 			expected,
 			edgeRequestData,
 			new CollectionEqualCount(Subtree),
-			new ValueTypeMatch("consents.metadata.time") // verify that only collect consent and metadata are updated
+			new ValueTypeMatch("consents.metadata.time")
 		);
 
 		// verify consent response event dispatched
@@ -145,21 +146,23 @@ public class ConsentPublicAPITests {
 
 		Map<String, Object> consentResponseData = consentResponseEvents.get(0).getEventData();
 
+		// verify that only collect consent and metadata are updated
 		assertExactMatch(
 			expected,
 			consentResponseData,
 			new CollectionEqualCount(Subtree),
-			new ValueTypeMatch("consents.metadata.time") // verify that only collect consent and metadata are updated
+			new ValueTypeMatch("consents.metadata.time")
 		);
 
 		// verify xdm shared state
 		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000);
 
+		// verify that only collect consent and metadata are updated
 		assertExactMatch(
 			expected,
 			xdmSharedState,
 			new CollectionEqualCount(Subtree),
-			new ValueTypeMatch("consents.metadata.time") // verify that only collect consent and metadata are updated
+			new ValueTypeMatch("consents.metadata.time")
 		);
 
 		// verify persisted data
@@ -168,11 +171,12 @@ public class ConsentPublicAPITests {
 			ConsentConstants.DataStoreKey.CONSENT_PREFERENCES
 		);
 
+		// verify that only collect consent and metadata are updated
 		assertExactMatch(
 			expected,
 			persistedJson,
 			new CollectionEqualCount(Subtree),
-			new ValueTypeMatch("consents.metadata.time") // verify that only collect consent and metadata are updated
+			new ValueTypeMatch("consents.metadata.time")
 		);
 	}
 
@@ -255,29 +259,32 @@ public class ConsentPublicAPITests {
 
 		Map<String, Object> edgeRequestData = edgeRequestEvents.get(0).getEventData();
 
-		JSONAsserts.assertExactMatch(
+		// verify that collect, adID consent and metadata are updated
+		assertExactMatch(
 			expected,
 			edgeRequestData,
-			new CollectionEqualCount(Subtree), // verify that collect, adID consent and metadata are updated
+			new CollectionEqualCount(Subtree),
 			new ValueTypeMatch("consents.metadata.time")
 		);
 
 		// verify consent response event dispatched
 		List<Event> consentResponseEvents = getDispatchedEventsWith(EventType.CONSENT, EventSource.RESPONSE_CONTENT);
 		Map<String, Object> consentResponseData = consentResponseEvents.get(0).getEventData();
-		JSONAsserts.assertExactMatch(
+		// verify that collect, adID consent and metadata are updated
+		assertExactMatch(
 			expected,
 			consentResponseData,
-			new CollectionEqualCount(Subtree), // verify that collect, adID consent and metadata are updated
+			new CollectionEqualCount(Subtree),
 			new ValueTypeMatch("consents.metadata.time")
 		);
 
 		// verify xdm shared state
 		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000);
-		JSONAsserts.assertExactMatch(
+		// verify that collect, adID consent and metadata are updated
+		assertExactMatch(
 			expected,
 			xdmSharedState,
-			new CollectionEqualCount(Subtree), // verify that collect, adID consent and metadata are updated
+			new CollectionEqualCount(Subtree),
 			new ValueTypeMatch("consents.metadata.time")
 		);
 	}
@@ -307,10 +314,11 @@ public class ConsentPublicAPITests {
 			"}" +
 			"}";
 
+		// verify that only collect consent and metadata are updated
 		assertExactMatch(
 			expected,
 			responseMap,
-			new ValueTypeMatch("consents.metadata.time") // verify that only collect consent and metadata are updated
+			new ValueTypeMatch("consents.metadata.time")
 		);
 	}
 

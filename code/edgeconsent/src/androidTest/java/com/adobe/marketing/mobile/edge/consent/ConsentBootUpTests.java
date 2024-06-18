@@ -167,7 +167,7 @@ public class ConsentBootUpTests {
 
 		String expected = "{\"consents\": {\"collect\": {\"val\": \"n\"}}}";
 
-		JSONAsserts.assertExactMatch(expected, consentResponseData);
+		JSONAsserts.assertEquals(expected, consentResponseData);
 
 		//  verify getConsent API
 		Map<String, Object> getConsentResponse = getConsentsSync();
@@ -240,7 +240,7 @@ public class ConsentBootUpTests {
 			"  }" +
 			"}";
 
-		JSONAsserts.assertExactMatch(
+		assertExactMatch(
 			expected,
 			consentResponseData,
 			new CollectionEqualCount(Subtree),
@@ -253,7 +253,7 @@ public class ConsentBootUpTests {
 			ConsentTestConstants.GetConsentHelper.VALUE
 		);
 
-		JSONAsserts.assertExactMatch(
+		assertExactMatch(
 			expected,
 			responseMap,
 			new CollectionEqualCount(Subtree),
