@@ -31,11 +31,9 @@ import com.adobe.marketing.mobile.EventType;
 import com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil;
 import com.adobe.marketing.mobile.edge.consent.util.ConsentTestConstants;
 import com.adobe.marketing.mobile.util.CollectionEqualCount;
-import com.adobe.marketing.mobile.util.JSONAsserts;
 import com.adobe.marketing.mobile.util.MonitorExtension;
 import com.adobe.marketing.mobile.util.TestHelper;
 import com.adobe.marketing.mobile.util.TestPersistenceHelper;
-import com.adobe.marketing.mobile.util.ValueExactMatch;
 import com.adobe.marketing.mobile.util.ValueTypeMatch;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -315,11 +313,7 @@ public class ConsentPublicAPITests {
 			"}";
 
 		// verify that only collect consent and metadata are updated
-		assertExactMatch(
-			expected,
-			responseMap,
-			new ValueTypeMatch("consents.metadata.time")
-		);
+		assertExactMatch(expected, responseMap, new ValueTypeMatch("consents.metadata.time"));
 	}
 
 	@Test
