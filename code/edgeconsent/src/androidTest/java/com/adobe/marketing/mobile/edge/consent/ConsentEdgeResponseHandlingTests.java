@@ -237,8 +237,7 @@ public class ConsentEdgeResponseHandlingTests {
 
 		// read timestamp from XDM shared state
 		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000);
-		Object metadata = ((Map<String, Object>) xdmSharedState.get("consents")).get("metadata");
-		String timestamp = (String) ((Map<String, Object>) metadata).get("time");
+		String timestamp = getTimestampFromXDMSharedState(xdmSharedState);
 
 		// test
 		MobileCore.dispatchEvent(buildEdgeConsentPreferenceEventWithConsents(CreateConsentXDMMap("y")));
@@ -276,8 +275,7 @@ public class ConsentEdgeResponseHandlingTests {
 
 		// read timestamp from XDM shared state
 		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000);
-		Object metadata = ((Map<String, Object>) xdmSharedState.get("consents")).get("metadata");
-		String timestamp = (String) ((Map<String, Object>) metadata).get("time");
+		String timestamp = getTimestampFromXDMSharedState(xdmSharedState);
 
 		// test
 		MobileCore.dispatchEvent(buildEdgeConsentPreferenceEventWithConsents(CreateConsentXDMMap("y", "n", timestamp)));
@@ -293,5 +291,28 @@ public class ConsentEdgeResponseHandlingTests {
 		xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000);
 		String expected = "{\"consents\": {\"metadata\": {\"time\": \"" + timestamp + "\"}}}";
 		assertExactMatch(expected, xdmSharedState);
+	}
+
+	private String getTimestampFromXDMSharedState(Map<String, Object> xdmSharedState) {
+		if (xdmSharedState == null) {
+			return "Error: xdmSharedState is null";
+		}
+
+		Object consents = xdmSharedState.get("consents");
+		if (consents == null) {
+			return "Error: consents is null";
+		}
+
+		Object metadata = ((Map<String, Object>) consents).get("metadata");
+		if (metadata == null) {
+			return "Error: metadata is null";
+		}
+
+		Object timestamp = ((Map<String, Object>) metadata).get("time");
+		if (timestamp == null) {
+			return "Error: timestamp is null";
+		}
+
+		return (String) timestamp; // return the timestamp
 	}
 }
