@@ -11,8 +11,6 @@
 
 package com.adobe.marketing.mobile.edge.consent.util;
 
-import static com.adobe.marketing.mobile.edge.consent.util.TestHelper.*;
-
 import com.adobe.marketing.mobile.AdobeCallbackWithError;
 import com.adobe.marketing.mobile.AdobeError;
 import com.adobe.marketing.mobile.Event;
@@ -20,21 +18,13 @@ import com.adobe.marketing.mobile.EventSource;
 import com.adobe.marketing.mobile.EventType;
 import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.edge.consent.Consent;
-import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.JSONUtils;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.ValueNode;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,6 +37,7 @@ public class ConsentFunctionalTestUtil {
 	private static final String PERSONALIZE = "personalize";
 	private static final String CONTENT = "content";
 	private static final String VALUE = "val";
+	private static final long REGISTRATION_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(2);
 
 	/**
 	 * A fully prepared valid consent JSON looks like : { "consents": { "adID": { "val": "n" },
@@ -207,65 +198,5 @@ public class ConsentFunctionalTestUtil {
 		return new Event.Builder("Edge Consent Preference", EventType.EDGE, EventSource.CONSENT_PREFERENCE)
 			.setEventData(eventData)
 			.build();
-	}
-
-	/**
-	 * Serialize the given {@code map} to a JSON Object, then flattens to {@code Map<String,
-	 * String>}. For example, a JSON such as "{xdm: {stitchId: myID, eventType: myType}}" is
-	 * flattened to two map elements "xdm.stitchId" = "myID" and "xdm.eventType" = "myType".
-	 *
-	 * @param map map with JSON structure to flatten
-	 * @return new map with flattened structure
-	 */
-	public static Map<String, String> flattenMap(final Map<String, Object> map) {
-		if (map == null || map.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		try {
-			JSONObject jsonObject = new JSONObject(map);
-			Map<String, String> payloadMap = new HashMap<>();
-			addKeys("", new ObjectMapper().readTree(jsonObject.toString()), payloadMap);
-			return payloadMap;
-		} catch (IOException e) {
-			Log.error(ConsentTestConstants.LOG_TAG, LOG_SOURCE, "Failed to parse JSON object to tree structure.");
-		}
-
-		return Collections.emptyMap();
-	}
-
-	/**
-	 * Deserialize {@code JsonNode} and flatten to provided {@code map}. For example, a JSON such as
-	 * "{xdm: {stitchId: myID, eventType: myType}}" is flattened to two map elements "xdm.stitchId"
-	 * = "myID" and "xdm.eventType" = "myType".
-	 *
-	 * <p>Method is called recursively. To use, call with an empty path such as {@code addKeys("",
-	 * new ObjectMapper().readTree(JsonNodeAsString), map);}
-	 *
-	 * @param currentPath the path in {@code JsonNode} to process
-	 * @param jsonNode {@link JsonNode} to deserialize
-	 * @param map {@code Map<String, String>} instance to store flattened JSON result
-	 * @see <a href="https://stackoverflow.com/a/24150263">Stack Overflow post</a>
-	 */
-	public static void addKeys(String currentPath, JsonNode jsonNode, Map<String, String> map) {
-		if (jsonNode.isObject()) {
-			ObjectNode objectNode = (ObjectNode) jsonNode;
-			Iterator<Map.Entry<String, JsonNode>> iter = objectNode.fields();
-			String pathPrefix = currentPath.isEmpty() ? "" : currentPath + ".";
-
-			while (iter.hasNext()) {
-				Map.Entry<String, JsonNode> entry = iter.next();
-				addKeys(pathPrefix + entry.getKey(), entry.getValue(), map);
-			}
-		} else if (jsonNode.isArray()) {
-			ArrayNode arrayNode = (ArrayNode) jsonNode;
-
-			for (int i = 0; i < arrayNode.size(); i++) {
-				addKeys(currentPath + "[" + i + "]", arrayNode.get(i), map);
-			}
-		} else if (jsonNode.isValueNode()) {
-			ValueNode valueNode = (ValueNode) jsonNode;
-			map.put(currentPath, valueNode.asText());
-		}
 	}
 }

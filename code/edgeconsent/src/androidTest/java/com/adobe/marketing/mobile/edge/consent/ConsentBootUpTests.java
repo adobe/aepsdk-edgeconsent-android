@@ -11,19 +11,30 @@
 
 package com.adobe.marketing.mobile.edge.consent;
 
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.*;
-import static com.adobe.marketing.mobile.edge.consent.util.TestHelper.*;
+import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.CreateConsentXDMMap;
+import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.SAMPLE_METADATA_TIMESTAMP;
+import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.buildEdgeConsentPreferenceEventWithConsents;
+import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.getConsentsSync;
+import static com.adobe.marketing.mobile.util.JSONAsserts.assertExactMatch;
+import static com.adobe.marketing.mobile.util.NodeConfig.Scope.Subtree;
+import static com.adobe.marketing.mobile.util.TestHelper.getDispatchedEventsWith;
+import static com.adobe.marketing.mobile.util.TestHelper.getXDMSharedStateFor;
+import static com.adobe.marketing.mobile.util.TestHelper.registerExtensions;
+import static com.adobe.marketing.mobile.util.TestHelper.resetTestExpectations;
+import static com.adobe.marketing.mobile.util.TestHelper.waitForThreads;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.EventSource;
 import com.adobe.marketing.mobile.EventType;
 import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.edge.consent.util.ConsentTestConstants;
-import com.adobe.marketing.mobile.edge.consent.util.MonitorExtension;
-import com.adobe.marketing.mobile.edge.consent.util.TestHelper;
-import com.adobe.marketing.mobile.edge.consent.util.TestPersistenceHelper;
+import com.adobe.marketing.mobile.util.CollectionEqualCount;
+import com.adobe.marketing.mobile.util.JSONAsserts;
+import com.adobe.marketing.mobile.util.MonitorExtension;
+import com.adobe.marketing.mobile.util.TestHelper;
+import com.adobe.marketing.mobile.util.TestPersistenceHelper;
+import com.adobe.marketing.mobile.util.ValueTypeMatch;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -58,30 +69,42 @@ public class ConsentBootUpTests {
 		// verify consent response event dispatched
 		List<Event> consentResponseEvents = getDispatchedEventsWith(EventType.CONSENT, EventSource.RESPONSE_CONTENT);
 		assertEquals(1, consentResponseEvents.size());
-		Map<String, String> consentResponseData = flattenMap(consentResponseEvents.get(0).getEventData());
-		assertEquals(4, consentResponseData.size());
-		assertEquals("p", consentResponseData.get("consents.collect.val"));
-		assertEquals("n", consentResponseData.get("consents.adID.val"));
-		assertEquals("vi", consentResponseData.get("consents.personalize.content.val"));
-		assertEquals(SAMPLE_METADATA_TIMESTAMP, consentResponseData.get("consents.metadata.time"));
+		Map<String, Object> consentResponseData = consentResponseEvents.get(0).getEventData();
+
+		String expected =
+			"{" +
+			"  \"consents\": {" +
+			"    \"collect\": {" +
+			"      \"val\": \"p\"" +
+			"    }," +
+			"    \"adID\": {" +
+			"      \"val\": \"n\"" +
+			"    }," +
+			"    \"personalize\": {" +
+			"      \"content\": {" +
+			"        \"val\": \"vi\"" +
+			"      }" +
+			"    }," +
+			"    \"metadata\": {" +
+			"      \"time\": \"" +
+			SAMPLE_METADATA_TIMESTAMP +
+			"\"" +
+			"    }" +
+			"  }" +
+			"}";
+
+		JSONAsserts.assertEquals(expected, consentResponseData);
 
 		//  verify getConsent API
 		Map<String, Object> getConsentResponse = getConsentsSync();
-		Map<String, String> responseMap = flattenMap(
-			(Map) getConsentResponse.get(ConsentTestConstants.GetConsentHelper.VALUE)
-		);
-		assertEquals("p", responseMap.get("consents.collect.val"));
-		assertEquals("n", responseMap.get("consents.adID.val"));
-		assertEquals("vi", responseMap.get("consents.personalize.content.val"));
-		assertEquals(SAMPLE_METADATA_TIMESTAMP, responseMap.get("consents.metadata.time"));
+		Map<String, Object> responseMap = (Map) getConsentResponse.get(ConsentTestConstants.GetConsentHelper.VALUE);
+
+		JSONAsserts.assertEquals(expected, responseMap);
 
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000));
-		assertEquals(4, xdmSharedState.size());
-		assertEquals("p", xdmSharedState.get("consents.collect.val"));
-		assertEquals("n", xdmSharedState.get("consents.adID.val"));
-		assertEquals("vi", xdmSharedState.get("consents.personalize.content.val"));
-		assertEquals(SAMPLE_METADATA_TIMESTAMP, xdmSharedState.get("consents.metadata.time"));
+		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000);
+
+		JSONAsserts.assertEquals(expected, xdmSharedState);
 	}
 
 	@Test
@@ -104,21 +127,20 @@ public class ConsentBootUpTests {
 		// verify consent response event dispatched
 		List<Event> consentResponseEvents = getDispatchedEventsWith(EventType.CONSENT, EventSource.RESPONSE_CONTENT);
 		assertEquals(1, consentResponseEvents.size());
-		Map<String, String> consentResponseData = flattenMap(consentResponseEvents.get(0).getEventData());
-		assertEquals(1, consentResponseData.size());
-		assertEquals("y", consentResponseData.get("consents.collect.val"));
+		Map<String, Object> consentResponseData = consentResponseEvents.get(0).getEventData();
+		String expected = "{\"consents\": {\"collect\": {\"val\": \"y\"}}}";
+
+		JSONAsserts.assertEquals(expected, consentResponseData);
 
 		//  verify getConsent API
 		Map<String, Object> getConsentResponse = getConsentsSync();
-		Map<String, String> responseMap = flattenMap(
-			(Map) getConsentResponse.get(ConsentTestConstants.GetConsentHelper.VALUE)
-		);
-		assertEquals("y", responseMap.get("consents.collect.val"));
+		Map<String, Object> responseMap = (Map) getConsentResponse.get(ConsentTestConstants.GetConsentHelper.VALUE);
+
+		JSONAsserts.assertEquals(expected, responseMap);
 
 		// verify xdm shared state //
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000));
-		assertEquals(1, xdmSharedState.size());
-		assertEquals("y", xdmSharedState.get("consents.collect.val"));
+		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000);
+		JSONAsserts.assertEquals(expected, xdmSharedState);
 	}
 
 	@Test
@@ -141,21 +163,24 @@ public class ConsentBootUpTests {
 		// verify consent response event dispatched
 		List<Event> consentResponseEvents = getDispatchedEventsWith(EventType.CONSENT, EventSource.RESPONSE_CONTENT);
 		assertEquals(1, consentResponseEvents.size());
-		Map<String, String> consentResponseData = flattenMap(consentResponseEvents.get(0).getEventData());
-		assertEquals(1, consentResponseData.size());
-		assertEquals("n", consentResponseData.get("consents.collect.val"));
+		Map<String, Object> consentResponseData = consentResponseEvents.get(0).getEventData();
+
+		String expected = "{\"consents\": {\"collect\": {\"val\": \"n\"}}}";
+
+		JSONAsserts.assertEquals(expected, consentResponseData);
 
 		//  verify getConsent API
 		Map<String, Object> getConsentResponse = getConsentsSync();
-		Map<String, String> responseMap = flattenMap(
-			(Map) getConsentResponse.get(ConsentTestConstants.GetConsentHelper.VALUE)
+		Map<String, Object> responseMap = (Map<String, Object>) getConsentResponse.get(
+			ConsentTestConstants.GetConsentHelper.VALUE
 		);
-		assertEquals("n", responseMap.get("consents.collect.val"));
+
+		JSONAsserts.assertEquals(expected, responseMap);
 
 		// verify xdm shared state //
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000));
-		assertEquals(1, xdmSharedState.size());
-		assertEquals("n", xdmSharedState.get("consents.collect.val"));
+		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000);
+
+		JSONAsserts.assertEquals(expected, xdmSharedState);
 	}
 
 	@Test
@@ -193,30 +218,56 @@ public class ConsentBootUpTests {
 		// verify consent response event dispatched
 		List<Event> consentResponseEvents = getDispatchedEventsWith(EventType.CONSENT, EventSource.RESPONSE_CONTENT);
 		assertEquals(1, consentResponseEvents.size());
-		Map<String, String> consentResponseData = flattenMap(consentResponseEvents.get(0).getEventData());
-		assertEquals(4, consentResponseData.size());
-		assertEquals("n", consentResponseData.get("consents.collect.val"));
-		assertEquals("n", consentResponseData.get("consents.adID.val"));
-		assertEquals("vi", consentResponseData.get("consents.personalize.content.val"));
-		assertNotNull(consentResponseData.get("consents.metadata.time"));
+		Map<String, Object> consentResponseData = consentResponseEvents.get(0).getEventData();
+
+		String expected =
+			"{" +
+			"  \"consents\": {" +
+			"    \"collect\": {" +
+			"      \"val\": \"n\"" +
+			"    }," +
+			"    \"adID\": {" +
+			"      \"val\": \"n\"" +
+			"    }," +
+			"    \"personalize\": {" +
+			"      \"content\": {" +
+			"        \"val\": \"vi\"" +
+			"      }" +
+			"    }," +
+			"    \"metadata\": {" +
+			"      \"time\": \"STRING_TYPE\"" +
+			"    }" +
+			"  }" +
+			"}";
+
+		assertExactMatch(
+			expected,
+			consentResponseData,
+			new CollectionEqualCount(Subtree),
+			new ValueTypeMatch("consents.metadata.time")
+		);
 
 		//  verify getConsent API
 		Map<String, Object> getConsentResponse = getConsentsSync();
-		Map<String, String> responseMap = flattenMap(
-			(Map) getConsentResponse.get(ConsentTestConstants.GetConsentHelper.VALUE)
+		Map<String, Object> responseMap = (Map<String, Object>) getConsentResponse.get(
+			ConsentTestConstants.GetConsentHelper.VALUE
 		);
-		assertEquals("n", responseMap.get("consents.collect.val"));
-		assertEquals("n", responseMap.get("consents.adID.val"));
-		assertEquals("vi", responseMap.get("consents.personalize.content.val"));
-		assertNotNull(consentResponseData.get("consents.metadata.time"));
+
+		assertExactMatch(
+			expected,
+			responseMap,
+			new CollectionEqualCount(Subtree),
+			new ValueTypeMatch("consents.metadata.time")
+		);
 
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000));
-		assertEquals(4, xdmSharedState.size());
-		assertEquals("n", xdmSharedState.get("consents.collect.val"));
-		assertEquals("n", xdmSharedState.get("consents.adID.val"));
-		assertEquals("vi", xdmSharedState.get("consents.personalize.content.val"));
-		assertNotNull(xdmSharedState.get("consents.metadata.time"));
+		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000);
+		assertExactMatch(
+			expected,
+			xdmSharedState,
+			new CollectionEqualCount(Subtree),
+			new ValueTypeMatch("consents.metadata.time")
+		);
 	}
 
 	// --------------------------------------------------------------------------------------------
