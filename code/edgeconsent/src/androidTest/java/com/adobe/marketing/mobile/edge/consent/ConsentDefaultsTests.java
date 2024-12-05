@@ -12,14 +12,14 @@
 package com.adobe.marketing.mobile.edge.consent;
 
 import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.CreateConsentXDMMap;
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.flattenMap;
 import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.getConsentsSync;
-import static com.adobe.marketing.mobile.edge.consent.util.TestHelper.*;
-import static com.adobe.marketing.mobile.edge.consent.util.TestHelper.getDispatchedEventsWith;
-import static com.adobe.marketing.mobile.edge.consent.util.TestHelper.getXDMSharedStateFor;
-import static com.adobe.marketing.mobile.edge.consent.util.TestHelper.waitForThreads;
+import static com.adobe.marketing.mobile.util.JSONAsserts.assertExactMatch;
+import static com.adobe.marketing.mobile.util.NodeConfig.Scope.Subtree;
+import static com.adobe.marketing.mobile.util.TestHelper.getDispatchedEventsWith;
+import static com.adobe.marketing.mobile.util.TestHelper.getXDMSharedStateFor;
+import static com.adobe.marketing.mobile.util.TestHelper.registerExtensions;
+import static com.adobe.marketing.mobile.util.TestHelper.waitForThreads;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import com.adobe.marketing.mobile.Event;
@@ -27,9 +27,12 @@ import com.adobe.marketing.mobile.EventSource;
 import com.adobe.marketing.mobile.EventType;
 import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.edge.consent.util.ConsentTestConstants;
-import com.adobe.marketing.mobile.edge.consent.util.MonitorExtension;
-import com.adobe.marketing.mobile.edge.consent.util.TestHelper;
-import com.adobe.marketing.mobile.edge.consent.util.TestPersistenceHelper;
+import com.adobe.marketing.mobile.util.CollectionEqualCount;
+import com.adobe.marketing.mobile.util.JSONAsserts;
+import com.adobe.marketing.mobile.util.MonitorExtension;
+import com.adobe.marketing.mobile.util.TestHelper;
+import com.adobe.marketing.mobile.util.TestPersistenceHelper;
+import com.adobe.marketing.mobile.util.ValueTypeMatch;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -56,27 +59,27 @@ public class ConsentDefaultsTests {
 		// verify in (ConsentResponse and XDMSharedState)
 
 		// setup
+
 		initWithDefaultConsent(CreateConsentXDMMap("y"));
-		waitForThreads(1000);
 
 		// verify consent response event dispatched
 		List<Event> consentResponseEvents = getDispatchedEventsWith(EventType.CONSENT, EventSource.RESPONSE_CONTENT);
 		assertEquals(1, consentResponseEvents.size());
-		Map<String, String> consentResponseData = flattenMap(consentResponseEvents.get(0).getEventData());
-		assertEquals(1, consentResponseData.size()); // verify that only collect consent is updated
-		assertEquals("y", consentResponseData.get("consents.collect.val"));
+
+		Map<String, Object> consentResponseData = consentResponseEvents.get(0).getEventData();
+
+		String expected = "{\"consents\": {\"collect\": {\"val\": \"y\"}}}";
+
+		JSONAsserts.assertEquals(expected, consentResponseData);
 
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000));
-		assertEquals(1, xdmSharedState.size()); // verify that only collect consent is set
-		assertEquals("y", xdmSharedState.get("consents.collect.val"));
+		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000);
+		JSONAsserts.assertEquals(expected, xdmSharedState);
 
 		// verify Public API Call
 		Map<String, Object> getConsentResponse = getConsentsSync();
-		Map<String, String> responseMap = flattenMap(
-			(Map) getConsentResponse.get(ConsentTestConstants.GetConsentHelper.VALUE)
-		);
-		assertEquals("y", responseMap.get("consents.collect.val"));
+		Map<String, Object> responseMap = (Map) getConsentResponse.get(ConsentTestConstants.GetConsentHelper.VALUE);
+		JSONAsserts.assertEquals(expected, responseMap);
 	}
 
 	@Test
@@ -98,11 +101,29 @@ public class ConsentDefaultsTests {
 		waitForThreads(1000);
 
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000));
-		assertEquals(3, xdmSharedState.size()); // verify that only collect consent is set
-		assertEquals("n", xdmSharedState.get("consents.collect.val"));
-		assertEquals("n", xdmSharedState.get("consents.adID.val"));
-		assertNotNull(xdmSharedState.get("consents.metadata.time"));
+		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000);
+
+		String expected =
+			"{" +
+			"  \"consents\": {" +
+			"    \"collect\": {" +
+			"      \"val\": \"n\"" +
+			"    }," +
+			"    \"adID\": {" +
+			"      \"val\": \"n\"" +
+			"    }," +
+			"    \"metadata\": {" +
+			"      \"time\": \"STRING_TYPE\"" +
+			"    }" +
+			"  }" +
+			"}";
+
+		assertExactMatch(
+			expected,
+			xdmSharedState,
+			new CollectionEqualCount(Subtree),
+			new ValueTypeMatch("consents.metadata.time")
+		);
 	}
 
 	@Test
@@ -128,9 +149,11 @@ public class ConsentDefaultsTests {
 		waitForThreads(1000);
 
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000));
-		assertEquals(1, xdmSharedState.size()); // verify that only collect consent is set
-		assertEquals("n", xdmSharedState.get("consents.collect.val"));
+		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000);
+
+		String expected = "{\"consents\": {\"collect\": {\"val\": \"n\"}}}";
+
+		JSONAsserts.assertEquals(expected, xdmSharedState);
 	}
 
 	@Test
@@ -143,10 +166,26 @@ public class ConsentDefaultsTests {
 		// verify edge event for only collectConsent data
 		List<Event> edgeRequestEvents = getDispatchedEventsWith(EventType.EDGE, EventSource.UPDATE_CONSENT);
 		assertEquals(1, edgeRequestEvents.size());
-		Map<String, String> edgeRequestData = flattenMap(edgeRequestEvents.get(0).getEventData());
-		assertEquals(2, edgeRequestData.size()); // verify that only collect consent and metadata are updated
-		assertEquals("n", edgeRequestData.get("consents.collect.val"));
-		assertNotNull(edgeRequestData.get("consents.metadata.time"));
+
+		Map<String, Object> edgeRequestData = edgeRequestEvents.get(0).getEventData();
+		String expected =
+			"{" +
+			"  \"consents\": {" +
+			"    \"collect\": {" +
+			"      \"val\": \"n\"" +
+			"    }," +
+			"    \"metadata\": {" +
+			"      \"time\": \"STRING_TYPE\"" +
+			"    }" +
+			"  }" +
+			"}";
+
+		assertExactMatch(
+			expected,
+			edgeRequestData,
+			new CollectionEqualCount(Subtree),
+			new ValueTypeMatch("consents.metadata.time")
+		);
 	}
 
 	@Test
@@ -175,7 +214,6 @@ public class ConsentDefaultsTests {
 		};
 		MobileCore.updateConfiguration(config);
 
-		TestHelper.registerExtensions(Arrays.asList(MonitorExtension.EXTENSION, Consent.EXTENSION), config);
-		resetTestExpectations();
+		registerExtensions(Arrays.asList(MonitorExtension.EXTENSION, Consent.EXTENSION), config);
 	}
 }

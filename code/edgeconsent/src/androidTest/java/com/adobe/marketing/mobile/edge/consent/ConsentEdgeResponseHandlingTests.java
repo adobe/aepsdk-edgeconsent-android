@@ -11,23 +11,31 @@
 
 package com.adobe.marketing.mobile.edge.consent;
 
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.*;
-import static com.adobe.marketing.mobile.edge.consent.util.TestHelper.*;
+import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.CreateConsentXDMMap;
+import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.applyDefaultConsent;
+import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.buildEdgeConsentPreferenceEvent;
+import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.buildEdgeConsentPreferenceEventWithConsents;
+import static com.adobe.marketing.mobile.util.JSONAsserts.assertExactMatch;
+import static com.adobe.marketing.mobile.util.JSONAsserts.assertTypeMatch;
+import static com.adobe.marketing.mobile.util.NodeConfig.Scope.Subtree;
+import static com.adobe.marketing.mobile.util.TestHelper.getDispatchedEventsWith;
+import static com.adobe.marketing.mobile.util.TestHelper.getXDMSharedStateFor;
+import static com.adobe.marketing.mobile.util.TestHelper.resetTestExpectations;
+import static com.adobe.marketing.mobile.util.TestHelper.waitForThreads;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.EventSource;
 import com.adobe.marketing.mobile.EventType;
 import com.adobe.marketing.mobile.MobileCore;
-import com.adobe.marketing.mobile.edge.consent.util.MonitorExtension;
-import com.adobe.marketing.mobile.edge.consent.util.TestHelper;
-import com.adobe.marketing.mobile.edge.consent.util.TestPersistenceHelper;
-import com.adobe.marketing.mobile.util.JSONUtils;
+import com.adobe.marketing.mobile.util.CollectionEqualCount;
+import com.adobe.marketing.mobile.util.MonitorExtension;
+import com.adobe.marketing.mobile.util.TestHelper;
+import com.adobe.marketing.mobile.util.TestPersistenceHelper;
+import com.adobe.marketing.mobile.util.ValueTypeMatch;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -75,29 +83,65 @@ public class ConsentEdgeResponseHandlingTests {
 		// verify consent response event dispatched
 		List<Event> consentResponseEvents = getDispatchedEventsWith(EventType.CONSENT, EventSource.RESPONSE_CONTENT);
 		assertEquals(1, consentResponseEvents.size());
-		Map<String, String> consentResponseData = flattenMap(consentResponseEvents.get(0).getEventData());
-		assertEquals(3, consentResponseData.size());
-		assertEquals("n", consentResponseData.get("consents.collect.val"));
-		assertEquals("n", consentResponseData.get("consents.adID.val"));
-		assertNotNull(consentResponseData.get("consents.metadata.time"));
+
+		Map<String, Object> consentResponseData = consentResponseEvents.get(0).getEventData();
+
+		String expected =
+			"{" +
+			"  \"consents\": {" +
+			"    \"collect\": {" +
+			"      \"val\": \"n\"" +
+			"    }," +
+			"    \"adID\": {" +
+			"      \"val\": \"n\"" +
+			"    }," +
+			"    \"metadata\": {" +
+			"      \"time\": \"STRING_TYPE\"" +
+			"    }" +
+			"  }" +
+			"}";
+
+		assertTypeMatch(
+			expected,
+			consentResponseData,
+			new CollectionEqualCount(Subtree),
+			new ValueTypeMatch("consents.metadata.time")
+		);
 
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000));
-		assertEquals(3, xdmSharedState.size());
-		assertEquals("n", xdmSharedState.get("consents.collect.val"));
-		assertEquals("n", xdmSharedState.get("consents.adID.val"));
-		assertNotNull(xdmSharedState.get("consents.metadata.time"));
+		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000);
+
+		assertExactMatch(
+			expected,
+			xdmSharedState,
+			new CollectionEqualCount(Subtree),
+			new ValueTypeMatch("consents.metadata.time")
+		);
 
 		// verify persisted data - default consents are not persisted
 		final String persistedJson = TestPersistenceHelper.readPersistedData(
 			ConsentConstants.DataStoreKey.DATASTORE_NAME,
 			ConsentConstants.DataStoreKey.CONSENT_PREFERENCES
 		);
-		Map<String, Object> persistedMap = JSONUtils.toMap(new JSONObject(persistedJson));
-		Map<String, String> flattenPersistedMap = flattenMap(persistedMap);
-		assertEquals(2, flattenPersistedMap.size());
-		assertEquals("n", flattenPersistedMap.get("consents.collect.val"));
-		assertNotNull(xdmSharedState.get("consents.metadata.time"));
+
+		String expectedPersistedData =
+			"{" +
+			"  \"consents\": {" +
+			"    \"collect\": {" +
+			"      \"val\": \"n\"" +
+			"    }," +
+			"    \"metadata\": {" +
+			"      \"time\": \"STRING_TYPE\"" +
+			"    }" +
+			"  }" +
+			"}";
+
+		assertExactMatch(
+			expectedPersistedData,
+			persistedJson,
+			new CollectionEqualCount(Subtree),
+			new ValueTypeMatch("consents.metadata.time")
+		);
 	}
 
 	@Test
@@ -126,21 +170,52 @@ public class ConsentEdgeResponseHandlingTests {
 		waitForThreads(1000);
 
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000));
-		assertEquals(2, xdmSharedState.size());
-		assertEquals("y", xdmSharedState.get("consents.collect.val"));
-		assertNotNull(xdmSharedState.get("consents.metadata.time"));
+		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000);
+
+		String expected =
+			"{" +
+			"  \"consents\": {" +
+			"    \"collect\": {" +
+			"      \"val\": \"y\"" +
+			"    }," +
+			"    \"metadata\": {" +
+			"      \"time\": \"STRING_TYPE\"" +
+			"    }" +
+			"  }" +
+			"}";
+
+		assertExactMatch(
+			expected,
+			xdmSharedState,
+			new CollectionEqualCount(Subtree),
+			new ValueTypeMatch("consents.metadata.time")
+		);
 
 		// verify persisted data
+
 		final String persistedJson = TestPersistenceHelper.readPersistedData(
 			ConsentConstants.DataStoreKey.DATASTORE_NAME,
 			ConsentConstants.DataStoreKey.CONSENT_PREFERENCES
 		);
-		Map<String, Object> persistedMap = JSONUtils.toMap(new JSONObject(persistedJson));
-		Map<String, String> flattenPersistedMap = flattenMap(persistedMap);
-		assertEquals(2, flattenPersistedMap.size());
-		assertEquals("y", flattenPersistedMap.get("consents.collect.val"));
-		assertNotNull(xdmSharedState.get("consents.metadata.time"));
+
+		String expectedPersistedData =
+			"{" +
+			"  \"consents\": {" +
+			"    \"collect\": {" +
+			"      \"val\": \"y\"" +
+			"    }," +
+			"    \"metadata\": {" +
+			"      \"time\": \"STRING_TYPE\"" +
+			"    }" +
+			"  }" +
+			"}";
+
+		assertExactMatch(
+			expectedPersistedData,
+			persistedJson,
+			new CollectionEqualCount(Subtree),
+			new ValueTypeMatch("consents.metadata.time")
+		);
 	}
 
 	@Test
@@ -161,8 +236,8 @@ public class ConsentEdgeResponseHandlingTests {
 		resetTestExpectations();
 
 		// read timestamp from XDM shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000));
-		String timestamp = xdmSharedState.get("consents.metadata.time");
+		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000);
+		String timestamp = getTimestampFromXDMSharedState(xdmSharedState);
 
 		// test
 		MobileCore.dispatchEvent(buildEdgeConsentPreferenceEventWithConsents(CreateConsentXDMMap("y")));
@@ -175,8 +250,10 @@ public class ConsentEdgeResponseHandlingTests {
 		assertEquals(0, sharedStateChangeEvents.size());
 
 		// verify timestamp has not changed
-		xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000));
-		assertEquals(timestamp, xdmSharedState.get("consents.metadata.time"));
+		xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000);
+		String expected = "{\"consents\": {\"metadata\": {\"time\": \"" + timestamp + "\"}}}";
+
+		assertExactMatch(expected, xdmSharedState);
 	}
 
 	@Test
@@ -197,8 +274,8 @@ public class ConsentEdgeResponseHandlingTests {
 		resetTestExpectations();
 
 		// read timestamp from XDM shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000));
-		String timestamp = xdmSharedState.get("consents.metadata.time");
+		Map<String, Object> xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000);
+		String timestamp = getTimestampFromXDMSharedState(xdmSharedState);
 
 		// test
 		MobileCore.dispatchEvent(buildEdgeConsentPreferenceEventWithConsents(CreateConsentXDMMap("y", "n", timestamp)));
@@ -211,7 +288,31 @@ public class ConsentEdgeResponseHandlingTests {
 		assertEquals(0, sharedStateChangeEvents.size());
 
 		// verify timestamp has not changed
-		xdmSharedState = flattenMap(getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000));
-		assertEquals(timestamp, xdmSharedState.get("consents.metadata.time"));
+		xdmSharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 1000);
+		String expected = "{\"consents\": {\"metadata\": {\"time\": \"" + timestamp + "\"}}}";
+		assertExactMatch(expected, xdmSharedState);
+	}
+
+	private String getTimestampFromXDMSharedState(Map<String, Object> xdmSharedState) {
+		if (xdmSharedState == null) {
+			return "Error: xdmSharedState is null";
+		}
+
+		Object consents = xdmSharedState.get("consents");
+		if (consents == null) {
+			return "Error: consents is null";
+		}
+
+		Object metadata = ((Map<String, Object>) consents).get("metadata");
+		if (metadata == null) {
+			return "Error: metadata is null";
+		}
+
+		Object timestamp = ((Map<String, Object>) metadata).get("time");
+		if (timestamp == null) {
+			return "Error: timestamp is null";
+		}
+
+		return (String) timestamp; // return the timestamp
 	}
 }
