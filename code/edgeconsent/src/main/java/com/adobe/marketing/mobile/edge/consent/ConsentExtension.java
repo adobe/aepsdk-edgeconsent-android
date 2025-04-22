@@ -33,6 +33,13 @@ class ConsentExtension extends Extension {
 
 	private final ConsentManager consentManager;
 
+	// The forceSync flag, false means the SDK will only sync if preferences have changed.
+    // Flag updated via configuration shared state.
+	private boolean forceSync = false;
+
+	// The last time a consent update was processed from public API.
+	private long lastConsentUpdateTime = 0;
+
 	/**
 	 * Constructor. It is called by the Mobile SDK when registering the extension and it initializes
 	 * the extension and registers event listeners.
@@ -174,12 +181,18 @@ class ConsentExtension extends Extension {
 			return;
 		}
 
+		// check if the forceSync flag is set to true
+		boolean forceSync = DataReader.optBoolean(consentData, ConsentConstants.ConfigurationKey.CONSENT_FORCE_SYNC, ConsentConstants.Defaults.FORCE_SYNC);	
+
 		// set the timestamp and merge with existing consents
 		newConsents.setTimestamp(event.getTimestamp());
-		if (consentManager.mergeAndPersist(newConsents)) {
+		// Only proceed with Edge event dispatch if preferences actually changed
+		if (consentManager.mergeAndPersist(newConsents) || shouldForceSync(event)) {
 			// share and dispatch the updated consents
 			shareCurrentConsents(event);
 			dispatchEdgeConsentUpdateEvent(newConsents); // dispatches only the newly updated consents
+
+			this.lastConsentUpdateTime = event.getTimestamp();
 		}
 	}
 
@@ -316,6 +329,9 @@ class ConsentExtension extends Extension {
 		if (consentManager.updateDefaultConsents(new Consents(defaultConsentMap))) {
 			shareCurrentConsents(event);
 		}
+
+		// update the forceSync flag from configuration shared state
+		this.forceSync = DataReader.optBoolean(configData, ConsentConstants.ConfigurationKey.CONSENT_FORCE_SYNC, ConsentConstants.Defaults.FORCE_SYNC);
 	}
 
 	/**
@@ -384,4 +400,21 @@ class ConsentExtension extends Extension {
 		consentMap.put(ConsentConstants.EventDataKey.CONSENTS, payload);
 		return consentMap;
 	}
+
+	/**
+	 * Determines if the SDK should force a sync of the consent preferences to the Edge Network
+	 * based on the forceSync flag and the timestamp of the event that triggered the consents update,
+	 * regardless if the consent preferences changed.
+	 *
+	 * @param event the {@link Event} that triggered the consents update.
+	 * @return true if the SDK should force a sync, false otherwise.
+	 */
+	private boolean shouldForceSync(final Event event) {
+		if (!forceSync) {
+			return false;
+		}
+
+		return event.getTimestamp() > lastConsentUpdateTime + ConsentConstants.Defaults.IGNORE_CONSENT_UPDATE_INTERVAL_MS;
+	}
+
 }

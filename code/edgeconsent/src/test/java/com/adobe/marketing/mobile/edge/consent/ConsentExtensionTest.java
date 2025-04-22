@@ -480,6 +480,56 @@ public class ConsentExtensionTest {
 		verify(mockExtensionApi, times(0)).dispatch(eventCaptor.capture());
 	}
 
+	@Test
+	public void test_handleConsentUpdate_doesNotDispatchEdgeEventIfForceSyncIsTrue_andConsentUpdateIsWithinIgnoreInterval() {
+		// setup
+		setupExistingConsents(CreateConsentsXDMJSONString("y", "n"));
+
+		Event consentUpdateEvent = buildConsentUpdateEvent("y", "n");
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+
+		Event configEvent = buildConfigUpdateForceSyncEvent(true); // forceSync = true dispatches events on every update request
+		extension.handleConfigurationResponse(configEvent);
+
+		// test, send consent update event with same values
+		extension.handleConsentUpdate(consentUpdateEvent);
+
+		// verify, expect 2 events to be dispatched
+		verify(mockExtensionApi, times(2)).dispatch(eventCaptor.capture());
+
+		// test, send consent update event with same values
+		extension.handleConsentUpdate(consentUpdateEvent);
+
+		// verify, expect no new events to be dispatched as the timestamp is within the ignore interval
+		verify(mockExtensionApi, times(2)).dispatch(eventCaptor.capture());
+	}
+
+	@Test
+	public void test_handleConsentUpdate_doesNotDispatchEdgeEventIfForceSyncIsTrue_andConsentUpdateIsOutsideIgnoreInterval() throws Exception {
+		// setup
+		setupExistingConsents(CreateConsentsXDMJSONString("y", "n"));
+
+		Event consentUpdateEvent = buildConsentUpdateEvent("y", "n");
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+
+		Event configEvent = buildConfigUpdateForceSyncEvent(true); // forceSync = true dispatches events on every update request
+		extension.handleConfigurationResponse(configEvent);
+
+		// test, send consent update event with same values
+		extension.handleConsentUpdate(consentUpdateEvent);
+
+		// verify, expect 2 events to be dispatched
+		verify(mockExtensionApi, times(2)).dispatch(eventCaptor.capture());
+
+		// test, send consent update event with same values, timestamp 500 ms later
+		Thread.sleep(1000);
+		Event repeatConsentUpdateEvent = buildConsentUpdateEvent("y", "n");
+		extension.handleConsentUpdate(repeatConsentUpdateEvent);
+
+		// verify, expect new events to be dispatched as the timestamp is outside the ignore interval
+		verify(mockExtensionApi, times(4)).dispatch(eventCaptor.capture()); 
+	}
+
 	// ========================================================================================
 	// handleRequestContent
 	// ========================================================================================
@@ -839,5 +889,13 @@ public class ConsentExtensionTest {
 	private void verifyNoEventDispatched() {
 		ArgumentCaptor<Event> eventCaptor2 = ArgumentCaptor.forClass(Event.class);
 		verify(mockExtensionApi, times(0)).dispatch(any(Event.class));
+	}
+
+	private Event buildConfigUpdateForceSyncEvent(final boolean forceSync) {
+		Map<String, Object> eventData = new HashMap<>();
+		eventData.put(ConsentConstants.ConfigurationKey.CONSENT_FORCE_SYNC, forceSync);
+		return new Event.Builder("Configuration Update Force Sync", EventType.CONFIGURATION, EventSource.RESPONSE_CONTENT)
+			.setEventData(eventData)
+			.build();
 	}
 }
