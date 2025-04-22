@@ -29,6 +29,9 @@ import com.adobe.marketing.mobile.ExtensionApi;
 import com.adobe.marketing.mobile.ExtensionEventListener;
 import com.adobe.marketing.mobile.services.NamedCollection;
 import com.adobe.marketing.mobile.util.JSONUtils;
+import com.adobe.marketing.mobile.util.TimeUtils;
+
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -398,6 +401,82 @@ public class ConsentExtensionTest {
 		extension.handleConsentUpdate(event);
 
 		// verify
+		verify(mockExtensionApi, times(0)).dispatch(eventCaptor.capture());
+	}
+
+	@Test
+	public void test_handleConsentUpdate_SetsTimestamp() {
+		// setup
+		setupExistingConsents(CreateConsentsXDMJSONString("n", "n"));
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+
+		// test
+		Event consentUpdateEvent = buildConsentUpdateEvent("y", "n");
+		extension.handleConsentUpdate(consentUpdateEvent);
+
+		// verify
+		verify(mockExtensionApi, times(2)).dispatch(eventCaptor.capture());
+
+		// verify consent response event has correct timestamp
+		Event consentResponseEvent = eventCaptor.getAllValues().get(0);
+		Map<String, Object> metadata = (Map) ((Map) consentResponseEvent.getEventData().get("consents")).get("metadata");
+		final String expectedTimestamp = TimeUtils.getISO8601UTCDateWithMilliseconds(new Date(consentUpdateEvent.getTimestamp()));
+		assertEquals(expectedTimestamp, metadata.get("time"));
+	}
+
+	@Test
+	public void test_handleConsentUpdate_MergesConsentsCorrectly() {
+		// setup
+		setupExistingConsents(CreateConsentsXDMJSONString("y", "n"));
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+
+		// test
+		Event consentUpdateEvent = buildConsentUpdateEvent("n", "y");
+		extension.handleConsentUpdate(consentUpdateEvent);
+
+		// verify
+		verify(mockExtensionApi, times(2)).dispatch(eventCaptor.capture());
+
+		// verify edge consent update event has merged consents
+		Event edgeConsentEvent = eventCaptor.getAllValues().get(1);
+		Map<String, Object> eventData = edgeConsentEvent.getEventData();
+		Map<String, Object> consents = (Map) eventData.get("consents");
+		Map<String, Object> collect = (Map) consents.get("collect");
+		Map<String, Object> adID = (Map) consents.get("adID");
+
+		assertEquals("n", collect.get("val"));
+		assertEquals("y", adID.get("val"));
+	}
+
+	@Test
+	public void test_handleConsentUpdate_SameConsentValuesNotDispatched() {
+		// setup
+		Event consentUpdateEvent = buildConsentUpdateEvent("y", "n");
+		final String isoTimestamp = TimeUtils.getISO8601UTCDateWithMilliseconds(new Date(consentUpdateEvent.getTimestamp()));
+
+		setupExistingConsents(CreateConsentsXDMJSONString("y", "n", isoTimestamp));
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+
+		// test - update with same values
+		extension.handleConsentUpdate(consentUpdateEvent);
+
+		// verify events are not dispatched
+		verify(mockExtensionApi, times(0)).dispatch(eventCaptor.capture());
+	}
+
+	@Test
+	public void test_handleConsentUpdate_SameConsentValuesDifferentTimestampNotDispatched() throws Exception {
+		// setup
+		Event consentUpdateEvent = buildConsentUpdateEvent("y", "n");
+		final String isoTimestamp = TimeUtils.getISO8601UTCDateWithMilliseconds(new Date(consentUpdateEvent.getTimestamp() - 10000)); // move timestamp 10 seconds back
+
+		setupExistingConsents(CreateConsentsXDMJSONString("y", "n", isoTimestamp));
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+
+		// test - update with same values but different timestamps
+		extension.handleConsentUpdate(consentUpdateEvent);
+
+		// verify events are not dispatched
 		verify(mockExtensionApi, times(0)).dispatch(eventCaptor.capture());
 	}
 
