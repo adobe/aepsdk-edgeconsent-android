@@ -34,7 +34,7 @@ class ConsentExtension extends Extension {
 	private final ConsentManager consentManager;
 
 	// The forceSync flag, false means the SDK will only sync if preferences have changed.
-    // Flag updated via configuration shared state.
+	// Flag updated via configuration shared state.
 	private boolean forceSync = false;
 
 	// The last time a consent update was processed from public API.
@@ -182,7 +182,11 @@ class ConsentExtension extends Extension {
 		}
 
 		// check if the forceSync flag is set to true
-		boolean forceSync = DataReader.optBoolean(consentData, ConsentConstants.ConfigurationKey.CONSENT_FORCE_SYNC, ConsentConstants.Defaults.FORCE_SYNC);	
+		boolean forceSync = DataReader.optBoolean(
+			consentData,
+			ConsentConstants.ConfigurationKey.CONSENT_FORCE_SYNC,
+			ConsentConstants.Defaults.FORCE_SYNC
+		);
 
 		// set the timestamp and merge with existing consents
 		newConsents.setTimestamp(event.getTimestamp());
@@ -331,7 +335,12 @@ class ConsentExtension extends Extension {
 		}
 
 		// update the forceSync flag from configuration shared state
-		this.forceSync = DataReader.optBoolean(configData, ConsentConstants.ConfigurationKey.CONSENT_FORCE_SYNC, ConsentConstants.Defaults.FORCE_SYNC);
+		this.forceSync =
+			DataReader.optBoolean(
+				configData,
+				ConsentConstants.ConfigurationKey.CONSENT_FORCE_SYNC,
+				ConsentConstants.Defaults.FORCE_SYNC
+			);
 	}
 
 	/**
@@ -414,7 +423,8 @@ class ConsentExtension extends Extension {
 			return false;
 		}
 
-		return event.getTimestamp() > lastConsentUpdateTime + ConsentConstants.Defaults.IGNORE_CONSENT_UPDATE_INTERVAL_MS;
+		return (
+			event.getTimestamp() > lastConsentUpdateTime + ConsentConstants.Defaults.IGNORE_CONSENT_UPDATE_INTERVAL_MS
+		);
 	}
-
 }

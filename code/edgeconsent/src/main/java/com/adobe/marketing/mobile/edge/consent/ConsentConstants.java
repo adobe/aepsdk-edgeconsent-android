@@ -21,6 +21,7 @@ final class ConsentConstants {
 	private ConsentConstants() {}
 
 	static final class Defaults {
+
 		// Default value for the forceSync flag, false means the SDK will only sync if preferences have changed.
 		static final boolean FORCE_SYNC = false;
 		// The interval to ignore consecutive consent updates, in milliseconds.

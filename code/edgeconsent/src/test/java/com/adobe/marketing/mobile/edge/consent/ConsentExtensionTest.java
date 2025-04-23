@@ -30,7 +30,6 @@ import com.adobe.marketing.mobile.ExtensionEventListener;
 import com.adobe.marketing.mobile.services.NamedCollection;
 import com.adobe.marketing.mobile.util.JSONUtils;
 import com.adobe.marketing.mobile.util.TimeUtils;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -419,8 +418,12 @@ public class ConsentExtensionTest {
 
 		// verify consent response event has correct timestamp
 		Event consentResponseEvent = eventCaptor.getAllValues().get(0);
-		Map<String, Object> metadata = (Map) ((Map) consentResponseEvent.getEventData().get("consents")).get("metadata");
-		final String expectedTimestamp = TimeUtils.getISO8601UTCDateWithMilliseconds(new Date(consentUpdateEvent.getTimestamp()));
+		Map<String, Object> metadata = (Map) ((Map) consentResponseEvent.getEventData().get("consents")).get(
+				"metadata"
+			);
+		final String expectedTimestamp = TimeUtils.getISO8601UTCDateWithMilliseconds(
+			new Date(consentUpdateEvent.getTimestamp())
+		);
 		assertEquals(expectedTimestamp, metadata.get("time"));
 	}
 
@@ -452,7 +455,9 @@ public class ConsentExtensionTest {
 	public void test_handleConsentUpdate_SameConsentValuesNotDispatched() {
 		// setup
 		Event consentUpdateEvent = buildConsentUpdateEvent("y", "n");
-		final String isoTimestamp = TimeUtils.getISO8601UTCDateWithMilliseconds(new Date(consentUpdateEvent.getTimestamp()));
+		final String isoTimestamp = TimeUtils.getISO8601UTCDateWithMilliseconds(
+			new Date(consentUpdateEvent.getTimestamp())
+		);
 
 		setupExistingConsents(CreateConsentsXDMJSONString("y", "n", isoTimestamp));
 		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
@@ -468,7 +473,9 @@ public class ConsentExtensionTest {
 	public void test_handleConsentUpdate_SameConsentValuesDifferentTimestampNotDispatched() throws Exception {
 		// setup
 		Event consentUpdateEvent = buildConsentUpdateEvent("y", "n");
-		final String isoTimestamp = TimeUtils.getISO8601UTCDateWithMilliseconds(new Date(consentUpdateEvent.getTimestamp() - 10000)); // move timestamp 10 seconds back
+		final String isoTimestamp = TimeUtils.getISO8601UTCDateWithMilliseconds(
+			new Date(consentUpdateEvent.getTimestamp() - 10000)
+		); // move timestamp 10 seconds back
 
 		setupExistingConsents(CreateConsentsXDMJSONString("y", "n", isoTimestamp));
 		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
@@ -505,7 +512,8 @@ public class ConsentExtensionTest {
 	}
 
 	@Test
-	public void test_handleConsentUpdate_doesNotDispatchEdgeEventIfForceSyncIsTrue_andConsentUpdateIsOutsideIgnoreInterval() throws Exception {
+	public void test_handleConsentUpdate_doesNotDispatchEdgeEventIfForceSyncIsTrue_andConsentUpdateIsOutsideIgnoreInterval()
+		throws Exception {
 		// setup
 		setupExistingConsents(CreateConsentsXDMJSONString("y", "n"));
 
@@ -527,7 +535,7 @@ public class ConsentExtensionTest {
 		extension.handleConsentUpdate(repeatConsentUpdateEvent);
 
 		// verify, expect new events to be dispatched as the timestamp is outside the ignore interval
-		verify(mockExtensionApi, times(4)).dispatch(eventCaptor.capture()); 
+		verify(mockExtensionApi, times(4)).dispatch(eventCaptor.capture());
 	}
 
 	@Test
@@ -919,7 +927,11 @@ public class ConsentExtensionTest {
 	private Event buildConfigUpdateForceSyncEvent(final boolean forceSync) {
 		Map<String, Object> eventData = new HashMap<>();
 		eventData.put(ConsentConstants.ConfigurationKey.CONSENT_FORCE_SYNC, forceSync);
-		return new Event.Builder("Configuration Update Force Sync", EventType.CONFIGURATION, EventSource.RESPONSE_CONTENT)
+		return new Event.Builder(
+			"Configuration Update Force Sync",
+			EventType.CONFIGURATION,
+			EventSource.RESPONSE_CONTENT
+		)
 			.setEventData(eventData)
 			.build();
 	}
