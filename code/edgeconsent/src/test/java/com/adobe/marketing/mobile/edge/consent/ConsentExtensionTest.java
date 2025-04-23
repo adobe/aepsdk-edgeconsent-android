@@ -530,6 +530,31 @@ public class ConsentExtensionTest {
 		verify(mockExtensionApi, times(4)).dispatch(eventCaptor.capture()); 
 	}
 
+	@Test
+	public void test_handleConsentUpdate_dispatchesEdgeEventIfForceSyncIsTrue_andConsentUpdateIsDifferent() {
+		// setup
+		setupExistingConsents(CreateConsentsXDMJSONString("y", "n"));
+
+		Event consentUpdateEvent = buildConsentUpdateEvent("y", "n");
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+
+		Event configEvent = buildConfigUpdateForceSyncEvent(true); // forceSync = true dispatches events on every update request
+		extension.handleConfigurationResponse(configEvent);
+
+		// test, send consent update event with same values
+		extension.handleConsentUpdate(consentUpdateEvent);
+
+		// verify, expect 2 events to be dispatched
+		verify(mockExtensionApi, times(2)).dispatch(eventCaptor.capture());
+
+		// test, send consent update event with new values
+		Event newConsentUpdateEvent = buildConsentUpdateEvent("y", "y");
+		extension.handleConsentUpdate(newConsentUpdateEvent);
+
+		// verify, expect two new events to be dispatched as values changed even though the timestamp is within the ignore interval
+		verify(mockExtensionApi, times(4)).dispatch(eventCaptor.capture());
+	}
+
 	// ========================================================================================
 	// handleRequestContent
 	// ========================================================================================
