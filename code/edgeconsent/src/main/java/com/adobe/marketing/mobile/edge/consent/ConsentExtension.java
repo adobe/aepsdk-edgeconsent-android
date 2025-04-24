@@ -181,13 +181,6 @@ class ConsentExtension extends Extension {
 			return;
 		}
 
-		// check if the forceSync flag is set to true
-		boolean forceSync = DataReader.optBoolean(
-			consentData,
-			ConsentConstants.ConfigurationKey.CONSENT_FORCE_SYNC,
-			ConsentConstants.Defaults.FORCE_SYNC
-		);
-
 		// set the timestamp and merge with existing consents
 		newConsents.setTimestamp(event.getTimestamp());
 		// Only proceed with Edge event dispatch if preferences actually changed
