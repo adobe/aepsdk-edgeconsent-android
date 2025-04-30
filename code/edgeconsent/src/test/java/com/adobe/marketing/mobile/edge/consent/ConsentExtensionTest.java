@@ -21,12 +21,15 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.EventSource;
 import com.adobe.marketing.mobile.EventType;
 import com.adobe.marketing.mobile.ExtensionApi;
 import com.adobe.marketing.mobile.ExtensionEventListener;
+import com.adobe.marketing.mobile.SharedStateResult;
+import com.adobe.marketing.mobile.SharedStateStatus;
 import com.adobe.marketing.mobile.services.NamedCollection;
 import com.adobe.marketing.mobile.util.JSONUtils;
 import com.adobe.marketing.mobile.util.TimeUtils;
@@ -132,6 +135,65 @@ public class ConsentExtensionTest {
 			"y",
 			((Map) ((Map) consentResponseEvent.getEventData().get("consents")).get("collect")).get("val")
 		);
+	}
+
+	@Test
+	public void test_OnBootUp_SharesXDMSharedState_whenDefaultSet() {
+		// setup
+		setupExistingDefaultConsents("y");
+
+		ArgumentCaptor<Map> sharedStateCaptor = ArgumentCaptor.forClass(Map.class);
+		ArgumentCaptor<Event> sharedStateEventCaptor = ArgumentCaptor.forClass(Event.class);
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+
+		// test
+		extension = new ConsentExtension(mockExtensionApi, mockNamedCollection);
+		extension.handleInitialization();
+
+		verify(mockExtensionApi, times(1))
+			.createXDMSharedState(sharedStateCaptor.capture(), sharedStateEventCaptor.capture());
+
+		Map<String, Object> sharedState = sharedStateCaptor.getValue();
+		assertEquals("y", ((Map) ((Map) sharedState.get("consents")).get("collect")).get("val"));
+
+		// verify consent response event is dispatched
+		verify(mockExtensionApi).dispatch(eventCaptor.capture());
+		Event consentResponseEvent = eventCaptor.getAllValues().get(0);
+		assertEquals(
+			"y",
+			((Map) ((Map) consentResponseEvent.getEventData().get("consents")).get("collect")).get("val")
+		);
+	}
+
+	@Test
+	public void test_OnBootUp_SharesXDMSharedState_whenDefaultAndPersistedSet() {
+		// setup
+		setupExistingDefaultConsents("p");
+		setupExistingConsents(CreateConsentsXDMJSONString("y", "y"));
+
+		ArgumentCaptor<Map> sharedStateCaptor = ArgumentCaptor.forClass(Map.class);
+		ArgumentCaptor<Event> sharedStateEventCaptor = ArgumentCaptor.forClass(Event.class);
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+
+		// test
+		extension = new ConsentExtension(mockExtensionApi, mockNamedCollection);
+		extension.handleInitialization();
+
+		verify(mockExtensionApi, times(1))
+			.createXDMSharedState(sharedStateCaptor.capture(), sharedStateEventCaptor.capture());
+
+		Map<String, Object> sharedState = sharedStateCaptor.getValue();
+		assertEquals("y", ((Map) ((Map) sharedState.get("consents")).get("collect")).get("val"));
+		assertEquals("y", ((Map) ((Map) sharedState.get("consents")).get("adID")).get("val"));
+
+		// verify consent response event is dispatched
+		verify(mockExtensionApi).dispatch(eventCaptor.capture());
+		Event consentResponseEvent = eventCaptor.getAllValues().get(0);
+		assertEquals(
+			"y",
+			((Map) ((Map) consentResponseEvent.getEventData().get("consents")).get("collect")).get("val")
+		);
+		assertEquals("y", ((Map) ((Map) consentResponseEvent.getEventData().get("consents")).get("adID")).get("val"));
 	}
 
 	@Test
@@ -883,10 +945,47 @@ public class ConsentExtensionTest {
 	 * @param jsonString the consents JSON string to set in mocked persistence
 	 */
 	private void setupExistingConsents(final String jsonString) {
-		Mockito
-			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES, null))
+		when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES, null))
 			.thenReturn(jsonString);
 		extension = new ConsentExtension(mockExtensionApi, mockNamedCollection);
+	}
+
+	private void setupExistingDefaultConsents(final String collectValue) {
+		final Map<String, Object> defaults = new HashMap<String, Object>() {
+			{
+				put(
+					ConsentConstants.ConfigurationKey.DEFAULT_CONSENT,
+					new HashMap<String, Object>() {
+						{
+							put(
+								ConsentConstants.EventDataKey.CONSENTS,
+								new HashMap<String, Object>() {
+									{
+										put(
+											"collect",
+											new HashMap<String, Object>() {
+												{
+													put("val", collectValue);
+												}
+											}
+										);
+									}
+								}
+							);
+						}
+					}
+				);
+			}
+		};
+		when(
+			mockExtensionApi.getSharedState(
+				eq(ConsentConstants.ConfigurationKey.STATE_OWNER_NAME),
+				eq(null),
+				eq(false),
+				any()
+			)
+		)
+			.thenReturn(new SharedStateResult(SharedStateStatus.SET, defaults));
 	}
 
 	private Event buildConsentUpdateEvent(final String collectConsentString, final String adIdConsentString) {

@@ -19,6 +19,9 @@ import com.adobe.marketing.mobile.EventSource;
 import com.adobe.marketing.mobile.EventType;
 import com.adobe.marketing.mobile.Extension;
 import com.adobe.marketing.mobile.ExtensionApi;
+import com.adobe.marketing.mobile.SharedStateResolution;
+import com.adobe.marketing.mobile.SharedStateResult;
+import com.adobe.marketing.mobile.SharedStateStatus;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.NamedCollection;
 import com.adobe.marketing.mobile.services.ServiceProvider;
@@ -147,6 +150,18 @@ class ConsentExtension extends Extension {
 
 	/** Share the initial consents loaded from persistence to XDM shared state. */
 	void handleInitialization() {
+		// get default consents from configuration shared state, if already set
+		final SharedStateResult configSharedState = getApi()
+			.getSharedState(
+				ConsentConstants.ConfigurationKey.STATE_OWNER_NAME,
+				null,
+				false,
+				SharedStateResolution.LAST_SET
+			);
+		if (configSharedState != null && configSharedState.getStatus() == SharedStateStatus.SET) {
+			updateDefaultsFromConfigSharedState(configSharedState.getValue());
+		}
+
 		// share the initial XDMSharedState onRegistered
 		final Consents currentConsents = consentManager.getCurrentConsents();
 
@@ -292,7 +307,18 @@ class ConsentExtension extends Extension {
 	 */
 	void handleConfigurationResponse(@NonNull final Event event) {
 		final Map<String, Object> configData = event.getEventData();
+		if (updateDefaultsFromConfigSharedState(configData)) {
+			shareCurrentConsents(event);
+		}
+	}
 
+	/**
+	 * Updates the defaults from the configuration shared state.
+	 *
+	 * @param configData the configuration data
+	 * @return true if `currentConsents` has been updated as a result of updating the default consents
+	 */
+	private boolean updateDefaultsFromConfigSharedState(Map<String, Object> configData) {
 		if (configData == null || configData.isEmpty()) {
 			Log.debug(
 				LOG_TAG,
@@ -300,8 +326,16 @@ class ConsentExtension extends Extension {
 				"Event data configuration response event is empty, unable to read configuration" +
 				" consent.default. Dropping event."
 			);
-			return;
+			return false;
 		}
+
+		// update the forceSync flag from configuration shared state
+		this.forceSync =
+			DataReader.optBoolean(
+				configData,
+				ConsentConstants.ConfigurationKey.CONSENT_FORCE_SYNC,
+				ConsentConstants.Defaults.FORCE_SYNC
+			);
 
 		final Map<String, Object> defaultConsentMap = DataReader.optTypedMap(
 			Object.class,
@@ -323,17 +357,7 @@ class ConsentExtension extends Extension {
 			// launch property. Then the defaults should be updated.
 		}
 
-		if (consentManager.updateDefaultConsents(new Consents(defaultConsentMap))) {
-			shareCurrentConsents(event);
-		}
-
-		// update the forceSync flag from configuration shared state
-		this.forceSync =
-			DataReader.optBoolean(
-				configData,
-				ConsentConstants.ConfigurationKey.CONSENT_FORCE_SYNC,
-				ConsentConstants.Defaults.FORCE_SYNC
-			);
+		return consentManager.updateDefaultConsents(new Consents(defaultConsentMap));
 	}
 
 	/**

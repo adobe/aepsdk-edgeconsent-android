@@ -60,6 +60,7 @@ final class ConsentConstants {
 
 	static final class ConfigurationKey {
 
+		static final String STATE_OWNER_NAME = "com.adobe.module.configuration";
 		static final String DEFAULT_CONSENT = "consent.default";
 		static final String CONSENT_FORCE_SYNC = "consent.forceSync";
 
