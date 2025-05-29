@@ -20,6 +20,11 @@ final class ConsentConstants {
 
 	private ConsentConstants() {}
 
+	static final class Defaults {
+
+		static final long IGNORE_CONSENT_UPDATE_INTERVAL_MS = 1000; // 1 second
+	}
+
 	static final class EventDataKey {
 
 		static final String CONSENTS = "consents";

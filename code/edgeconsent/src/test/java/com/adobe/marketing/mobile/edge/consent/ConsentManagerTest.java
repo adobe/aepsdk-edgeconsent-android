@@ -120,8 +120,11 @@ public class ConsentManagerTest {
 
 		// test
 		Consents newConsent = new Consents(CreateConsentXDMMap("n", null, "pi", SAMPLE_METADATA_TIMESTAMP_OTHER));
-		consentManager.mergeAndPersist(newConsent);
+		boolean result = consentManager.mergeAndPersist(newConsent);
 		Consents mergedConsent = consentManager.getCurrentConsents();
+
+		// verify return value is true since consents have changed
+		assertTrue(result);
 
 		// verify
 		assertEquals("n", readCollectConsent(mergedConsent)); // assert CollectConsent value has changed on merge
@@ -147,8 +150,11 @@ public class ConsentManagerTest {
 		consentManager = new ConsentManager(mockNamedCollection); // consentManager now loads the persisted data
 
 		// test
-		consentManager.mergeAndPersist(null);
+		boolean result = consentManager.mergeAndPersist(null);
 		Consents mergedConsent = consentManager.getCurrentConsents();
+
+		// verify return value is false since consents have not changed
+		assertFalse(result);
 
 		// verify that no value has changed
 		assertEquals("y", readCollectConsent(mergedConsent)); // assert CollectConsent value has not changed on merge
@@ -173,8 +179,11 @@ public class ConsentManagerTest {
 		consentManager = new ConsentManager(mockNamedCollection); // consentManager now loads the persisted data
 
 		// test
-		consentManager.mergeAndPersist(new Consents(new HashMap<String, Object>()));
+		boolean result = consentManager.mergeAndPersist(new Consents(new HashMap<String, Object>()));
 		Consents mergedConsent = consentManager.getCurrentConsents();
+
+		// verify return value is false since consents have not changed
+		assertFalse(result);
 
 		// verify that no value has changed
 		assertEquals("y", readCollectConsent(mergedConsent)); // assert CollectConsent value has not changed on merge
@@ -393,5 +402,65 @@ public class ConsentManagerTest {
 		Consents defaultConsents = consentManager.defaultConsents;
 		assertEquals("n", readCollectConsent(defaultConsents));
 		assertNull(readAdIdConsent(defaultConsents));
+	}
+
+	@Test
+	public void test_MergeAndPersist_sameConsentsDifferentTimestamp() {
+		// setup currentConsent
+		final String persistedJSON = CreateConsentsXDMJSONString("y", "n", SAMPLE_METADATA_TIMESTAMP);
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES, null))
+			.thenReturn(persistedJSON);
+		consentManager = new ConsentManager(mockNamedCollection); // consentManager now loads the persisted data
+
+		// test - merge with same consents but different timestamp
+		Consents newConsent = new Consents(CreateConsentXDMMap("y", "n", SAMPLE_METADATA_TIMESTAMP_OTHER));
+		boolean result = consentManager.mergeAndPersist(newConsent);
+		Consents mergedConsent = consentManager.getCurrentConsents();
+
+		// verify return value is false since consents have not changed (only timestamp changed)
+		assertFalse(result);
+
+		// verify that values have not changed, only timestamp
+		assertEquals("y", readCollectConsent(mergedConsent));
+		assertEquals("n", readAdIdConsent(mergedConsent));
+		assertEquals(SAMPLE_METADATA_TIMESTAMP_OTHER, ConsentTestUtil.readTimestamp(mergedConsent));
+
+		// verify persistence data is correct
+		verify(mockNamedCollection, times(1))
+			.setString(
+				ConsentConstants.DataStoreKey.CONSENT_PREFERENCES,
+				CreateConsentsXDMJSONString("y", "n", SAMPLE_METADATA_TIMESTAMP_OTHER)
+			);
+	}
+
+	@Test
+	public void test_MergeAndPersist_sameConsentsSameTimestamp() {
+		// setup currentConsent
+		final String persistedJSON = CreateConsentsXDMJSONString("y", "n", SAMPLE_METADATA_TIMESTAMP);
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES, null))
+			.thenReturn(persistedJSON);
+		consentManager = new ConsentManager(mockNamedCollection); // consentManager now loads the persisted data
+
+		// test - merge with same consents and same timestamp
+		Consents newConsent = new Consents(CreateConsentXDMMap("y", "n", SAMPLE_METADATA_TIMESTAMP));
+		boolean result = consentManager.mergeAndPersist(newConsent);
+		Consents mergedConsent = consentManager.getCurrentConsents();
+
+		// verify return value is false since consents have not changed
+		assertFalse(result);
+
+		// verify that values have not changed
+		assertEquals("y", readCollectConsent(mergedConsent));
+		assertEquals("n", readAdIdConsent(mergedConsent));
+		assertEquals(SAMPLE_METADATA_TIMESTAMP, ConsentTestUtil.readTimestamp(mergedConsent));
+
+		// verify persistence data is correct
+		verify(mockNamedCollection, times(1))
+			.setString(
+				ConsentConstants.DataStoreKey.CONSENT_PREFERENCES,
+				CreateConsentsXDMJSONString("y", "n", SAMPLE_METADATA_TIMESTAMP)
+			);
 	}
 }
