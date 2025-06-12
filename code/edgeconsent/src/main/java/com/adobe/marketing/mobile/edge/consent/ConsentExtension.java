@@ -398,17 +398,4 @@ class ConsentExtension extends Extension {
 		consentMap.put(ConsentConstants.EventDataKey.CONSENTS, payload);
 		return consentMap;
 	}
-
-	/**
-	 * Determines if the SDK should sync the consent preferences to the Edge Network
-	 * based on the timestamp of the triggering event and the timestamp of the last update event.
-	 *
-	 * @param event the {@link Event} that triggered the consent update
-	 * @return true if the SDK should sync the update request
-	 */
-	private boolean canSync(final Event event) {
-		return (
-			event.getTimestamp() > lastConsentUpdateTime + ConsentConstants.Defaults.IGNORE_CONSENT_UPDATE_INTERVAL_MS
-		);
-	}
 }
