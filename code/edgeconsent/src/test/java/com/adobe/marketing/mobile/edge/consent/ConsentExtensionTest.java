@@ -473,6 +473,28 @@ public class ConsentExtensionTest {
 	}
 
 	@Test
+	public void test_handleConsentUpdate_doesDispatchEdgeEvent_ifConsentUpdateIsWithinIgnoreIntervalButPreferenceIsDifferent() {
+		// setup
+		setupExistingConsents(CreateConsentsXDMJSONString("y", "n"));
+
+		Event consentUpdateEvent1 = buildConsentUpdateEvent("y", "n");
+		Event consentUpdateEvent2 = buildConsentUpdateEvent("y", "y");
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+
+		// test, send consent update event with same values
+		extension.handleConsentUpdate(consentUpdateEvent1);
+
+		// verify, expect 2 events to be dispatched
+		verify(mockExtensionApi, times(2)).dispatch(eventCaptor.capture());
+
+		// test, send consent update event with different values
+		extension.handleConsentUpdate(consentUpdateEvent2);
+
+		// verify, expect new events to be dispatched as the preferences have changed
+		verify(mockExtensionApi, times(4)).dispatch(eventCaptor.capture());
+	}
+
+	@Test
 	public void test_handleConsentUpdate_dispatchesEdgeEvent_ifConsentUpdateIsOutsideIgnoreInterval() throws Exception {
 		// setup
 		setupExistingConsents(CreateConsentsXDMJSONString("y", "n"));
