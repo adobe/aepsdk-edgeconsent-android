@@ -31,6 +31,8 @@ class ConsentTestUtil {
 	private static final String PERSONALIZE = "personalize";
 	private static final String CONTENT = "content";
 	private static final String VALUE = "val";
+	private static final String MARKETING = "marketing";
+	private static final String PREFERRED = "preferred";
 
 	/**
 	 * A fully prepared valid consent JSON looks like : { "consents": { "adID": { "val": "n" },
@@ -148,6 +150,132 @@ class ConsentTestUtil {
 
 		consentData.put(ConsentConstants.EventDataKey.CONSENTS, consents);
 		return consentData;
+	}
+
+	public static class ConsentsMapBuilder {
+
+		Map<String, Object> consents = new HashMap<String, Object>();
+
+		public ConsentsMapBuilder setCollect(String val) {
+			if (val != null && !val.isEmpty()) {
+				consents.put(
+					COLLECT,
+					new HashMap<String, Object>() {
+						{
+							put(VALUE, val);
+						}
+					}
+				);
+			} else {
+				consents.remove(COLLECT);
+			}
+			return this;
+		}
+
+		public ConsentsMapBuilder setAdId(String val) {
+			if (val != null && !val.isEmpty()) {
+				consents.put(
+					ADID,
+					new HashMap<String, Object>() {
+						{
+							put(VALUE, val);
+						}
+					}
+				);
+			} else {
+				consents.remove(ADID);
+			}
+			return this;
+		}
+
+		public ConsentsMapBuilder setPersonalize(String val) {
+			if (val != null && !val.isEmpty()) {
+				consents.put(
+					PERSONALIZE,
+					new HashMap<String, Object>() {
+						{
+							put(
+								CONTENT,
+								new HashMap<String, String>() {
+									{
+										put(VALUE, val);
+									}
+								}
+							);
+						}
+					}
+				);
+			} else {
+				consents.remove(PERSONALIZE);
+			}
+			return this;
+		}
+
+		public ConsentsMapBuilder setMarketing(String type, String val, String preferred) {
+			if (
+				type != null &&
+				val != null &&
+				preferred != null &&
+				!type.isEmpty() &&
+				!val.isEmpty() &&
+				!preferred.isEmpty()
+			) {
+				consents.put(
+					MARKETING,
+					new HashMap<String, Object>() {
+						{
+							put(PREFERRED, preferred);
+							put(
+								type,
+								new HashMap<String, Object>() {
+									{
+										put(VALUE, val);
+									}
+								}
+							);
+						}
+					}
+				);
+			} else {
+				consents.remove(MARKETING);
+			}
+			return this;
+		}
+
+		public ConsentsMapBuilder setTime(String time) {
+			if (time != null && !time.isEmpty()) {
+				consents.put(
+					ConsentConstants.EventDataKey.METADATA,
+					new HashMap<String, Object>() {
+						{
+							put(ConsentConstants.EventDataKey.TIME, time);
+						}
+					}
+				);
+			} else {
+				consents.remove(ConsentConstants.EventDataKey.METADATA);
+			}
+			return this;
+		}
+
+		public Map<String, Object> buildToMap() {
+			return new HashMap<String, Object>() {
+				{
+					put(ConsentConstants.EventDataKey.CONSENTS, consents);
+				}
+			};
+		}
+
+		public String buildToString() {
+			Map<String, Object> consentDataMap = this.buildToMap();
+			JSONObject jsonObject = new JSONObject(consentDataMap);
+			return jsonObject.toString();
+		}
+	}
+
+	static String consentsAsJson(Consents consents) {
+		JSONObject jsonObject = new JSONObject(consents.asXDMMap());
+		return jsonObject.toString();
 	}
 
 	static String readTimestamp(Consents consents) {

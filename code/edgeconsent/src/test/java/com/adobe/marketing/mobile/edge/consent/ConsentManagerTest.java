@@ -12,10 +12,12 @@
 package com.adobe.marketing.mobile.edge.consent;
 
 import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.*;
+import static com.adobe.marketing.mobile.util.JSONAsserts.assertExactMatch;
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -24,6 +26,7 @@ import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -138,6 +141,57 @@ public class ConsentManagerTest {
 				ConsentConstants.DataStoreKey.CONSENT_PREFERENCES,
 				CreateConsentsXDMJSONString("n", "n", "pi", SAMPLE_METADATA_TIMESTAMP_OTHER)
 			);
+	}
+
+	@Test
+	public void test_MergeAndPersistNestedPreferences() {
+		// setup currentConsent
+		ConsentsMapBuilder preferenceBuilder = new ConsentsMapBuilder()
+			.setCollect("y")
+			.setMarketing("push", "y", "none")
+			.setTime(SAMPLE_METADATA_TIMESTAMP);
+		final String persistedJSON = preferenceBuilder.buildToString();
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES, null))
+			.thenReturn(persistedJSON);
+		consentManager = new ConsentManager(mockNamedCollection); // consentManager now loads the persisted data
+
+		// test
+		Consents newConsent = new Consents(
+			preferenceBuilder.setMarketing("sms", "y", "sms").setTime(SAMPLE_METADATA_TIMESTAMP_OTHER).buildToMap()
+		);
+		boolean result = consentManager.mergeAndPersist(newConsent);
+		Consents mergedConsent = consentManager.getCurrentConsents();
+
+		// verify return value is true since consents have changed
+		assertTrue(result);
+
+		String actualResult = consentsAsJson(mergedConsent);
+		String expectedResult =
+			"{" +
+			"  \"consents\": {" +
+			"      \"collect\": {" +
+			"        \"val\": \"y\"" +
+			"      }," +
+			"      \"marketing\": {" +
+			"        \"preferred\": \"sms\"," +
+			"        \"push\": {\"val\": \"y\"}," +
+			"        \"sms\": {\"val\": \"y\"}," +
+			"      }," +
+			"      \"metadata\": {\"time\": \"" +
+			SAMPLE_METADATA_TIMESTAMP_OTHER +
+			"\"}" +
+			"    }" +
+			"}";
+
+		assertExactMatch(expectedResult, actualResult);
+
+		// verify if correct data is written in persistence
+		final ArgumentCaptor<String> persistedConsents = ArgumentCaptor.forClass(String.class);
+		verify(mockNamedCollection, times(1))
+			.setString(eq(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES), persistedConsents.capture());
+
+		assertExactMatch(expectedResult, persistedConsents.getValue());
 	}
 
 	@Test

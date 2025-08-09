@@ -125,6 +125,7 @@ final class Consents {
 	/**
 	 * Merges the provided {@link Consents} with the current object. The current object is
 	 * undisturbed if the provided consent is null or empty.
+	 * This method performs a deep merge, handling nested maps properly.
 	 *
 	 * @param newConsents the consents that needs to be merged
 	 */
@@ -134,11 +135,51 @@ final class Consents {
 		}
 
 		if (isEmpty()) {
-			consentsMap = newConsents.consentsMap;
+			consentsMap = Utils.optDeepCopy(newConsents.consentsMap, new HashMap<>());
 			return;
 		}
 
-		consentsMap.putAll(newConsents.consentsMap);
+		consentsMap = deepMergeMaps(consentsMap, newConsents.consentsMap);
+	}
+
+	/**
+	 * Recursively merges two maps, handling nested maps properly.
+	 * If both maps contain the same key and both values are maps, they are merged recursively.
+	 * Otherwise, the value from the new map overwrites the existing value.
+	 *
+	 * @param existingMap the existing map to merge into
+	 * @param newMap the new map to merge from
+	 * @return the merged map
+	 */
+	private Map<String, Object> deepMergeMaps(final Map<String, Object> existingMap, final Map<String, Object> newMap) {
+		if (existingMap == null) {
+			return Utils.optDeepCopy(newMap, new HashMap<>());
+		}
+		if (newMap == null) {
+			return Utils.optDeepCopy(existingMap, new HashMap<>());
+		}
+
+		Map<String, Object> result = Utils.optDeepCopy(existingMap, new HashMap<>());
+
+		for (Map.Entry<String, Object> entry : newMap.entrySet()) {
+			String key = entry.getKey();
+			Object newValue = entry.getValue();
+			Object existingValue = result.get(key);
+
+			if (existingValue instanceof Map && newValue instanceof Map) {
+				// Both values are maps, merge them recursively
+				@SuppressWarnings("unchecked")
+				Map<String, Object> existingMapValue = (Map<String, Object>) existingValue;
+				@SuppressWarnings("unchecked")
+				Map<String, Object> newMapValue = (Map<String, Object>) newValue;
+				result.put(key, deepMergeMaps(existingMapValue, newMapValue));
+			} else {
+				// One or both values are not maps, new value overwrites existing
+				result.put(key, newValue);
+			}
+		}
+
+		return result;
 	}
 
 	/**

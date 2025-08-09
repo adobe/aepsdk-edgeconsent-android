@@ -13,6 +13,9 @@ package com.adobe.marketing.mobile.edge.consent;
 
 import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.CreateConsentXDMMap;
 import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.SAMPLE_METADATA_TIMESTAMP;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.SAMPLE_METADATA_TIMESTAMP_OTHER;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.consentsAsJson;
+import static com.adobe.marketing.mobile.util.JSONAsserts.assertExactMatch;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -219,6 +222,60 @@ public class ConsentsTest {
 		assertEquals("n", ConsentTestUtil.readCollectConsent(baseConsent));
 		assertEquals("n", ConsentTestUtil.readAdIdConsent(baseConsent));
 		assertEquals(SAMPLE_METADATA_TIMESTAMP, ConsentTestUtil.readTimestamp(baseConsent));
+	}
+
+	@Test
+	public void test_merge_nestedMaps() {
+		// setup
+		Consents baseConsent = new Consents(new HashMap<>());
+
+		// test
+		ConsentTestUtil.ConsentsMapBuilder preferences = new ConsentTestUtil.ConsentsMapBuilder()
+			.setCollect("y")
+			.setMarketing("push", "y", "none")
+			.setTime(SAMPLE_METADATA_TIMESTAMP);
+		Consents firstOverridingConsent = new Consents(preferences.buildToMap());
+		baseConsent.merge(firstOverridingConsent);
+
+		// verify
+		String expectedFirst =
+			"{\n" +
+			"  \"consents\": {\n" +
+			"    \"collect\": {\"val\": \"y\"},\n" +
+			"    \"marketing\": {\n" +
+			"      \"preferred\": \"none\",\n" +
+			"      \"push\": {\"val\": \"y\"}\n" +
+			"    },\n" +
+			"    \"metadata\": {\"time\": \"" +
+			SAMPLE_METADATA_TIMESTAMP +
+			"\"}" +
+			"  }\n" +
+			"}";
+		String actualFirst = consentsAsJson(baseConsent);
+		assertExactMatch(expectedFirst, actualFirst);
+
+		// test again
+		preferences.setMarketing("sms", "y", "sms").setTime(SAMPLE_METADATA_TIMESTAMP_OTHER);
+		Consents secondOverridingConsent = new Consents(preferences.buildToMap());
+		baseConsent.merge(secondOverridingConsent);
+
+		String expectedSecond =
+			"{\n" +
+			"  \"consents\": {\n" +
+			"    \"collect\": {\"val\": \"y\"},\n" +
+			"    \"marketing\": {\n" +
+			"      \"preferred\": \"sms\",\n" +
+			"      \"push\": {\"val\": \"y\"},\n" +
+			"      \"sms\": {\"val\": \"y\"}\n" +
+			"    },\n" +
+			"    \"metadata\": {\"time\": \"" +
+			SAMPLE_METADATA_TIMESTAMP_OTHER +
+			"\"}" +
+			"  }\n" +
+			"}";
+		String actualSecond = consentsAsJson(baseConsent);
+
+		assertExactMatch(expectedSecond, actualSecond);
 	}
 
 	@Test
