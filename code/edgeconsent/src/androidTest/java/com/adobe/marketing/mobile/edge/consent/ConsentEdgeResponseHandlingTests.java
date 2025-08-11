@@ -11,10 +11,10 @@
 
 package com.adobe.marketing.mobile.edge.consent;
 
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.CreateConsentXDMMap;
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.applyDefaultConsent;
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.buildEdgeConsentPreferenceEvent;
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.buildEdgeConsentPreferenceEventWithConsents;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.CreateConsentXDMMap;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.applyDefaultConsent;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.buildEdgeConsentPreferenceEvent;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.buildEdgeConsentPreferenceEventWithConsents;
 import static com.adobe.marketing.mobile.util.JSONAsserts.assertExactMatch;
 import static com.adobe.marketing.mobile.util.JSONAsserts.assertTypeMatch;
 import static com.adobe.marketing.mobile.util.NodeConfig.Scope.Subtree;

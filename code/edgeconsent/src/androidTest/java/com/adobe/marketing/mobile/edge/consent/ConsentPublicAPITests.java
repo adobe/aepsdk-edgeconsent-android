@@ -11,7 +11,8 @@
 
 package com.adobe.marketing.mobile.edge.consent;
 
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.getConsentsSync;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.CreateConsentXDMMap;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.getConsentsSync;
 import static com.adobe.marketing.mobile.util.JSONAsserts.assertExactMatch;
 import static com.adobe.marketing.mobile.util.NodeConfig.Scope.Subtree;
 import static com.adobe.marketing.mobile.util.TestHelper.getDispatchedEventsWith;
@@ -28,8 +29,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.EventSource;
 import com.adobe.marketing.mobile.EventType;
-import com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil;
-import com.adobe.marketing.mobile.edge.consent.util.ConsentTestConstants;
 import com.adobe.marketing.mobile.util.CollectionEqualCount;
 import com.adobe.marketing.mobile.util.MonitorExtension;
 import com.adobe.marketing.mobile.util.TestHelper;
@@ -112,7 +111,7 @@ public class ConsentPublicAPITests {
 		// verify in (Persistence, ConsentResponse and XDMSharedState)
 
 		// test
-		Consent.update(ConsentFunctionalTestUtil.CreateConsentXDMMap("y"));
+		Consent.update(CreateConsentXDMMap("y"));
 
 		// verify edge event dispatched
 		List<Event> edgeRequestEvents = getDispatchedEventsWith(EventType.EDGE, EventSource.UPDATE_CONSENT);
@@ -232,10 +231,10 @@ public class ConsentPublicAPITests {
 		// verify in (Persistence, ConsentResponse and XDMSharedState)
 
 		// test
-		Consent.update(ConsentFunctionalTestUtil.CreateConsentXDMMap("y"));
+		Consent.update(CreateConsentXDMMap("y"));
 		waitForThreads(2000);
 		resetTestExpectations();
-		Consent.update(ConsentFunctionalTestUtil.CreateConsentXDMMap("n", "y"));
+		Consent.update(CreateConsentXDMMap("n", "y"));
 
 		// verify edge event dispatched
 		List<Event> edgeRequestEvents = getDispatchedEventsWith(EventType.EDGE, EventSource.UPDATE_CONSENT);
@@ -293,7 +292,7 @@ public class ConsentPublicAPITests {
 	@Test
 	public void testGetConsentsAPI() {
 		// setup
-		Consent.update(ConsentFunctionalTestUtil.CreateConsentXDMMap("y"));
+		Consent.update(CreateConsentXDMMap("y"));
 
 		// test
 		Map<String, Object> getConsentResponse = getConsentsSync();
@@ -330,7 +329,7 @@ public class ConsentPublicAPITests {
 	@Test
 	public void testGetConsentsAPI_NoCallback() throws InterruptedException {
 		// setup
-		Consent.update(ConsentFunctionalTestUtil.CreateConsentXDMMap("y"));
+		Consent.update(CreateConsentXDMMap("y"));
 
 		// test
 		Consent.getConsents(null);
@@ -342,4 +341,7 @@ public class ConsentPublicAPITests {
 		Map<String, Object> sharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000);
 		assertNotNull(sharedState);
 	}
+
+	@Test
+	public void testUpdateAndGetConsentsAPI_nestedConsents() {}
 }

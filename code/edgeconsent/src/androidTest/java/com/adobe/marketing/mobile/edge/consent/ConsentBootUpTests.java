@@ -11,10 +11,10 @@
 
 package com.adobe.marketing.mobile.edge.consent;
 
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.CreateConsentXDMMap;
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.SAMPLE_METADATA_TIMESTAMP;
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.buildEdgeConsentPreferenceEventWithConsents;
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.getConsentsSync;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.CreateConsentXDMMap;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.SAMPLE_METADATA_TIMESTAMP;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.buildEdgeConsentPreferenceEventWithConsents;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.getConsentsSync;
 import static com.adobe.marketing.mobile.util.JSONAsserts.assertExactMatch;
 import static com.adobe.marketing.mobile.util.NodeConfig.Scope.Subtree;
 import static com.adobe.marketing.mobile.util.TestHelper.getDispatchedEventsWith;
@@ -28,7 +28,6 @@ import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.EventSource;
 import com.adobe.marketing.mobile.EventType;
 import com.adobe.marketing.mobile.MobileCore;
-import com.adobe.marketing.mobile.edge.consent.util.ConsentTestConstants;
 import com.adobe.marketing.mobile.util.CollectionEqualCount;
 import com.adobe.marketing.mobile.util.JSONAsserts;
 import com.adobe.marketing.mobile.util.MonitorExtension;

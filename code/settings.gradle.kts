@@ -32,5 +32,6 @@ dependencyResolutionManagement {
 rootProject.name = "aepsdk-edgeconsent-android"
 include (
          ":app",
-         ":edgeconsent"
+         ":edgeconsent",
+         ":test-utils"
 )

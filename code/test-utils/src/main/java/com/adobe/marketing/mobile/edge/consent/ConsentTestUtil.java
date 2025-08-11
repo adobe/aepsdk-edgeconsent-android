@@ -11,14 +11,19 @@
 
 package com.adobe.marketing.mobile.edge.consent;
 
+import com.adobe.marketing.mobile.AdobeCallbackWithError;
+import com.adobe.marketing.mobile.AdobeError;
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.EventSource;
 import com.adobe.marketing.mobile.EventType;
+import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.util.JSONUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -348,6 +353,42 @@ class ConsentTestUtil {
 		}
 
 		return contentMap.get("val");
+	}
+
+	static Map<String, Object> getConsentsSync() {
+		try {
+			final HashMap<String, Object> getConsentResponse = new HashMap<String, Object>();
+			final CountDownLatch latch = new CountDownLatch(1);
+			Consent.getConsents(
+					new AdobeCallbackWithError<Map<String, Object>>() {
+						@Override
+						public void call(Map<String, Object> consents) {
+							getConsentResponse.put(ConsentTestConstants.GetConsentHelper.VALUE, consents);
+							latch.countDown();
+						}
+
+						@Override
+						public void fail(AdobeError adobeError) {
+							getConsentResponse.put(ConsentTestConstants.GetConsentHelper.ERROR, adobeError);
+							latch.countDown();
+						}
+					}
+			);
+			latch.await();
+
+			return getConsentResponse;
+		} catch (Exception exp) {
+			return null;
+		}
+	}
+
+	static void applyDefaultConsent(final Map defaultConsentMap) {
+		HashMap<String, Object> config = new HashMap<String, Object>() {
+			{
+				put(ConsentTestConstants.ConfigurationKey.DEFAULT_CONSENT, defaultConsentMap);
+			}
+		};
+		MobileCore.updateConfiguration(config);
 	}
 
 	static Event buildEdgeConsentPreferenceEventWithConsents(final Map<String, Object> consents) {
