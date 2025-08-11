@@ -139,7 +139,7 @@ final class Consents {
 			return;
 		}
 
-		consentsMap = deepMergeMaps(consentsMap, newConsents.consentsMap);
+		consentsMap = deepMergeMaps(consentsMap, Utils.optDeepCopy(newConsents.consentsMap, new HashMap<>()));
 	}
 
 	/**
@@ -153,13 +153,13 @@ final class Consents {
 	 */
 	private Map<String, Object> deepMergeMaps(final Map<String, Object> existingMap, final Map<String, Object> newMap) {
 		if (existingMap == null) {
-			return Utils.optDeepCopy(newMap, new HashMap<>());
+			return newMap;
 		}
 		if (newMap == null) {
-			return Utils.optDeepCopy(existingMap, new HashMap<>());
+			return existingMap;
 		}
 
-		Map<String, Object> result = Utils.optDeepCopy(existingMap, new HashMap<>());
+		Map<String, Object> result = new HashMap<>(existingMap);
 
 		for (Map.Entry<String, Object> entry : newMap.entrySet()) {
 			String key = entry.getKey();
