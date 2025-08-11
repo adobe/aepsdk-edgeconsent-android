@@ -27,9 +27,26 @@ import java.util.concurrent.CountDownLatch;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * Utility class providing helper methods for testing Adobe Edge Consent functionality.
+ * <p>
+ * This class contains static methods for:
+ * - Creating and manipulating consent data structures
+ * - Reading consent values from Consents objects
+ * - Building test events for consent preferences
+ * - Synchronously retrieving consent data
+ * - Applying default consent configurations
+ * <p>
+ * The class also includes a builder pattern (ConsentsBuilder) for constructing
+ * consent data maps in a fluent manner.
+ * 
+ * @since 1.0.0
+ */
 class ConsentTestUtil {
 
+	/** Sample timestamp for testing consent metadata (2019-09-23T18:15:45Z) */
 	public static String SAMPLE_METADATA_TIMESTAMP = "2019-09-23T18:15:45Z";
+	/** Alternative sample timestamp for testing consent metadata (2020-07-23T18:16:45Z) */
 	public static String SAMPLE_METADATA_TIMESTAMP_OTHER = "2020-07-23T18:16:45Z";
 	private static final String ADID = "adID";
 	private static final String COLLECT = "collect";
@@ -39,10 +56,25 @@ class ConsentTestUtil {
 	private static final String MARKETING = "marketing";
 	private static final String PREFERRED = "preferred";
 
-	/**
+	/*
 	 * A fully prepared valid consent JSON looks like : { "consents": { "adID": { "val": "n" },
 	 * "collect": { "val": "y" }, "personalize": { "content": { "val":"y" } } "metadata": { "time":
 	 * "2019-09-23T18:15:45Z" } } }
+	 */
+	
+	/**
+	 * Creates an empty consent XDM map structure.
+	 * <p>
+	 * Returns a map containing only the "consents" key with an empty HashMap as its value.
+	 * This is useful for testing scenarios where you need a valid but empty consent structure.
+	 * 
+	 * @return A Map containing an empty consents structure
+	 * <p>
+	 * Example:
+	 * <pre>{@code
+	 * Map<String, Object> emptyConsent = ConsentTestUtil.emptyConsentXDMMap();
+	 * // Result: {"consents": {}}
+	 * }</pre>
 	 */
 	static Map<String, Object> emptyConsentXDMMap() {
 		Map<String, Object> consentMap = new HashMap<>();
@@ -50,118 +82,44 @@ class ConsentTestUtil {
 		return consentMap;
 	}
 
-	static String CreateConsentsXDMJSONString(final String collectConsentString) {
-		return CreateConsentsXDMJSONString(collectConsentString, null);
-	}
-
-	static String CreateConsentsXDMJSONString(final String collectConsentString, final String adIDConsentString) {
-		return CreateConsentsXDMJSONString(collectConsentString, adIDConsentString, null);
-	}
-
-	static String CreateConsentsXDMJSONString(
-		final String collectConsentString,
-		final String adIDConsentString,
-		final String time
-	) {
-		return CreateConsentsXDMJSONString(collectConsentString, adIDConsentString, null, time);
-	}
-
-	static String CreateConsentsXDMJSONString(
-		final String collectConsentString,
-		final String adIDConsentString,
-		final String personalizeConsentString,
-		final String time
-	) {
-		Map<String, Object> consentDataMap = CreateConsentXDMMap(
-			collectConsentString,
-			adIDConsentString,
-			personalizeConsentString,
-			time
-		);
-		JSONObject jsonObject = new JSONObject(consentDataMap);
-		return jsonObject.toString();
-	}
-
-	static Map<String, Object> CreateConsentXDMMap(final String collectConsentString) {
-		return CreateConsentXDMMap(collectConsentString, null);
-	}
-
-	static Map<String, Object> CreateConsentXDMMap(final String collectConsentString, final String adIDConsentString) {
-		return CreateConsentXDMMap(collectConsentString, adIDConsentString, null);
-	}
-
-	static Map<String, Object> CreateConsentXDMMap(
-		final String collectConsentString,
-		final String adIDConsentString,
-		final String time
-	) {
-		return CreateConsentXDMMap(collectConsentString, adIDConsentString, null, time);
-	}
-
-	static Map<String, Object> CreateConsentXDMMap(
-		final String collectConsentString,
-		final String adIDConsentString,
-		final String personalizeConsentString,
-		final String time
-	) {
-		Map<String, Object> consentData = new HashMap<String, Object>();
-		Map<String, Object> consents = new HashMap<String, Object>();
-
-		if (collectConsentString != null) {
-			consents.put(
-				COLLECT,
-				new HashMap<String, String>() {
-					{
-						put(VALUE, collectConsentString);
-					}
-				}
-			);
-		}
-
-		if (adIDConsentString != null) {
-			consents.put(
-				ADID,
-				new HashMap<String, String>() {
-					{
-						put(VALUE, adIDConsentString);
-					}
-				}
-			);
-		}
-
-		if (personalizeConsentString != null) {
-			consents.put(
-				PERSONALIZE,
-				new HashMap<String, Object>() {
-					{
-						put(
-							CONTENT,
-							new HashMap<String, String>() {
-								{
-									put(VALUE, personalizeConsentString);
-								}
-							}
-						);
-					}
-				}
-			);
-		}
-
-		if (time != null) {
-			Map<String, String> metaDataMap = new HashMap<String, String>();
-			metaDataMap.put(ConsentConstants.EventDataKey.TIME, time);
-			consents.put(ConsentConstants.EventDataKey.METADATA, metaDataMap);
-		}
-
-		consentData.put(ConsentConstants.EventDataKey.CONSENTS, consents);
-		return consentData;
-	}
-
-	public static class ConsentsMapBuilder {
+	/**
+	 * Builder class for constructing consent data maps in a fluent manner.
+	 * <p>
+	 * This builder provides methods to set various consent preferences including:
+	 * - Data collection consent
+	 * - Advertising ID consent  
+	 * - Personalization consent
+	 * - Marketing consent
+	 * - Metadata timestamp
+	 * <p>
+	 * Usage example:
+	 * <pre>{@code
+	 * Map<String, Object> consentData = new ConsentsBuilder()
+	 *     .setCollect("y")
+	 *     .setAdId("n")
+	 *     .setPersonalize("y")
+	 *     .setTime("2023-01-01T12:00:00Z")
+	 *     .buildToMap();
+	 * }</pre>
+	 */
+	public static class ConsentsBuilder {
 
 		Map<String, Object> consents = new HashMap<String, Object>();
 
-		public ConsentsMapBuilder setCollect(String val) {
+		/**
+		 * Sets the data collection consent value.
+		 * 
+		 * @param val The consent value ("y" for yes, "n" for no, or null/empty to remove)
+		 * @return This builder instance for method chaining
+		 * <p>
+		 * Example:
+		 * <pre>{@code
+		 * .setCollect("y")  // Sets collect consent to yes
+		 * .setCollect("n")  // Sets collect consent to no
+		 * .setCollect(null) // Removes collect consent
+		 * }</pre>
+		 */
+		public ConsentsBuilder setCollect(String val) {
 			if (val != null && !val.isEmpty()) {
 				consents.put(
 					COLLECT,
@@ -177,7 +135,20 @@ class ConsentTestUtil {
 			return this;
 		}
 
-		public ConsentsMapBuilder setAdId(String val) {
+		/**
+		 * Sets the advertising ID consent value.
+		 * 
+		 * @param val The consent value ("y" for yes, "n" for no, or null/empty to remove)
+		 * @return This builder instance for method chaining
+		 * <p>
+		 * Example:
+		 * <pre>{@code
+		 * .setAdId("y")  // Sets ad ID consent to yes
+		 * .setAdId("n")  // Sets ad ID consent to no
+		 * .setAdId(null) // Removes ad ID consent
+		 * }</pre>
+		 */
+		public ConsentsBuilder setAdId(String val) {
 			if (val != null && !val.isEmpty()) {
 				consents.put(
 					ADID,
@@ -193,7 +164,22 @@ class ConsentTestUtil {
 			return this;
 		}
 
-		public ConsentsMapBuilder setPersonalize(String val) {
+		/**
+		 * Sets the personalization consent value.
+		 * <p>
+		 * Creates a nested structure with "content" as the key containing the consent value.
+		 * 
+		 * @param val The consent value ("y" for yes, "n" for no, or null/empty to remove)
+		 * @return This builder instance for method chaining
+		 * <p>
+		 * Example:
+		 * <pre>{@code
+		 * .setPersonalize("y")  // Sets personalize consent to yes
+		 * .setPersonalize("n")  // Sets personalize consent to no
+		 * .setPersonalize(null) // Removes personalize consent
+		 * }</pre>
+		 */
+		public ConsentsBuilder setPersonalize(String val) {
 			if (val != null && !val.isEmpty()) {
 				consents.put(
 					PERSONALIZE,
@@ -216,7 +202,24 @@ class ConsentTestUtil {
 			return this;
 		}
 
-		public ConsentsMapBuilder setMarketing(String type, String val, String preferred) {
+		/**
+		 * Sets the marketing consent with type, value, and preferred settings.
+		 * <p>
+		 * Creates a marketing consent structure with the specified type, consent value,
+		 * and preferred setting.
+		 * 
+		 * @param type The marketing consent type (e.g., "email", "sms", "push")
+		 * @param val The consent value ("y" for yes, "n" for no)
+		 * @param preferred The preferred setting ("true" or "false")
+		 * @return This builder instance for method chaining
+		 * <p>
+		 * Example:
+		 * <pre>{@code
+		 * .setMarketing("email", "y", "true")  // Sets email marketing consent to yes with preferred true
+		 * .setMarketing("sms", "n", "false")   // Sets SMS marketing consent to no with preferred false
+		 * }</pre>
+		 */
+		public ConsentsBuilder setMarketing(String type, String val, String preferred) {
 			if (
 				type != null &&
 				val != null &&
@@ -247,7 +250,19 @@ class ConsentTestUtil {
 			return this;
 		}
 
-		public ConsentsMapBuilder setTime(String time) {
+		/**
+		 * Sets the metadata timestamp for the consent data.
+		 * 
+		 * @param time The timestamp string in ISO 8601 format (e.g., "2023-01-01T12:00:00Z")
+		 * @return This builder instance for method chaining
+		 * <p>
+		 * Example:
+		 * <pre>{@code
+		 * .setTime("2023-01-01T12:00:00Z")  // Sets consent timestamp
+		 * .setTime(null)                     // Removes timestamp
+		 * }</pre>
+		 */
+		public ConsentsBuilder setTime(String time) {
 			if (time != null && !time.isEmpty()) {
 				consents.put(
 					ConsentConstants.EventDataKey.METADATA,
@@ -263,6 +278,19 @@ class ConsentTestUtil {
 			return this;
 		}
 
+		/**
+		 * Builds the consent data as a Map structure.
+		 * 
+		 * @return A Map containing the constructed consent data with "consents" as the root key
+		 * <p>
+		 * Example:
+		 * <pre>{@code
+		 * Map<String, Object> consentMap = new ConsentsBuilder()
+		 *     .setCollect("y")
+		 *     .buildToMap();
+		 * // Result: {"consents": {"collect": {"val": "y"}}}
+		 * }</pre>
+		 */
 		public Map<String, Object> buildToMap() {
 			return new HashMap<String, Object>() {
 				{
@@ -271,6 +299,19 @@ class ConsentTestUtil {
 			};
 		}
 
+		/**
+		 * Builds the consent data as a JSON string.
+		 * 
+		 * @return A JSON string representation of the constructed consent data
+		 * <p>
+		 * Example:
+		 * <pre>{@code
+		 * String jsonString = new ConsentsBuilder()
+		 *     .setCollect("y")
+		 *     .buildToString();
+		 * // Result: "{\"consents\":{\"collect\":{\"val\":\"y\"}}}"
+		 * }</pre>
+		 */
 		public String buildToString() {
 			Map<String, Object> consentDataMap = this.buildToMap();
 			JSONObject jsonObject = new JSONObject(consentDataMap);
@@ -278,11 +319,37 @@ class ConsentTestUtil {
 		}
 	}
 
+	/**
+	 * Converts a Consents object to a JSON string representation.
+	 * 
+	 * @param consents The Consents object to convert
+	 * @return A JSON string representation of the consents data, or null if conversion fails
+	 * <p>
+	 * Example:
+	 * <pre>{@code
+	 * Consents consentObj = new Consents();
+	 * String json = ConsentTestUtil.consentsAsJson(consentObj);
+	 * }</pre>
+	 */
 	static String consentsAsJson(Consents consents) {
 		JSONObject jsonObject = new JSONObject(consents.asXDMMap());
 		return jsonObject.toString();
 	}
 
+	/**
+	 * Extracts the timestamp from a Consents object.
+	 * <p>
+	 * Reads the metadata timestamp from the consents structure.
+	 * 
+	 * @param consents The Consents object to read from
+	 * @return The timestamp string, or null if not found or invalid
+	 * <p>
+	 * Example:
+	 * <pre>{@code
+	 * String timestamp = ConsentTestUtil.readTimestamp(consents);
+	 * // Returns: "2023-01-01T12:00:00Z" or null
+	 * }</pre>
+	 */
 	static String readTimestamp(Consents consents) {
 		Map<String, Object> allConsentMap = getAllConsentsMap(consents);
 
@@ -301,6 +368,18 @@ class ConsentTestUtil {
 		return (String) collectMap.get(ConsentConstants.EventDataKey.TIME);
 	}
 
+	/**
+	 * Extracts the data collection consent value from a Consents object.
+	 * 
+	 * @param consents The Consents object to read from
+	 * @return The collect consent value ("y", "n"), or null if not found
+	 * <p>
+	 * Example:
+	 * <pre>{@code
+	 * String collectConsent = ConsentTestUtil.readCollectConsent(consents);
+	 * // Returns: "y", "n", or null
+	 * }</pre>
+	 */
 	static String readCollectConsent(Consents consents) {
 		Map<String, Object> allConsentMap = getAllConsentsMap(consents);
 
@@ -317,6 +396,18 @@ class ConsentTestUtil {
 		return (String) collectMap.get("val");
 	}
 
+	/**
+	 * Extracts the advertising ID consent value from a Consents object.
+	 * 
+	 * @param consents The Consents object to read from
+	 * @return The ad ID consent value ("y", "n"), or null if not found
+	 * <p>
+	 * Example:
+	 * <pre>{@code
+	 * String adIdConsent = ConsentTestUtil.readAdIdConsent(consents);
+	 * // Returns: "y", "n", or null
+	 * }</pre>
+	 */
 	static String readAdIdConsent(Consents consents) {
 		Map<String, Object> allConsentMap = getAllConsentsMap(consents);
 
@@ -333,6 +424,20 @@ class ConsentTestUtil {
 		return (String) adIdMap.get("val");
 	}
 
+	/**
+	 * Extracts the personalization consent value from a Consents object.
+	 * <p>
+	 * Reads the nested personalization consent value from the content structure.
+	 * 
+	 * @param consents The Consents object to read from
+	 * @return The personalize consent value ("y", "n"), or null if not found
+	 * <p>
+	 * Example:
+	 * <pre>{@code
+	 * String personalizeConsent = ConsentTestUtil.readPersonalizeConsent(consents);
+	 * // Returns: "y", "n", or null
+	 * }</pre>
+	 */
 	static String readPersonalizeConsent(Consents consents) {
 		Map<String, Object> allConsentMap = getAllConsentsMap(consents);
 
@@ -355,6 +460,26 @@ class ConsentTestUtil {
 		return contentMap.get("val");
 	}
 
+	/**
+	 * Synchronously retrieves current consent data.
+	 * <p>
+	 * This method blocks until the consent data is retrieved or an error occurs.
+	 * Uses a CountDownLatch to convert the asynchronous Consent.getConsents() call
+	 * into a synchronous operation for testing purposes.
+	 * 
+	 * @return A Map containing either the consent data under "value" key or
+	 *         an AdobeError under "error" key, or null if an exception occurs
+	 * <p>
+	 * Example:
+	 * <pre>{@code
+	 * Map<String, Object> result = ConsentTestUtil.getConsentsSync();
+	 * if (result.containsKey("value")) {
+	 *     Map<String, Object> consents = (Map<String, Object>) result.get("value");
+	 * } else if (result.containsKey("error")) {
+	 *     AdobeError error = (AdobeError) result.get("error");
+	 * }
+	 * }</pre>
+	 */
 	static Map<String, Object> getConsentsSync() {
 		try {
 			final HashMap<String, Object> getConsentResponse = new HashMap<String, Object>();
@@ -382,6 +507,22 @@ class ConsentTestUtil {
 		}
 	}
 
+	/**
+	 * Applies default consent configuration to MobileCore.
+	 * <p>
+	 * Updates the MobileCore configuration with the provided default consent map.
+	 * This is useful for setting up test scenarios with predefined consent defaults.
+	 * 
+	 * @param defaultConsentMap The default consent configuration map to apply
+	 * <p>
+	 * Example:
+	 * <pre>{@code
+	 * Map<String, Object> defaultConsent = new ConsentsBuilder()
+	 *     .setCollect("y")
+	 *     .buildToMap();
+	 * ConsentTestUtil.applyDefaultConsent(defaultConsent);
+	 * }</pre>
+	 */
 	static void applyDefaultConsent(final Map defaultConsentMap) {
 		HashMap<String, Object> config = new HashMap<String, Object>() {
 			{
@@ -391,6 +532,23 @@ class ConsentTestUtil {
 		MobileCore.updateConfiguration(config);
 	}
 
+	/**
+	 * Builds an Edge consent preference event with the provided consent data.
+	 * <p>
+	 * Creates an Event object with type "consent:preferences" and the specified
+	 * consent data as payload.
+	 * 
+	 * @param consents The consent data map to include in the event payload
+	 * @return An Event object configured for Edge consent preferences
+	 * <p>
+	 * Example:
+	 * <pre>{@code
+	 * Map<String, Object> consentData = new ConsentsBuilder()
+	 *     .setCollect("y")
+	 *     .buildToMap();
+	 * Event event = ConsentTestUtil.buildEdgeConsentPreferenceEventWithConsents(consentData);
+	 * }</pre>
+	 */
 	static Event buildEdgeConsentPreferenceEventWithConsents(final Map<String, Object> consents) {
 		List<Map<String, Object>> payload = new ArrayList<>();
 		payload.add((Map) (consents.get("consents")));
@@ -402,6 +560,22 @@ class ConsentTestUtil {
 			.build();
 	}
 
+	/**
+	 * Builds an Edge consent preference event from a JSON string.
+	 * <p>
+	 * Parses the provided JSON string and creates an Event object with type
+	 * "consent:preferences".
+	 * 
+	 * @param jsonString The JSON string containing consent data
+	 * @return An Event object configured for Edge consent preferences
+	 * @throws JSONException if the JSON string is malformed
+	 * <p>
+	 * Example:
+	 * <pre>{@code
+	 * String jsonData = "{\"consents\":{\"collect\":{\"val\":\"y\"}}}";
+	 * Event event = ConsentTestUtil.buildEdgeConsentPreferenceEvent(jsonData);
+	 * }</pre>
+	 */
 	static Event buildEdgeConsentPreferenceEvent(final String jsonString) throws JSONException {
 		Map<String, Object> eventData = JSONUtils.toMap(new JSONObject(jsonString));
 		return new Event.Builder("Edge Consent Preference", EventType.EDGE, EventSource.CONSENT_PREFERENCE)
@@ -409,6 +583,15 @@ class ConsentTestUtil {
 			.build();
 	}
 
+	/**
+	 * Extracts the consents map from a Consents object.
+	 * <p>
+	 * Helper method that retrieves the nested consents data from the XDM map
+	 * structure of a Consents object.
+	 * 
+	 * @param consents The Consents object to extract data from
+	 * @return The consents map, or null if not found or invalid
+	 */
 	private static Map<String, Object> getAllConsentsMap(Consents consents) {
 		Map<String, Object> xdmMap = consents.asXDMMap();
 
@@ -425,6 +608,12 @@ class ConsentTestUtil {
 		return allConsents;
 	}
 
+	/**
+	 * Checks if a Map is null or empty.
+	 * 
+	 * @param map The Map to check
+	 * @return true if the map is null or empty, false otherwise
+	 */
 	private static boolean isNullOrEmpty(final Map map) {
 		return (map == null || map.isEmpty());
 	}

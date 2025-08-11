@@ -41,7 +41,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ConsentTest {
 
-	private static Map<String, Object> SAMPLE_CONSENTS_MAP = ConsentTestUtil.CreateConsentXDMMap("y");
+	private static Map<String, Object> SAMPLE_CONSENTS_MAP = new ConsentTestUtil.ConsentsBuilder()
+		.setCollect("y")
+		.buildToMap();
 
 	@Mock
 	Application mockApplication;
@@ -243,7 +245,7 @@ public class ConsentTest {
 
 			final AdobeCallbackWithError<Event> callbackWithError = callbackCaptor.getValue();
 
-			Map<String, Object> verifyConsentMap = ConsentTestUtil.CreateConsentXDMMap("y");
+			Map<String, Object> verifyConsentMap = new ConsentTestUtil.ConsentsBuilder().setCollect("y").buildToMap();
 			callbackWithError.call(buildConsentResponseEvent(verifyConsentMap));
 			assertEquals(verifyConsentMap, callbackReturnValues.get(0));
 
