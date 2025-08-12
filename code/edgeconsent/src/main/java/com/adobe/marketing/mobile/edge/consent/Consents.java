@@ -134,12 +134,14 @@ final class Consents {
 			return;
 		}
 
+		final Map<String, Object> newConsentsMapCopy = Utils.optDeepCopy(newConsents.consentsMap, new HashMap<>());
+
 		if (isEmpty()) {
-			consentsMap = Utils.optDeepCopy(newConsents.consentsMap, new HashMap<>());
+			consentsMap = newConsentsMapCopy;
 			return;
 		}
 
-		consentsMap = deepMergeMaps(consentsMap, Utils.optDeepCopy(newConsents.consentsMap, new HashMap<>()));
+		consentsMap = deepMergeMaps(consentsMap, newConsentsMapCopy);
 	}
 
 	/**
