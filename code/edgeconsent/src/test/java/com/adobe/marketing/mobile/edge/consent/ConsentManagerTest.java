@@ -12,10 +12,12 @@
 package com.adobe.marketing.mobile.edge.consent;
 
 import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.*;
+import static com.adobe.marketing.mobile.util.JSONAsserts.assertExactMatch;
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -24,6 +26,7 @@ import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -47,7 +50,10 @@ public class ConsentManagerTest {
 	@Test
 	public void test_Constructor_LoadsFromPersistence() {
 		// setup
-		final String updatedConsentsJSON = CreateConsentsXDMJSONString("y", null, SAMPLE_METADATA_TIMESTAMP);
+		final String updatedConsentsJSON = new ConsentsBuilder()
+			.setCollect("y")
+			.setTime(SAMPLE_METADATA_TIMESTAMP)
+			.buildToString();
 		Mockito
 			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES, null))
 			.thenReturn(updatedConsentsJSON);
@@ -112,14 +118,25 @@ public class ConsentManagerTest {
 	@Test
 	public void test_MergeAndPersist() {
 		// setup currentConsent
-		final String persistedJSON = CreateConsentsXDMJSONString("y", "n", "vi", SAMPLE_METADATA_TIMESTAMP);
+		final String persistedJSON = new ConsentsBuilder()
+			.setCollect("y")
+			.setAdId("n")
+			.setPersonalize("vi")
+			.setTime(SAMPLE_METADATA_TIMESTAMP)
+			.buildToString();
 		Mockito
 			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES, null))
 			.thenReturn(persistedJSON);
 		consentManager = new ConsentManager(mockNamedCollection); // consentManager now loads the persisted data
 
 		// test
-		Consents newConsent = new Consents(CreateConsentXDMMap("n", null, "pi", SAMPLE_METADATA_TIMESTAMP_OTHER));
+		Consents newConsent = new Consents(
+			new ConsentsBuilder()
+				.setCollect("n")
+				.setPersonalize("pi")
+				.setTime(SAMPLE_METADATA_TIMESTAMP_OTHER)
+				.buildToMap()
+		);
 		boolean result = consentManager.mergeAndPersist(newConsent);
 		Consents mergedConsent = consentManager.getCurrentConsents();
 
@@ -136,14 +153,74 @@ public class ConsentManagerTest {
 		verify(mockNamedCollection, times(1))
 			.setString(
 				ConsentConstants.DataStoreKey.CONSENT_PREFERENCES,
-				CreateConsentsXDMJSONString("n", "n", "pi", SAMPLE_METADATA_TIMESTAMP_OTHER)
+				new ConsentsBuilder()
+					.setCollect("n")
+					.setAdId("n")
+					.setPersonalize("pi")
+					.setTime(SAMPLE_METADATA_TIMESTAMP_OTHER)
+					.buildToString()
 			);
+	}
+
+	@Test
+	public void test_MergeAndPersistNestedPreferences() {
+		// setup currentConsent
+		ConsentsBuilder preferenceBuilder = new ConsentsBuilder()
+			.setCollect("y")
+			.setMarketing("push", "y", "none")
+			.setTime(SAMPLE_METADATA_TIMESTAMP);
+		final String persistedJSON = preferenceBuilder.buildToString();
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES, null))
+			.thenReturn(persistedJSON);
+		consentManager = new ConsentManager(mockNamedCollection); // consentManager now loads the persisted data
+
+		// test
+		Consents newConsent = new Consents(
+			preferenceBuilder.setMarketing("sms", "y", "sms").setTime(SAMPLE_METADATA_TIMESTAMP_OTHER).buildToMap()
+		);
+		boolean result = consentManager.mergeAndPersist(newConsent);
+		Consents mergedConsent = consentManager.getCurrentConsents();
+
+		// verify return value is true since consents have changed
+		assertTrue(result);
+
+		String actualResult = consentsAsJson(mergedConsent);
+		String expectedResult =
+			"{" +
+			"  \"consents\": {" +
+			"      \"collect\": {" +
+			"        \"val\": \"y\"" +
+			"      }," +
+			"      \"marketing\": {" +
+			"        \"preferred\": \"sms\"," +
+			"        \"push\": {\"val\": \"y\"}," +
+			"        \"sms\": {\"val\": \"y\"}," +
+			"      }," +
+			"      \"metadata\": {\"time\": \"" +
+			SAMPLE_METADATA_TIMESTAMP_OTHER +
+			"\"}" +
+			"    }" +
+			"}";
+
+		assertExactMatch(expectedResult, actualResult);
+
+		// verify if correct data is written in persistence
+		final ArgumentCaptor<String> persistedConsents = ArgumentCaptor.forClass(String.class);
+		verify(mockNamedCollection, times(1))
+			.setString(eq(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES), persistedConsents.capture());
+
+		assertExactMatch(expectedResult, persistedConsents.getValue());
 	}
 
 	@Test
 	public void test_MergeAndPersist_nullConsent() {
 		// setup currentConsent
-		final String persistedJSON = CreateConsentsXDMJSONString("y", "n", SAMPLE_METADATA_TIMESTAMP);
+		final String persistedJSON = new ConsentsBuilder()
+			.setCollect("y")
+			.setAdId("n")
+			.setTime(SAMPLE_METADATA_TIMESTAMP)
+			.buildToString();
 		Mockito
 			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES, null))
 			.thenReturn(persistedJSON);
@@ -165,14 +242,18 @@ public class ConsentManagerTest {
 		verify(mockNamedCollection, times(1))
 			.setString(
 				ConsentConstants.DataStoreKey.CONSENT_PREFERENCES,
-				CreateConsentsXDMJSONString("y", "n", SAMPLE_METADATA_TIMESTAMP)
+				new ConsentsBuilder().setCollect("y").setAdId("n").setTime(SAMPLE_METADATA_TIMESTAMP).buildToString()
 			);
 	}
 
 	@Test
 	public void test_MergeAndPersist_emptyConsent() {
 		// setup currentConsent
-		final String persistedJSON = CreateConsentsXDMJSONString("y", "n", SAMPLE_METADATA_TIMESTAMP);
+		final String persistedJSON = new ConsentsBuilder()
+			.setCollect("y")
+			.setAdId("n")
+			.setTime(SAMPLE_METADATA_TIMESTAMP)
+			.buildToString();
 		Mockito
 			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES, null))
 			.thenReturn(persistedJSON);
@@ -194,7 +275,7 @@ public class ConsentManagerTest {
 		verify(mockNamedCollection, times(1))
 			.setString(
 				ConsentConstants.DataStoreKey.CONSENT_PREFERENCES,
-				CreateConsentsXDMJSONString("y", "n", SAMPLE_METADATA_TIMESTAMP)
+				new ConsentsBuilder().setCollect("y").setAdId("n").setTime(SAMPLE_METADATA_TIMESTAMP).buildToString()
 			);
 	}
 
@@ -208,7 +289,7 @@ public class ConsentManagerTest {
 		// data
 
 		// test
-		Consents newConsent = new Consents(CreateConsentXDMMap("n"));
+		Consents newConsent = new Consents(new ConsentsBuilder().setCollect("n").buildToMap());
 		consentManager.mergeAndPersist(newConsent);
 		Consents mergedConsent = consentManager.getCurrentConsents();
 
@@ -219,7 +300,10 @@ public class ConsentManagerTest {
 
 		// verify persistence is not disturbed
 		verify(mockNamedCollection, times(1))
-			.setString(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES, CreateConsentsXDMJSONString("n", null));
+			.setString(
+				ConsentConstants.DataStoreKey.CONSENT_PREFERENCES,
+				new ConsentsBuilder().setCollect("n").buildToString()
+			);
 	}
 
 	@Test(expected = Test.None.class)
@@ -227,7 +311,7 @@ public class ConsentManagerTest {
 		consentManager = new ConsentManager(null);
 
 		// test
-		Consents newConsent = new Consents(CreateConsentXDMMap("n"));
+		Consents newConsent = new Consents(new ConsentsBuilder().setCollect("n").buildToMap());
 		consentManager.mergeAndPersist(newConsent);
 		Consents mergedConsent = consentManager.getCurrentConsents();
 
@@ -272,7 +356,9 @@ public class ConsentManagerTest {
 
 		// test
 		// update default consent with Collect NO
-		boolean isCurrentConsentChanged = consentManager.updateDefaultConsents(new Consents(CreateConsentXDMMap("n")));
+		boolean isCurrentConsentChanged = consentManager.updateDefaultConsents(
+			new Consents(new ConsentsBuilder().setCollect("n").buildToMap())
+		);
 
 		// verify
 		assertTrue(isCurrentConsentChanged);
@@ -303,12 +389,21 @@ public class ConsentManagerTest {
 
 		// setup
 		consentManager = new ConsentManager(mockNamedCollection);
-		consentManager.mergeAndPersist(new Consents(CreateConsentXDMMap("y", "n", "vi", SAMPLE_METADATA_TIMESTAMP)));
+		consentManager.mergeAndPersist(
+			new Consents(
+				new ConsentsBuilder()
+					.setCollect("y")
+					.setAdId("n")
+					.setPersonalize("vi")
+					.setTime(SAMPLE_METADATA_TIMESTAMP)
+					.buildToMap()
+			)
+		);
 
 		// test
 		// update default consent with Collect NO adID NO
 		boolean isCurrentConsentChanged = consentManager.updateDefaultConsents(
-			new Consents(CreateConsentXDMMap("n", "n"))
+			new Consents(new ConsentsBuilder().setCollect("n").setAdId("n").buildToMap())
 		);
 
 		// verify
@@ -342,12 +437,12 @@ public class ConsentManagerTest {
 
 		// setup
 		consentManager = new ConsentManager(mockNamedCollection);
-		consentManager.mergeAndPersist(new Consents(CreateConsentXDMMap("y")));
+		consentManager.mergeAndPersist(new Consents(new ConsentsBuilder().setCollect("y").buildToMap()));
 
 		// test
 		// update default consent with Collect NO adID NO
 		boolean isCurrentConsentChanged = consentManager.updateDefaultConsents(
-			new Consents(CreateConsentXDMMap("n", "n"))
+			new Consents(new ConsentsBuilder().setCollect("n").setAdId("n").buildToMap())
 		);
 
 		// verify
@@ -382,13 +477,19 @@ public class ConsentManagerTest {
 
 		// setup
 		consentManager = new ConsentManager(mockNamedCollection);
-		assertTrue(consentManager.updateDefaultConsents(new Consents(CreateConsentXDMMap("n", "n"))));
+		assertTrue(
+			consentManager.updateDefaultConsents(
+				new Consents(new ConsentsBuilder().setCollect("n").setAdId("n").buildToMap())
+			)
+		);
 
 		// setup 2
-		consentManager.mergeAndPersist(new Consents(CreateConsentXDMMap("y")));
+		consentManager.mergeAndPersist(new Consents(new ConsentsBuilder().setCollect("y").buildToMap()));
 
 		// test
-		boolean isCurrentConsentChanged = consentManager.updateDefaultConsents(new Consents(CreateConsentXDMMap("n")));
+		boolean isCurrentConsentChanged = consentManager.updateDefaultConsents(
+			new Consents(new ConsentsBuilder().setCollect("n").buildToMap())
+		);
 
 		// verify
 		assertTrue(isCurrentConsentChanged);
@@ -407,14 +508,20 @@ public class ConsentManagerTest {
 	@Test
 	public void test_MergeAndPersist_sameConsentsDifferentTimestamp() {
 		// setup currentConsent
-		final String persistedJSON = CreateConsentsXDMJSONString("y", "n", SAMPLE_METADATA_TIMESTAMP);
+		final String persistedJSON = new ConsentsBuilder()
+			.setCollect("y")
+			.setAdId("n")
+			.setTime(SAMPLE_METADATA_TIMESTAMP)
+			.buildToString();
 		Mockito
 			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES, null))
 			.thenReturn(persistedJSON);
 		consentManager = new ConsentManager(mockNamedCollection); // consentManager now loads the persisted data
 
 		// test - merge with same consents but different timestamp
-		Consents newConsent = new Consents(CreateConsentXDMMap("y", "n", SAMPLE_METADATA_TIMESTAMP_OTHER));
+		Consents newConsent = new Consents(
+			new ConsentsBuilder().setCollect("y").setAdId("n").setTime(SAMPLE_METADATA_TIMESTAMP_OTHER).buildToMap()
+		);
 		boolean result = consentManager.mergeAndPersist(newConsent);
 		Consents mergedConsent = consentManager.getCurrentConsents();
 
@@ -430,21 +537,31 @@ public class ConsentManagerTest {
 		verify(mockNamedCollection, times(1))
 			.setString(
 				ConsentConstants.DataStoreKey.CONSENT_PREFERENCES,
-				CreateConsentsXDMJSONString("y", "n", SAMPLE_METADATA_TIMESTAMP_OTHER)
+				new ConsentsBuilder()
+					.setCollect("y")
+					.setAdId("n")
+					.setTime(SAMPLE_METADATA_TIMESTAMP_OTHER)
+					.buildToString()
 			);
 	}
 
 	@Test
 	public void test_MergeAndPersist_sameConsentsSameTimestamp() {
 		// setup currentConsent
-		final String persistedJSON = CreateConsentsXDMJSONString("y", "n", SAMPLE_METADATA_TIMESTAMP);
+		final String persistedJSON = new ConsentsBuilder()
+			.setCollect("y")
+			.setAdId("n")
+			.setTime(SAMPLE_METADATA_TIMESTAMP)
+			.buildToString();
 		Mockito
 			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES, null))
 			.thenReturn(persistedJSON);
 		consentManager = new ConsentManager(mockNamedCollection); // consentManager now loads the persisted data
 
 		// test - merge with same consents and same timestamp
-		Consents newConsent = new Consents(CreateConsentXDMMap("y", "n", SAMPLE_METADATA_TIMESTAMP));
+		Consents newConsent = new Consents(
+			new ConsentsBuilder().setCollect("y").setAdId("n").setTime(SAMPLE_METADATA_TIMESTAMP).buildToMap()
+		);
 		boolean result = consentManager.mergeAndPersist(newConsent);
 		Consents mergedConsent = consentManager.getCurrentConsents();
 
@@ -460,7 +577,7 @@ public class ConsentManagerTest {
 		verify(mockNamedCollection, times(1))
 			.setString(
 				ConsentConstants.DataStoreKey.CONSENT_PREFERENCES,
-				CreateConsentsXDMJSONString("y", "n", SAMPLE_METADATA_TIMESTAMP)
+				new ConsentsBuilder().setCollect("y").setAdId("n").setTime(SAMPLE_METADATA_TIMESTAMP).buildToString()
 			);
 	}
 }
