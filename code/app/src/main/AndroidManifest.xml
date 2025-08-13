@@ -56,6 +56,16 @@
                 android:value=".AssuranceActivity" />
         </activity>
 
+        <activity
+            android:name=".TestingActivity"
+            android:label="Tests"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".TestingActivity" />
+        </activity>
+
     </application>
 
 </manifest>

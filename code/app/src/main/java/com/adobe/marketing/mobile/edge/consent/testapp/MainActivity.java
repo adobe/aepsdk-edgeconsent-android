@@ -77,6 +77,12 @@ public class MainActivity extends AppCompatActivity {
 			return true;
 		}
 
+		if (item.getItemId() == R.id.testing) {
+			intent = new Intent(MainActivity.this, TestingActivity.class);
+			startActivity(intent);
+			return true;
+		}
+
 		return super.onOptionsItemSelected(item);
 	}
 
