@@ -11,8 +11,8 @@
 
 package com.adobe.marketing.mobile.edge.consent;
 
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.CreateConsentXDMMap;
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.getConsentsSync;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.ConsentsBuilder;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.getConsentsSync;
 import static com.adobe.marketing.mobile.util.JSONAsserts.assertExactMatch;
 import static com.adobe.marketing.mobile.util.NodeConfig.Scope.Subtree;
 import static com.adobe.marketing.mobile.util.TestHelper.getDispatchedEventsWith;
@@ -26,7 +26,6 @@ import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.EventSource;
 import com.adobe.marketing.mobile.EventType;
 import com.adobe.marketing.mobile.MobileCore;
-import com.adobe.marketing.mobile.edge.consent.util.ConsentTestConstants;
 import com.adobe.marketing.mobile.util.CollectionEqualCount;
 import com.adobe.marketing.mobile.util.JSONAsserts;
 import com.adobe.marketing.mobile.util.MonitorExtension;
@@ -60,7 +59,7 @@ public class ConsentDefaultsTests {
 
 		// setup
 
-		initWithDefaultConsent(CreateConsentXDMMap("y"));
+		initWithDefaultConsent(new ConsentsBuilder().setCollect("y").buildToMap());
 
 		// verify consent response event dispatched
 		List<Event> consentResponseEvents = getDispatchedEventsWith(EventType.CONSENT, EventSource.RESPONSE_CONTENT);
@@ -96,8 +95,8 @@ public class ConsentDefaultsTests {
 		// verify in (XDMSharedState)
 
 		// setup
-		initWithDefaultConsent(CreateConsentXDMMap("y", "n")); // Initiate with collectConsent = y and adID = n
-		Consent.update(CreateConsentXDMMap("n")); // // Initiate with collectConsent = n
+		initWithDefaultConsent(new ConsentsBuilder().setCollect("y").setAdId("n").buildToMap()); // Initiate with collectConsent = y and adID = n
+		Consent.update(new ConsentsBuilder().setCollect("n").buildToMap()); // // Initiate with collectConsent = n
 		waitForThreads(1000);
 
 		// verify xdm shared state
@@ -139,10 +138,13 @@ public class ConsentDefaultsTests {
 		// -------------------------------------------
 		// verify in (XDMSharedState)
 		// setup
-		initWithDefaultConsent(CreateConsentXDMMap("y", "n")); // Initiate with collectConsent = y and adID = n
+		initWithDefaultConsent(new ConsentsBuilder().setCollect("y").setAdId("n").buildToMap()); // Initiate with collectConsent = y and adID = n
 		HashMap<String, Object> config = new HashMap<String, Object>() {
 			{
-				put(ConsentTestConstants.ConfigurationKey.DEFAULT_CONSENT, CreateConsentXDMMap("n")); // Reset collectConsent = y
+				put(
+					ConsentTestConstants.ConfigurationKey.DEFAULT_CONSENT,
+					new ConsentsBuilder().setCollect("n").buildToMap()
+				); // Reset collectConsent = y
 			}
 		};
 		MobileCore.updateConfiguration(config);
@@ -159,8 +161,8 @@ public class ConsentDefaultsTests {
 	@Test
 	public void test_DefaultConsent_DoesNotGetForwardedToEdge() throws Exception {
 		// setup
-		initWithDefaultConsent(CreateConsentXDMMap("y", "n")); // Initiate default consents with collectConsent = y and adID = n
-		Consent.update(CreateConsentXDMMap("n")); // then update collectConsent = n
+		initWithDefaultConsent(new ConsentsBuilder().setCollect("y").setAdId("n").buildToMap()); // Initiate default consents with collectConsent = y and adID = n
+		Consent.update(new ConsentsBuilder().setCollect("n").buildToMap()); // then update collectConsent = n
 		waitForThreads(1000);
 
 		// verify edge event for only collectConsent data
@@ -191,7 +193,7 @@ public class ConsentDefaultsTests {
 	@Test
 	public void test_DefaultConsent_NotSavedInPersistence() throws Exception {
 		// setup
-		initWithDefaultConsent(CreateConsentXDMMap("y", "n"));
+		initWithDefaultConsent(new ConsentsBuilder().setCollect("y").setAdId("n").buildToMap());
 		waitForThreads(2000);
 
 		// verify persisted Data

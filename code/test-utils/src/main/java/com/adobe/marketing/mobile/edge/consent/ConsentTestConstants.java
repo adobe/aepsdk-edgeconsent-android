@@ -9,7 +9,7 @@
   governing permissions and limitations under the License.
 */
 
-package com.adobe.marketing.mobile.edge.consent.util;
+package com.adobe.marketing.mobile.edge.consent;
 
 /** Class to maintain test constants. */
 public class ConsentTestConstants {

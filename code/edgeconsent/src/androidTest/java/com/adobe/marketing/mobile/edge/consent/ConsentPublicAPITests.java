@@ -11,7 +11,8 @@
 
 package com.adobe.marketing.mobile.edge.consent;
 
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.getConsentsSync;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.ConsentsBuilder;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.getConsentsSync;
 import static com.adobe.marketing.mobile.util.JSONAsserts.assertExactMatch;
 import static com.adobe.marketing.mobile.util.NodeConfig.Scope.Subtree;
 import static com.adobe.marketing.mobile.util.TestHelper.getDispatchedEventsWith;
@@ -28,8 +29,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.EventSource;
 import com.adobe.marketing.mobile.EventType;
-import com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil;
-import com.adobe.marketing.mobile.edge.consent.util.ConsentTestConstants;
 import com.adobe.marketing.mobile.util.CollectionEqualCount;
 import com.adobe.marketing.mobile.util.MonitorExtension;
 import com.adobe.marketing.mobile.util.TestHelper;
@@ -112,7 +111,7 @@ public class ConsentPublicAPITests {
 		// verify in (Persistence, ConsentResponse and XDMSharedState)
 
 		// test
-		Consent.update(ConsentFunctionalTestUtil.CreateConsentXDMMap("y"));
+		Consent.update(new ConsentsBuilder().setCollect("y").buildToMap());
 
 		// verify edge event dispatched
 		List<Event> edgeRequestEvents = getDispatchedEventsWith(EventType.EDGE, EventSource.UPDATE_CONSENT);
@@ -232,10 +231,10 @@ public class ConsentPublicAPITests {
 		// verify in (Persistence, ConsentResponse and XDMSharedState)
 
 		// test
-		Consent.update(ConsentFunctionalTestUtil.CreateConsentXDMMap("y"));
+		Consent.update(new ConsentsBuilder().setCollect("y").buildToMap());
 		waitForThreads(2000);
 		resetTestExpectations();
-		Consent.update(ConsentFunctionalTestUtil.CreateConsentXDMMap("n", "y"));
+		Consent.update(new ConsentsBuilder().setCollect("n").setAdId("y").buildToMap());
 
 		// verify edge event dispatched
 		List<Event> edgeRequestEvents = getDispatchedEventsWith(EventType.EDGE, EventSource.UPDATE_CONSENT);
@@ -293,7 +292,7 @@ public class ConsentPublicAPITests {
 	@Test
 	public void testGetConsentsAPI() {
 		// setup
-		Consent.update(ConsentFunctionalTestUtil.CreateConsentXDMMap("y"));
+		Consent.update(new ConsentsBuilder().setCollect("y").buildToMap());
 
 		// test
 		Map<String, Object> getConsentResponse = getConsentsSync();
@@ -330,7 +329,7 @@ public class ConsentPublicAPITests {
 	@Test
 	public void testGetConsentsAPI_NoCallback() throws InterruptedException {
 		// setup
-		Consent.update(ConsentFunctionalTestUtil.CreateConsentXDMMap("y"));
+		Consent.update(new ConsentsBuilder().setCollect("y").buildToMap());
 
 		// test
 		Consent.getConsents(null);
@@ -341,5 +340,41 @@ public class ConsentPublicAPITests {
 		// verify shared state set
 		Map<String, Object> sharedState = getXDMSharedStateFor(ConsentConstants.EXTENSION_NAME, 2000);
 		assertNotNull(sharedState);
+	}
+
+	@Test
+	public void testUpdateAndGetConsentsAPI_nestedConsents() {
+		ConsentsBuilder consentsBuilder = new ConsentsBuilder();
+		consentsBuilder.setCollect("y");
+
+		Consent.update(consentsBuilder.setMarketing("push", "y", "none").buildToMap());
+		Consent.update(consentsBuilder.setMarketing("sms", "y", "sms").buildToMap());
+
+		Map<String, Object> getConsentResponse = getConsentsSync();
+		Map<String, Object> responseMap = (Map) getConsentResponse.get(ConsentTestConstants.GetConsentHelper.VALUE);
+
+		String expected =
+			"        {\n" +
+			"          \"consents\": {\n" +
+			"            \"collect\": {\n" +
+			"              \"val\": \"y\"\n" +
+			"            },\n" +
+			"            \"marketing\": {\n" +
+			"              \"preferred\": \"sms\",\n" +
+			"              \"push\": {\n" +
+			"                \"val\": \"y\"\n" +
+			"              },\n" +
+			"              \"sms\": {\n" +
+			"                \"val\": \"y\"\n" +
+			"              }\n" +
+			"            },\n" +
+			"            \"metadata\": {\n" +
+			"              \"time\": \"STRING_TYPE\"\n" +
+			"            }\n" +
+			"          }\n" +
+			"        }";
+
+		// verify that only collect consent and metadata are updated
+		assertExactMatch(expected, responseMap, new ValueTypeMatch("consents.metadata.time"));
 	}
 }

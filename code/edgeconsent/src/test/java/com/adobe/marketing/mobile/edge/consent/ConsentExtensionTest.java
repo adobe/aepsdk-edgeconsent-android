@@ -29,6 +29,8 @@ import com.adobe.marketing.mobile.ExtensionApi;
 import com.adobe.marketing.mobile.ExtensionEventListener;
 import com.adobe.marketing.mobile.services.NamedCollection;
 import com.adobe.marketing.mobile.util.JSONUtils;
+import com.adobe.marketing.mobile.util.TimeUtils;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,7 +110,7 @@ public class ConsentExtensionTest {
 	@Test
 	public void test_OnBootUp_SharesXDMSharedState() {
 		// setup
-		setupExistingConsents(CreateConsentsXDMJSONString("y"));
+		setupExistingConsents(new ConsentsBuilder().setCollect("y").buildToString());
 		ArgumentCaptor<Map> sharedStateCaptor = ArgumentCaptor.forClass(Map.class);
 		ArgumentCaptor<Event> sharedStateEventCaptor = ArgumentCaptor.forClass(Event.class);
 		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
@@ -192,7 +194,7 @@ public class ConsentExtensionTest {
 	@Test
 	public void test_handleConfigurationResponse() throws Exception {
 		// setup
-		Event configEvent = buildConfigurationResponseEvent(CreateConsentsXDMJSONString("y"));
+		Event configEvent = buildConfigurationResponseEvent(new ConsentsBuilder().setCollect("y").buildToString());
 		ArgumentCaptor<Map> sharedStateCaptor = ArgumentCaptor.forClass(Map.class);
 		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
 
@@ -217,7 +219,7 @@ public class ConsentExtensionTest {
 	@Test
 	public void test_handleConfigurationResponse_multipleTimesWithSameDefaults() throws Exception {
 		// setup
-		Event configEvent = buildConfigurationResponseEvent(CreateConsentsXDMJSONString("y"));
+		Event configEvent = buildConfigurationResponseEvent(new ConsentsBuilder().setCollect("y").buildToString());
 		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
 
 		// test
@@ -235,7 +237,7 @@ public class ConsentExtensionTest {
 	@Test
 	public void test_handleConfigurationResponse_RemoveDefault() throws Exception {
 		// setup
-		Event configEvent = buildConfigurationResponseEvent(CreateConsentsXDMJSONString("y"));
+		Event configEvent = buildConfigurationResponseEvent(new ConsentsBuilder().setCollect("y").buildToString());
 		Event emptyConfigEvent = buildConfigurationResponseEvent("{}");
 		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
 
@@ -326,7 +328,7 @@ public class ConsentExtensionTest {
 	@Test
 	public void test_handleConsentUpdate_MergesWithExistingConsents() {
 		// setup
-		setupExistingConsents(CreateConsentsXDMJSONString("n", "n"));
+		setupExistingConsents(new ConsentsBuilder().setCollect("n").setAdId("n").buildToString());
 		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
 		ArgumentCaptor<Map> sharedStateCaptor = ArgumentCaptor.forClass(Map.class);
 
@@ -373,7 +375,7 @@ public class ConsentExtensionTest {
 	@Test
 	public void test_handleConsentUpdate_NullOrEmptyConsents() {
 		// setup event with no valid consents
-		setupExistingConsents(CreateConsentsXDMJSONString("n", "n"));
+		setupExistingConsents(new ConsentsBuilder().setCollect("n").setAdId("n").buildToString());
 		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
 
 		// test
@@ -401,13 +403,128 @@ public class ConsentExtensionTest {
 		verify(mockExtensionApi, times(0)).dispatch(eventCaptor.capture());
 	}
 
+	@Test
+	public void test_handleConsentUpdate_SetsTimestamp() {
+		// setup
+		setupExistingConsents(new ConsentsBuilder().setCollect("n").setAdId("n").buildToString());
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+
+		// test
+		Event consentUpdateEvent = buildConsentUpdateEvent("y", "n");
+		extension.handleConsentUpdate(consentUpdateEvent);
+
+		// verify
+		verify(mockExtensionApi, times(2)).dispatch(eventCaptor.capture());
+
+		// verify consent response event has correct timestamp
+		Event consentResponseEvent = eventCaptor.getAllValues().get(0);
+		Map<String, Object> metadata = (Map) ((Map) consentResponseEvent.getEventData().get("consents")).get(
+				"metadata"
+			);
+		final String expectedTimestamp = TimeUtils.getISO8601UTCDateWithMilliseconds(
+			new Date(consentUpdateEvent.getTimestamp())
+		);
+		assertEquals(expectedTimestamp, metadata.get("time"));
+	}
+
+	@Test
+	public void test_handleConsentUpdate_MergesConsentsCorrectly() {
+		// setup
+		setupExistingConsents(new ConsentsBuilder().setCollect("y").setAdId("n").buildToString());
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+
+		// test
+		Event consentUpdateEvent = buildConsentUpdateEvent("n", "y");
+		extension.handleConsentUpdate(consentUpdateEvent);
+
+		// verify
+		verify(mockExtensionApi, times(2)).dispatch(eventCaptor.capture());
+
+		// verify edge consent update event has merged consents
+		Event edgeConsentEvent = eventCaptor.getAllValues().get(1);
+		Map<String, Object> eventData = edgeConsentEvent.getEventData();
+		Map<String, Object> consents = (Map) eventData.get("consents");
+		Map<String, Object> collect = (Map) consents.get("collect");
+		Map<String, Object> adID = (Map) consents.get("adID");
+
+		assertEquals("n", collect.get("val"));
+		assertEquals("y", adID.get("val"));
+	}
+
+	@Test
+	public void test_handleConsentUpdate_doesNotDispatchEdgeEvent_ifConsentUpdateIsWithinIgnoreInterval() {
+		// setup
+		setupExistingConsents(new ConsentsBuilder().setCollect("y").setAdId("n").buildToString());
+
+		Event consentUpdateEvent = buildConsentUpdateEvent("y", "n");
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+
+		// test, send consent update event with same values
+		extension.handleConsentUpdate(consentUpdateEvent);
+
+		// verify, expect 2 events to be dispatched
+		verify(mockExtensionApi, times(2)).dispatch(eventCaptor.capture());
+
+		// test, send consent update event with same values
+		extension.handleConsentUpdate(consentUpdateEvent);
+
+		// verify, expect no new events to be dispatched as the timestamp is within the ignore interval
+		verify(mockExtensionApi, times(2)).dispatch(eventCaptor.capture());
+	}
+
+	@Test
+	public void test_handleConsentUpdate_doesDispatchEdgeEvent_ifConsentUpdateIsWithinIgnoreIntervalButPreferenceIsDifferent() {
+		// setup
+		setupExistingConsents(new ConsentsBuilder().setCollect("y").setAdId("n").buildToString());
+
+		Event consentUpdateEvent1 = buildConsentUpdateEvent("y", "n");
+		Event consentUpdateEvent2 = buildConsentUpdateEvent("y", "y");
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+
+		// test, send consent update event with same values
+		extension.handleConsentUpdate(consentUpdateEvent1);
+
+		// verify, expect 2 events to be dispatched
+		verify(mockExtensionApi, times(2)).dispatch(eventCaptor.capture());
+
+		// test, send consent update event with different values
+		extension.handleConsentUpdate(consentUpdateEvent2);
+
+		// verify, expect new events to be dispatched as the preferences have changed
+		verify(mockExtensionApi, times(4)).dispatch(eventCaptor.capture());
+	}
+
+	@Test
+	public void test_handleConsentUpdate_dispatchesEdgeEvent_ifConsentUpdateIsOutsideIgnoreInterval() throws Exception {
+		// setup
+		setupExistingConsents(new ConsentsBuilder().setCollect("y").setAdId("n").buildToString());
+
+		Event consentUpdateEvent = buildConsentUpdateEvent("y", "n");
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+
+		// test, send initial consent update request
+		extension.handleConsentUpdate(consentUpdateEvent);
+
+		// verify, expect 2 events to be dispatched
+		verify(mockExtensionApi, times(2)).dispatch(eventCaptor.capture());
+
+		// test, send consent update event with same values, timestamp 1000 ms later
+		Thread.sleep(1100); // sleep to add time to next event
+		Event repeatConsentUpdateEvent = buildConsentUpdateEvent("y", "n");
+		extension.handleConsentUpdate(repeatConsentUpdateEvent);
+
+		// verify, expect new events to be dispatched as the timestamp is outside the ignore interval
+		verify(mockExtensionApi, times(4)).dispatch(eventCaptor.capture());
+	}
+
 	// ========================================================================================
 	// handleRequestContent
 	// ========================================================================================
 	@Test
 	public void test_handleRequestContent() {
 		// setup
-		setupExistingConsents(CreateConsentsXDMJSONString("n", "n"));
+		ConsentsBuilder consentsBuilder = new ConsentsBuilder().setCollect("n").setAdId("n");
+		setupExistingConsents(consentsBuilder.buildToString());
 
 		Event event = new Event.Builder("Get Consent Request", EventType.CONSENT, EventSource.RESPONSE_CONTENT)
 			.setEventData(null)
@@ -427,7 +544,7 @@ public class ConsentExtensionTest {
 		assertEquals(ConsentConstants.EventNames.GET_CONSENTS_RESPONSE, dispatchedEvent.getName());
 		assertEquals(EventType.CONSENT, dispatchedEvent.getType());
 		assertEquals(EventSource.RESPONSE_CONTENT, dispatchedEvent.getSource());
-		assertEquals(CreateConsentXDMMap("n", "n"), dispatchedEvent.getEventData());
+		assertEquals(consentsBuilder.buildToMap(), dispatchedEvent.getEventData());
 	}
 
 	@Test
@@ -521,7 +638,7 @@ public class ConsentExtensionTest {
 	@Test
 	public void test_handleEdgeConsentPreferenceHandle_MergesWithExistingConsents() throws Exception {
 		// setup
-		setupExistingConsents(CreateConsentsXDMJSONString("n", "n"));
+		setupExistingConsents(new ConsentsBuilder().setCollect("n").setAdId("n").buildToString());
 		Event event = buildEdgeConsentPreferenceEvent(
 			"{\n" +
 			"                            \"payload\": [\n" +
@@ -583,8 +700,9 @@ public class ConsentExtensionTest {
 	@Test
 	public void test_handleEdgeConsentPreferenceHandle_SameConsentAndTimeStamp() throws Exception {
 		// setup
-		setupExistingConsents(CreateConsentsXDMJSONString("y", "y", "sometime"));
-		Event event = buildEdgeConsentPreferenceEventWithConsents(CreateConsentXDMMap("y", "y", "sometime"));
+		ConsentsBuilder consentsBuilder = new ConsentsBuilder().setCollect("y").setAdId("y").setTime("sometime");
+		setupExistingConsents(consentsBuilder.buildToString());
+		Event event = buildEdgeConsentPreferenceEventWithConsents(consentsBuilder.buildToMap());
 
 		// test
 		extension.handleEdgeConsentPreferenceHandle(event);
@@ -597,8 +715,9 @@ public class ConsentExtensionTest {
 	@Test
 	public void test_handleEdgeConsentPreferenceHandle_SameConsentAndNoTimeStamp() throws Exception {
 		// setup
-		setupExistingConsents(CreateConsentsXDMJSONString("y", "y", "sometime"));
-		Event event = buildEdgeConsentPreferenceEventWithConsents(CreateConsentXDMMap("y", "y"));
+		ConsentsBuilder consentsBuilder = new ConsentsBuilder().setCollect("y").setAdId("y").setTime("sometime");
+		setupExistingConsents(consentsBuilder.buildToString());
+		Event event = buildEdgeConsentPreferenceEventWithConsents(consentsBuilder.setTime(null).buildToMap());
 
 		// test
 		extension.handleEdgeConsentPreferenceHandle(event);
@@ -611,8 +730,9 @@ public class ConsentExtensionTest {
 	@Test
 	public void test_handleEdgeConsentPreferenceHandle_SameConsentAndDifferentTimeStamp() throws Exception {
 		// setup
-		setupExistingConsents(CreateConsentsXDMJSONString("y", "y", "sometime"));
-		Event event = buildEdgeConsentPreferenceEventWithConsents(CreateConsentXDMMap("y", "y", "different"));
+		ConsentsBuilder consentsBuilder = new ConsentsBuilder().setCollect("y").setAdId("y").setTime("sometime");
+		setupExistingConsents(consentsBuilder.buildToString());
+		Event event = buildEdgeConsentPreferenceEventWithConsents(consentsBuilder.setTime("different").buildToMap());
 		final ArgumentCaptor<Map> sharedStateCaptor = ArgumentCaptor.forClass(Map.class);
 		final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
 
@@ -634,7 +754,7 @@ public class ConsentExtensionTest {
 	public void test_handleEdgeConsentPreferenceHandle_SameConsentAndDifferentMetadataWithNoTimeStamp()
 		throws Exception {
 		// setup
-		setupExistingConsents(CreateConsentsXDMJSONString("y", "y", "sometime"));
+		setupExistingConsents(new ConsentsBuilder().setCollect("y").setAdId("y").setTime("sometime").buildToString());
 		Event event = buildEdgeConsentPreferenceEvent(
 			"{\n" +
 			"  \"payload\": [\n" +
@@ -728,7 +848,10 @@ public class ConsentExtensionTest {
 	}
 
 	private Event buildConsentUpdateEvent(final String collectConsentString, final String adIdConsentString) {
-		Map<String, Object> eventData = CreateConsentXDMMap(collectConsentString, adIdConsentString);
+		Map<String, Object> eventData = new ConsentsBuilder()
+			.setCollect(collectConsentString)
+			.setAdId(adIdConsentString)
+			.buildToMap();
 		return new Event.Builder("Consent Update", EventType.CONSENT, EventSource.UPDATE_CONSENT)
 			.setEventData(eventData)
 			.build();

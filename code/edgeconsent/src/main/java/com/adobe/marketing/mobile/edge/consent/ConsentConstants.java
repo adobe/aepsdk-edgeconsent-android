@@ -14,11 +14,16 @@ package com.adobe.marketing.mobile.edge.consent;
 final class ConsentConstants {
 
 	static final String LOG_TAG = "Consent";
-	static final String EXTENSION_VERSION = "3.0.0";
+	static final String EXTENSION_VERSION = "3.0.2";
 	static final String EXTENSION_NAME = "com.adobe.edge.consent";
 	static final String FRIENDLY_NAME = "Consent";
 
 	private ConsentConstants() {}
+
+	static final class Defaults {
+
+		static final long IGNORE_CONSENT_UPDATE_INTERVAL_MS = 1000; // 1 second
+	}
 
 	static final class EventDataKey {
 

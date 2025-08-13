@@ -33,6 +33,9 @@ class ConsentExtension extends Extension {
 
 	private final ConsentManager consentManager;
 
+	// The last time a consent update was processed from public API.
+	private long lastConsentUpdateTime = 0;
+
 	/**
 	 * Constructor. It is called by the Mobile SDK when registering the extension and it initializes
 	 * the extension and registers event listeners.
@@ -174,13 +177,24 @@ class ConsentExtension extends Extension {
 			return;
 		}
 
+		final boolean outsideTimeout =
+			event.getTimestamp() > lastConsentUpdateTime + ConsentConstants.Defaults.IGNORE_CONSENT_UPDATE_INTERVAL_MS;
 		// set the timestamp and merge with existing consents
 		newConsents.setTimestamp(event.getTimestamp());
-		consentManager.mergeAndPersist(newConsents);
-
-		// share and dispatch the updated consents
-		shareCurrentConsents(event);
-		dispatchEdgeConsentUpdateEvent(newConsents); // dispatches only the newly updated consents
+		if (consentManager.mergeAndPersist(newConsents) || outsideTimeout) {
+			// share and dispatch the updated consents
+			shareCurrentConsents(event);
+			dispatchEdgeConsentUpdateEvent(newConsents); // dispatches only the newly updated consents
+			lastConsentUpdateTime = event.getTimestamp();
+		} else {
+			// If the consent preferences have not changed and arrived too soon to the previously synced preferences, ignore event
+			Log.debug(
+				LOG_TAG,
+				LOG_SOURCE,
+				"Consent update request did not change preferences and is within %d ms of the previous update request, dropping event.",
+				ConsentConstants.Defaults.IGNORE_CONSENT_UPDATE_INTERVAL_MS
+			);
+		}
 	}
 
 	/**

@@ -15,6 +15,7 @@ plugins {
 
 val mavenCoreVersion: String by project
 val mavenEdgeVersion: String by project
+val mavenTestUtilsVersion: String by project
 
 aepLibrary {
     namespace = "com.adobe.marketing.mobile.edge.consent"
@@ -36,11 +37,13 @@ dependencies {
     // MOCKITO_CORE, MOCKITO_INLINE, JSON
 
     testImplementation ("com.fasterxml.jackson.core:jackson-databind:2.12.7")
-    testImplementation("com.github.adobe:aepsdk-testutils-android:0bfafc7296")
+    testImplementation("com.github.adobe:aepsdk-testutils-android:$mavenTestUtilsVersion")
+    testImplementation(project(":test-utils"))
 
     // androidTestImplementation dependencies provided by aep-library:
     // ANDROIDX_TEST_EXT_JUNIT, ESPRESSO_CORE
 
     androidTestImplementation ("com.fasterxml.jackson.core:jackson-databind:2.12.7")
-    androidTestImplementation("com.github.adobe:aepsdk-testutils-android:0bfafc7296")
+    androidTestImplementation("com.github.adobe:aepsdk-testutils-android:$mavenTestUtilsVersion")
+    androidTestImplementation(project(":test-utils"))
 }
