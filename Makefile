@@ -52,10 +52,10 @@ assemble-app:
 	(./code/gradlew -p code/$(TEST-APP-FOLDER-NAME) assemble)
 
 ci-publish-maven-local-jitpack:
-	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) publishReleasePublicationToMavenLocal -Pjitpack  -x signReleasePublication)
+	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) publishReleasePublicationToMavenLocal -Pjitpack)
 
-ci-publish-staging:
-	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) publishReleasePublicationToSonatypeRepository)
+ci-publish-staging: clean
+	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) publish)
 
-ci-publish:
-	(./code/gradlew -p code/${EXTENSION-LIBRARY-FOLDER-NAME} publishReleasePublicationToSonatypeRepository -Prelease)
+ci-publish: clean
+	(./code/gradlew -p code/${EXTENSION-LIBRARY-FOLDER-NAME} publish -Prelease)
