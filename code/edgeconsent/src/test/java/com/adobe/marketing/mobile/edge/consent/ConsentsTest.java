@@ -11,8 +11,11 @@
 
 package com.adobe.marketing.mobile.edge.consent;
 
-import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.CreateConsentXDMMap;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.ConsentsBuilder;
 import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.SAMPLE_METADATA_TIMESTAMP;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.SAMPLE_METADATA_TIMESTAMP_OTHER;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.consentsAsJson;
+import static com.adobe.marketing.mobile.util.JSONAsserts.assertExactMatch;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -34,7 +37,12 @@ public class ConsentsTest {
 	@Test
 	public void test_ConsentsCreation_With_ConsentDataMap() {
 		// setup
-		Map<String, Object> consentData = CreateConsentXDMMap("y", "n", "vi", SAMPLE_METADATA_TIMESTAMP);
+		Map<String, Object> consentData = new ConsentsBuilder()
+			.setCollect("y")
+			.setAdId("n")
+			.setPersonalize("vi")
+			.setTime(SAMPLE_METADATA_TIMESTAMP)
+			.buildToMap();
 
 		// test
 		Consents consents = new Consents(consentData);
@@ -51,7 +59,7 @@ public class ConsentsTest {
 	@Test
 	public void test_ConsentsCreation_With_CollectConsentOnly() {
 		// setup
-		Map<String, Object> consentData = CreateConsentXDMMap("n");
+		Map<String, Object> consentData = new ConsentsBuilder().setCollect("n").buildToMap();
 
 		// test
 		Consents consents = new Consents(consentData);
@@ -66,7 +74,7 @@ public class ConsentsTest {
 	@Test
 	public void test_ConsentsCreation_With_NoConsentDetailsInMap() {
 		// setup
-		Map<String, Object> consentData = CreateConsentXDMMap(null, null);
+		Map<String, Object> consentData = new ConsentsBuilder().buildToMap();
 
 		// test
 		Consents consents = new Consents(consentData);
@@ -127,12 +135,14 @@ public class ConsentsTest {
 	@Test
 	public void test_ConsentsCreation_With_ImmutableMap() {
 		// setup
-		Map<String, Object> xdmMap = CreateConsentXDMMap("y", "y");
+		Map<String, Object> xdmMap = new ConsentsBuilder().setCollect("y").setAdId("y").buildToMap();
 		Map<String, Object> immutableXdmMap = Collections.unmodifiableMap(xdmMap);
 		Consents baseConsent = new Consents(immutableXdmMap);
 
 		// test
-		Consents overridingConsent = new Consents(CreateConsentXDMMap("n", "n", SAMPLE_METADATA_TIMESTAMP));
+		Consents overridingConsent = new Consents(
+			new ConsentsBuilder().setCollect("n").setAdId("n").setTime(SAMPLE_METADATA_TIMESTAMP).buildToMap()
+		);
 		baseConsent.merge(overridingConsent);
 
 		// verify
@@ -149,7 +159,7 @@ public class ConsentsTest {
 	@Test
 	public void test_CopyConstructor() {
 		// setup
-		Map<String, Object> consentData = CreateConsentXDMMap("y", "n");
+		Map<String, Object> consentData = new ConsentsBuilder().setCollect("y").setAdId("n").buildToMap();
 		Consents originalConsent = new Consents(consentData);
 
 		// test
@@ -177,7 +187,12 @@ public class ConsentsTest {
 	@Test
 	public void test_AsXDMMap() {
 		// setup
-		Map<String, Object> consentData = CreateConsentXDMMap("y", "n", "vi", SAMPLE_METADATA_TIMESTAMP);
+		Map<String, Object> consentData = new ConsentsBuilder()
+			.setCollect("y")
+			.setAdId("n")
+			.setPersonalize("vi")
+			.setTime(SAMPLE_METADATA_TIMESTAMP)
+			.buildToMap();
 
 		// test and verify
 		Consents consents = new Consents(consentData);
@@ -187,7 +202,7 @@ public class ConsentsTest {
 	@Test
 	public void test_AsXDMMap_whenEmptyConsents() {
 		// setup
-		Map<String, Object> consentData = CreateConsentXDMMap(null, null);
+		Map<String, Object> consentData = new ConsentsBuilder().buildToMap();
 		Consents consents = new Consents(consentData);
 
 		// test and verify
@@ -204,7 +219,7 @@ public class ConsentsTest {
 		Consents baseConsent = new Consents(xdmMap);
 
 		// test
-		Consents firstOverridingConsent = new Consents(CreateConsentXDMMap("y"));
+		Consents firstOverridingConsent = new Consents(new ConsentsBuilder().setCollect("y").buildToMap());
 		baseConsent.merge(firstOverridingConsent);
 
 		// verify
@@ -213,7 +228,9 @@ public class ConsentsTest {
 		assertNull(ConsentTestUtil.readTimestamp(baseConsent));
 
 		// test again
-		Consents secondOverridingConsent = new Consents(CreateConsentXDMMap("n", "n", SAMPLE_METADATA_TIMESTAMP));
+		Consents secondOverridingConsent = new Consents(
+			new ConsentsBuilder().setCollect("n").setAdId("n").setTime(SAMPLE_METADATA_TIMESTAMP).buildToMap()
+		);
 		baseConsent.merge(secondOverridingConsent);
 
 		assertEquals("n", ConsentTestUtil.readCollectConsent(baseConsent));
@@ -222,9 +239,65 @@ public class ConsentsTest {
 	}
 
 	@Test
+	public void test_merge_nestedMaps() {
+		// setup
+		Consents baseConsent = new Consents(new HashMap<>());
+
+		// test
+		ConsentsBuilder preferences = new ConsentsBuilder()
+			.setCollect("y")
+			.setMarketing("push", "y", "none")
+			.setTime(SAMPLE_METADATA_TIMESTAMP);
+		Consents firstOverridingConsent = new Consents(preferences.buildToMap());
+		baseConsent.merge(firstOverridingConsent);
+
+		// verify
+		String expectedFirst =
+			"{\n" +
+			"  \"consents\": {\n" +
+			"    \"collect\": {\"val\": \"y\"},\n" +
+			"    \"marketing\": {\n" +
+			"      \"preferred\": \"none\",\n" +
+			"      \"push\": {\"val\": \"y\"}\n" +
+			"    },\n" +
+			"    \"metadata\": {\"time\": \"" +
+			SAMPLE_METADATA_TIMESTAMP +
+			"\"}" +
+			"  }\n" +
+			"}";
+		String actualFirst = consentsAsJson(baseConsent);
+		assertExactMatch(expectedFirst, actualFirst);
+
+		// test again
+		preferences.setMarketing("sms", "y", "sms").setTime(SAMPLE_METADATA_TIMESTAMP_OTHER);
+		Consents secondOverridingConsent = new Consents(preferences.buildToMap());
+		baseConsent.merge(secondOverridingConsent);
+
+		String expectedSecond =
+			"{\n" +
+			"  \"consents\": {\n" +
+			"    \"collect\": {\"val\": \"y\"},\n" +
+			"    \"marketing\": {\n" +
+			"      \"preferred\": \"sms\",\n" +
+			"      \"push\": {\"val\": \"y\"},\n" +
+			"      \"sms\": {\"val\": \"y\"}\n" +
+			"    },\n" +
+			"    \"metadata\": {\"time\": \"" +
+			SAMPLE_METADATA_TIMESTAMP_OTHER +
+			"\"}" +
+			"  }\n" +
+			"}";
+		String actualSecond = consentsAsJson(baseConsent);
+
+		assertExactMatch(expectedSecond, actualSecond);
+	}
+
+	@Test
 	public void test_merge_NullConsent() {
 		// setup
-		Consents baseConsent = new Consents(CreateConsentXDMMap("n", null, SAMPLE_METADATA_TIMESTAMP));
+		Consents baseConsent = new Consents(
+			new ConsentsBuilder().setCollect("n").setTime(SAMPLE_METADATA_TIMESTAMP).buildToMap()
+		);
 
 		// test
 		baseConsent.merge(null);
@@ -240,7 +313,7 @@ public class ConsentsTest {
 	// ========================================================================================
 	public void test_setTimeStamp() {
 		// setup
-		Consents consents = new Consents(CreateConsentXDMMap("n"));
+		Consents consents = new Consents(new ConsentsBuilder().setCollect("n").buildToMap());
 
 		// test
 		long currentTimestamp = System.currentTimeMillis();
@@ -269,13 +342,15 @@ public class ConsentsTest {
 	// ========================================================================================
 	@Test
 	public void test_equals_sameObject() {
-		Consents consents = new Consents(CreateConsentXDMMap("n"));
+		ConsentsBuilder consentsBuilder = new ConsentsBuilder();
+		Consents consents = new Consents(consentsBuilder.setCollect("n").buildToMap());
 		assertTrue(consents.equals(consents));
 	}
 
 	@Test
 	public void test_equals_WhenDifferentClass() {
-		Consents first = new Consents(CreateConsentXDMMap("n"));
+		ConsentsBuilder consentsBuilder = new ConsentsBuilder();
+		Consents first = new Consents(consentsBuilder.setCollect("n").buildToMap());
 
 		assertFalse(first.equals("sd"));
 		assertFalse(first.equals(new Object()));
@@ -283,8 +358,9 @@ public class ConsentsTest {
 
 	@Test
 	public void test_equals_WhenDifferent() {
-		Consents first = new Consents(CreateConsentXDMMap("n"));
-		Consents second = new Consents(CreateConsentXDMMap("y"));
+		ConsentsBuilder consentsBuilder = new ConsentsBuilder();
+		Consents first = new Consents(consentsBuilder.setCollect("n").buildToMap());
+		Consents second = new Consents(consentsBuilder.setCollect("y").buildToMap());
 
 		assertFalse(first.equals(second));
 		assertFalse(second.equals(first));
@@ -292,8 +368,9 @@ public class ConsentsTest {
 
 	@Test
 	public void test_equals_WhenSame() {
-		Consents first = new Consents(CreateConsentXDMMap("y"));
-		Consents second = new Consents(CreateConsentXDMMap("y"));
+		ConsentsBuilder consentsBuilder = new ConsentsBuilder();
+		Consents first = new Consents(consentsBuilder.setCollect("y").buildToMap());
+		Consents second = new Consents(consentsBuilder.setCollect("y").buildToMap());
 
 		assertTrue(first.equals(second));
 		assertTrue(second.equals(first));
@@ -301,13 +378,15 @@ public class ConsentsTest {
 
 	@Test
 	public void test_equals_WhenNull() {
-		Consents first = new Consents(CreateConsentXDMMap("y"));
+		ConsentsBuilder consentsBuilder = new ConsentsBuilder();
+		Consents first = new Consents(consentsBuilder.setCollect("y").buildToMap());
 		assertFalse(first.equals(null));
 	}
 
 	@Test
 	public void test_equals_WhenEmptyAndLoaded() {
-		Consents first = new Consents(CreateConsentXDMMap("y"));
+		ConsentsBuilder consentsBuilder = new ConsentsBuilder();
+		Consents first = new Consents(consentsBuilder.setCollect("y").buildToMap());
 		Consents second = new Consents(new HashMap<String, Object>());
 		assertFalse(first.equals(second));
 		assertFalse(second.equals(first));
@@ -326,17 +405,19 @@ public class ConsentsTest {
 	// ========================================================================================
 	@Test
 	public void test_equalsIgnoreTimeStamp_sameObject() {
-		Consents consents = new Consents(CreateConsentXDMMap("n"));
+		ConsentsBuilder consentsBuilder = new ConsentsBuilder();
+		Consents consents = new Consents(consentsBuilder.setCollect("n").buildToMap());
 		assertTrue(consents.equalsIgnoreTimestamp(consents));
 
-		Consents consentWithTimestamp = new Consents(CreateConsentXDMMap("n"));
+		Consents consentWithTimestamp = new Consents(consentsBuilder.setCollect("n").buildToMap());
 		consentWithTimestamp.setTimestamp(1616985318);
 		assertTrue(consents.equalsIgnoreTimestamp(consents));
 	}
 
 	@Test
 	public void test_equalsIgnoreTimeStamp_whenNull() {
-		Consents consents = new Consents(CreateConsentXDMMap("y"));
+		ConsentsBuilder consentsBuilder = new ConsentsBuilder();
+		Consents consents = new Consents(consentsBuilder.setCollect("y").buildToMap());
 		assertFalse(consents.equalsIgnoreTimestamp(null));
 	}
 
@@ -350,8 +431,9 @@ public class ConsentsTest {
 
 	@Test
 	public void test_equalsIgnoreTimeStamp_SameConsentAndSameTimeStamp() {
-		Consents first = new Consents(CreateConsentXDMMap("y"));
-		Consents second = new Consents(CreateConsentXDMMap("y"));
+		ConsentsBuilder consentsBuilder = new ConsentsBuilder();
+		Consents first = new Consents(consentsBuilder.setCollect("y").buildToMap());
+		Consents second = new Consents(consentsBuilder.setCollect("y").buildToMap());
 
 		assertTrue(first.equals(second));
 		assertTrue(second.equals(first));
@@ -366,9 +448,10 @@ public class ConsentsTest {
 
 	@Test
 	public void test_equalsIgnoreTimeStamp_SameConsentsAndDifferentTimestamp() {
-		Consents first = new Consents(CreateConsentXDMMap("y"));
-		Consents second = new Consents(CreateConsentXDMMap("y"));
-		Consents third = new Consents(CreateConsentXDMMap("y"));
+		ConsentsBuilder consentsBuilder = new ConsentsBuilder();
+		Consents first = new Consents(consentsBuilder.setCollect("y").buildToMap());
+		Consents second = new Consents(consentsBuilder.setCollect("y").buildToMap());
+		Consents third = new Consents(consentsBuilder.setCollect("y").buildToMap());
 
 		first.setTimestamp(1616985318);
 		second.setTimestamp(1616985319);
@@ -384,8 +467,9 @@ public class ConsentsTest {
 
 	@Test
 	public void test_equalsIgnoreTimeStamp_DifferentConsentsAndSameTimestamp() {
-		Consents first = new Consents(CreateConsentXDMMap("n"));
-		Consents second = new Consents(CreateConsentXDMMap("y"));
+		ConsentsBuilder consentsBuilder = new ConsentsBuilder();
+		Consents first = new Consents(consentsBuilder.setCollect("n").buildToMap());
+		Consents second = new Consents(consentsBuilder.setCollect("y").buildToMap());
 
 		first.setTimestamp(1616985318);
 		second.setTimestamp(1616985318);
@@ -396,8 +480,9 @@ public class ConsentsTest {
 
 	@Test
 	public void test_equalsIgnoreTimeStamp_DifferentConsentsAndDifferentTimestamp() {
-		Consents first = new Consents(CreateConsentXDMMap("n"));
-		Consents second = new Consents(CreateConsentXDMMap("y"));
+		ConsentsBuilder consentsBuilder = new ConsentsBuilder();
+		Consents first = new Consents(consentsBuilder.setCollect("n").buildToMap());
+		Consents second = new Consents(consentsBuilder.setCollect("y").buildToMap());
 
 		first.setTimestamp(1616985318);
 		second.setTimestamp(1616985320);

@@ -11,10 +11,10 @@
 
 package com.adobe.marketing.mobile.edge.consent;
 
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.CreateConsentXDMMap;
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.SAMPLE_METADATA_TIMESTAMP;
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.buildEdgeConsentPreferenceEventWithConsents;
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.getConsentsSync;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.ConsentsBuilder;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.SAMPLE_METADATA_TIMESTAMP;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.buildEdgeConsentPreferenceEventWithConsents;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.getConsentsSync;
 import static com.adobe.marketing.mobile.util.JSONAsserts.assertExactMatch;
 import static com.adobe.marketing.mobile.util.NodeConfig.Scope.Subtree;
 import static com.adobe.marketing.mobile.util.TestHelper.getDispatchedEventsWith;
@@ -28,7 +28,6 @@ import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.EventSource;
 import com.adobe.marketing.mobile.EventType;
 import com.adobe.marketing.mobile.MobileCore;
-import com.adobe.marketing.mobile.edge.consent.util.ConsentTestConstants;
 import com.adobe.marketing.mobile.util.CollectionEqualCount;
 import com.adobe.marketing.mobile.util.JSONAsserts;
 import com.adobe.marketing.mobile.util.MonitorExtension;
@@ -63,7 +62,15 @@ public class ConsentBootUpTests {
 		// verify in (ConsentResponse and XDMSharedState)
 
 		// test
-		initExtensionWithPersistedDataAndDefaults(CreateConsentXDMMap("p", "n", "vi", SAMPLE_METADATA_TIMESTAMP), null);
+		initExtensionWithPersistedDataAndDefaults(
+			new ConsentsBuilder()
+				.setCollect("p")
+				.setAdId("n")
+				.setPersonalize("vi")
+				.setTime(SAMPLE_METADATA_TIMESTAMP)
+				.buildToMap(),
+			null
+		);
 		waitForThreads(2000);
 
 		// verify consent response event dispatched
@@ -121,7 +128,7 @@ public class ConsentBootUpTests {
 		// verify in (ConsentResponse and XDMSharedState and GetConsent API)
 
 		// test
-		initExtensionWithPersistedDataAndDefaults(null, CreateConsentXDMMap("y"));
+		initExtensionWithPersistedDataAndDefaults(null, new ConsentsBuilder().setCollect("y").buildToMap());
 		waitForThreads(2000);
 
 		// verify consent response event dispatched
@@ -157,7 +164,10 @@ public class ConsentBootUpTests {
 		// verify in (ConsentResponse and XDMSharedState and GetConsent API)
 
 		// setup and test
-		initExtensionWithPersistedDataAndDefaults(CreateConsentXDMMap("n"), CreateConsentXDMMap("y"));
+		initExtensionWithPersistedDataAndDefaults(
+			new ConsentsBuilder().setCollect("n").buildToMap(),
+			new ConsentsBuilder().setCollect("y").buildToMap()
+		);
 		waitForThreads(2000);
 
 		// verify consent response event dispatched
@@ -200,14 +210,26 @@ public class ConsentBootUpTests {
 		// verify in (ConsentResponse and XDMSharedState and GetConsent API and persistence)
 
 		// setup and test
-		initExtensionWithPersistedDataAndDefaults(CreateConsentXDMMap("y"), CreateConsentXDMMap("y", "y"));
-		Consent.update(CreateConsentXDMMap("n"));
+		initExtensionWithPersistedDataAndDefaults(
+			new ConsentsBuilder().setCollect("y").buildToMap(),
+			new ConsentsBuilder().setCollect("y").setAdId("y").buildToMap()
+		);
+		Consent.update(new ConsentsBuilder().setCollect("n").buildToMap());
 		MobileCore.dispatchEvent(
-			buildEdgeConsentPreferenceEventWithConsents(CreateConsentXDMMap("n", null, "vi", SAMPLE_METADATA_TIMESTAMP))
+			buildEdgeConsentPreferenceEventWithConsents(
+				new ConsentsBuilder()
+					.setCollect("n")
+					.setPersonalize("vi")
+					.setTime(SAMPLE_METADATA_TIMESTAMP)
+					.buildToMap()
+			)
 		);
 		HashMap<String, Object> config = new HashMap<String, Object>() {
 			{
-				put(ConsentTestConstants.ConfigurationKey.DEFAULT_CONSENT, CreateConsentXDMMap("y", "n"));
+				put(
+					ConsentTestConstants.ConfigurationKey.DEFAULT_CONSENT,
+					new ConsentsBuilder().setCollect("y").setAdId("n").buildToMap()
+				);
 			}
 		};
 		waitForThreads(2000);

@@ -11,10 +11,10 @@
 
 package com.adobe.marketing.mobile.edge.consent;
 
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.CreateConsentXDMMap;
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.applyDefaultConsent;
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.buildEdgeConsentPreferenceEvent;
-import static com.adobe.marketing.mobile.edge.consent.util.ConsentFunctionalTestUtil.buildEdgeConsentPreferenceEventWithConsents;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.ConsentsBuilder;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.applyDefaultConsent;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.buildEdgeConsentPreferenceEvent;
+import static com.adobe.marketing.mobile.edge.consent.ConsentTestUtil.buildEdgeConsentPreferenceEventWithConsents;
 import static com.adobe.marketing.mobile.util.JSONAsserts.assertExactMatch;
 import static com.adobe.marketing.mobile.util.JSONAsserts.assertTypeMatch;
 import static com.adobe.marketing.mobile.util.NodeConfig.Scope.Subtree;
@@ -72,12 +72,14 @@ public class ConsentEdgeResponseHandlingTests {
 		// verify in (Persistence, ConsentResponse and XDMSharedState)
 
 		// setup
-		applyDefaultConsent(CreateConsentXDMMap("p", "n"));
-		Consent.update(CreateConsentXDMMap("y"));
+		applyDefaultConsent(new ConsentsBuilder().setCollect("p").setAdId("n").buildToMap());
+		Consent.update(new ConsentsBuilder().setCollect("y").buildToMap());
 		waitForThreads(1000);
 		resetTestExpectations();
 
-		MobileCore.dispatchEvent(buildEdgeConsentPreferenceEventWithConsents(CreateConsentXDMMap("n"))); // edge response sets the collect consent to no
+		MobileCore.dispatchEvent(
+			buildEdgeConsentPreferenceEventWithConsents(new ConsentsBuilder().setCollect("n").buildToMap())
+		); // edge response sets the collect consent to no
 		waitForThreads(1000);
 
 		// verify consent response event dispatched
@@ -158,8 +160,8 @@ public class ConsentEdgeResponseHandlingTests {
 		// -------------------------------------------
 
 		// setup
-		applyDefaultConsent(CreateConsentXDMMap("p"));
-		Consent.update(CreateConsentXDMMap("y"));
+		applyDefaultConsent(new ConsentsBuilder().setCollect("p").buildToMap());
+		Consent.update(new ConsentsBuilder().setCollect("y").buildToMap());
 		waitForThreads(1000);
 		resetTestExpectations();
 
@@ -231,7 +233,7 @@ public class ConsentEdgeResponseHandlingTests {
 		// -------------------------------------------
 
 		// setup
-		Consent.update(CreateConsentXDMMap("y"));
+		Consent.update(new ConsentsBuilder().setCollect("y").buildToMap());
 		waitForThreads(1000);
 		resetTestExpectations();
 
@@ -240,7 +242,9 @@ public class ConsentEdgeResponseHandlingTests {
 		String timestamp = getTimestampFromXDMSharedState(xdmSharedState);
 
 		// test
-		MobileCore.dispatchEvent(buildEdgeConsentPreferenceEventWithConsents(CreateConsentXDMMap("y")));
+		MobileCore.dispatchEvent(
+			buildEdgeConsentPreferenceEventWithConsents(new ConsentsBuilder().setCollect("y").buildToMap())
+		);
 		waitForThreads(1000);
 
 		// verify that shared state and consent response events are not dispatched
@@ -269,7 +273,7 @@ public class ConsentEdgeResponseHandlingTests {
 		// -------------------------------------------
 
 		// setup
-		Consent.update(CreateConsentXDMMap("y", "n"));
+		Consent.update(new ConsentsBuilder().setCollect("y").setAdId("n").buildToMap());
 		waitForThreads(1000);
 		resetTestExpectations();
 
@@ -278,7 +282,11 @@ public class ConsentEdgeResponseHandlingTests {
 		String timestamp = getTimestampFromXDMSharedState(xdmSharedState);
 
 		// test
-		MobileCore.dispatchEvent(buildEdgeConsentPreferenceEventWithConsents(CreateConsentXDMMap("y", "n", timestamp)));
+		MobileCore.dispatchEvent(
+			buildEdgeConsentPreferenceEventWithConsents(
+				new ConsentsBuilder().setCollect("y").setAdId("n").setTime(timestamp).buildToMap()
+			)
+		);
 		waitForThreads(1000);
 
 		// verify that shared state and consent response events are not dispatched
