@@ -13,11 +13,8 @@ package com.adobe.marketing.mobile.edge.consent.testapp;
 
 import android.app.Application;
 import android.util.Log;
-import com.adobe.marketing.mobile.Edge;
 import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
-import com.adobe.marketing.mobile.edge.consent.Consent;
-import java.util.Arrays;
 
 public class ConsentTestApplication extends Application {
 
@@ -29,15 +26,8 @@ public class ConsentTestApplication extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		MobileCore.setApplication(this);
 
-		MobileCore.setLogLevel(LoggingMode.DEBUG);
-		MobileCore.configureWithAppID(ENVIRONMENT_FILE_ID);
-
-		// register Adobe extensions
-		MobileCore.registerExtensions(
-			Arrays.asList(Consent.EXTENSION, Edge.EXTENSION),
-			o -> Log.d(LOG_TAG, "Mobile SDK was initialized")
-		);
+		MobileCore.setLogLevel(LoggingMode.VERBOSE);
+		MobileCore.initialize(this, ENVIRONMENT_FILE_ID, o -> Log.d(LOG_TAG, "Mobile SDK was initialized"));
 	}
 }
