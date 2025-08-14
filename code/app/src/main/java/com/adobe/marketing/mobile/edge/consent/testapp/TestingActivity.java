@@ -29,6 +29,10 @@ public class TestingActivity extends AppCompatActivity {
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_testing);
+
+		// Make the consents TextView scrollable
+		TextView txtViewConsents = findViewById(R.id.txtViewConsents);
+		txtViewConsents.setMovementMethod(new android.text.method.ScrollingMovementMethod());
 	}
 
 	public void btnTestRepeatedSameConsentsClicked(View v) {

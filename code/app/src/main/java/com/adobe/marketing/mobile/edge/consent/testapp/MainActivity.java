@@ -59,6 +59,10 @@ public class MainActivity extends AppCompatActivity {
 
 		llConsentRows = findViewById(R.id.llConsentRows);
 		consentRowViews = new ArrayList<>();
+
+		// Make the consents TextView scrollable
+		TextView txtViewConsents = findViewById(R.id.txtViewConsents);
+		txtViewConsents.setMovementMethod(new android.text.method.ScrollingMovementMethod());
 	}
 
 	@Override
@@ -128,6 +132,10 @@ public class MainActivity extends AppCompatActivity {
 		View rowView = (View) v.getParent();
 		llConsentRows.removeView(rowView);
 		consentRowViews.remove(rowView);
+
+		// Force the ScrollView to recalculate its layout
+		llConsentRows.requestLayout();
+		llConsentRows.invalidate();
 	}
 
 	private void addConsentRow() {
@@ -228,5 +236,9 @@ public class MainActivity extends AppCompatActivity {
 		llConsentRows.removeAllViews();
 		consentRowViews.clear();
 		rowCounter = 0;
+
+		// Force the ScrollView to recalculate its layout
+		llConsentRows.requestLayout();
+		llConsentRows.invalidate();
 	}
 }
