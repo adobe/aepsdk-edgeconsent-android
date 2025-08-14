@@ -37,7 +37,14 @@ public class TestingActivity extends AppCompatActivity {
 
 	public void btnTestRepeatedSameConsentsClicked(View v) {
 		// Expect only the first update to send a network request to Adobe Experience Platform.
-		// The other requests will log that the requests are ignored.
+		// The other 3 requests will log that the requests are ignored.
+		// The resulting consent preferences should contain the following if cleared before testing:
+		// {"consents": {
+		//    "marketing": {
+		//        "preferred": "none",
+		//        "push": {"val": "y"},
+		//    }
+		// }}
 		final Map<String, Object> preferences = new HashMap<String, Object>() {
 			{
 				put(
@@ -74,15 +81,15 @@ public class TestingActivity extends AppCompatActivity {
 
 	public void btnTestRepeatedDifferentConsentsClicked(View v) {
 		// Expect all 4 updates to send network requests to Adobe Experience Platform.
-		// The resulting consent preferences should contain:
-		// ["consents": [
-		//    "marketing": [
+		// The resulting consent preferences should contain the following if cleared before testing:
+		// {"consents": {
+		//    "marketing": {
 		//        "preferred": "email",
-		//        "push": ["val": "y"],
-		//        "email": ["val": "y"],
-		//        "sms": ["val": "n"],
-		//    ]
-		// ]]
+		//        "push": {"val": "y"},
+		//        "email": {"val": "y"},
+		//        "sms": {"val": "n"},
+		//    }
+		// }}
 
 		final Map<String, Object> one = new HashMap<String, Object>() {
 			{
@@ -204,6 +211,14 @@ public class TestingActivity extends AppCompatActivity {
 	public void btnTestRepeatedMixedConsentsClicked(View v) {
 		// Expect only first 2 updates to send network requests to Adobe Experience Platform.
 		// The last two requests do not change the preferences and are therefore ignored.
+		// The resulting consent preferences should contain the following if cleared before testing:
+		// {"consents": {
+		//    "marketing": {
+		//        "preferred": "none",
+		//        "push": {"val": "n"},
+		//        "email": {"val": "n"},
+		//    }
+		// }}
 
 		final Map<String, Object> one = new HashMap<String, Object>() {
 			{
