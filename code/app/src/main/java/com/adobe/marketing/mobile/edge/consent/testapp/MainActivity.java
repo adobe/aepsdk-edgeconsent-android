@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -100,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
 			new AdobeCallbackWithError<Map<String, Object>>() {
 				@Override
 				public void call(Map<String, Object> consents) {
-					String prettyPrinted = prettyPrintMap(consents, 0);
+					String prettyPrinted = prettyPrintMap(consents);
 					txtViewConsents.setText(prettyPrinted);
 				}
 
@@ -115,38 +116,12 @@ public class MainActivity extends AppCompatActivity {
 		);
 	}
 
-	private String prettyPrintMap(Map<String, Object> map, int indentLevel) {
-		if (map == null || map.isEmpty()) {
-			return "{}";
+	private String prettyPrintMap(Map<String, Object> map) {
+		try {
+			return new JSONObject(map == null ? new HashMap<>() : map).toString(2);
+		} catch (Exception e) {
+			return String.valueOf(map);
 		}
-
-		StringBuilder sb = new StringBuilder();
-		String indent = "  ".repeat(indentLevel);
-		String nextIndent = "  ".repeat(indentLevel + 1);
-
-		sb.append("{\n");
-
-		int count = 0;
-		for (Map.Entry<String, Object> entry : map.entrySet()) {
-			sb.append(nextIndent).append("\"").append(entry.getKey()).append("\": ");
-
-			Object value = entry.getValue();
-			if (value instanceof Map) {
-				@SuppressWarnings("unchecked")
-				Map<String, Object> nestedMap = (Map<String, Object>) value;
-				sb.append(prettyPrintMap(nestedMap, indentLevel + 1));
-			} else {
-				sb.append("\"").append(value.toString()).append("\"");
-			}
-
-			if (++count < map.size()) {
-				sb.append(",");
-			}
-			sb.append("\n");
-		}
-
-		sb.append(indent).append("}");
-		return sb.toString();
 	}
 
 	public void btnDeleteClicked(View v) {
