@@ -19,6 +19,6 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath("com.github.adobe:aepsdk-commons:gp-3.4.3")
+        classpath("com.github.adobe.aepsdk-commons:aepsdk-gradle-plugin:4.0.0")
     }
 }
