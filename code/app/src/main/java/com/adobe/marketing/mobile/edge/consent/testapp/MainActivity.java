@@ -49,8 +49,9 @@ public class MainActivity extends AppCompatActivity {
 		"marketing.phone",
 	};
 
-	// Consent value options
-	private static final String[] CONSENT_VALUES = { "yes", "no" };
+	// Consent value options. "pending" maps to "p" — used to verify the
+	// `y → p → y` invariant in AEPEdgeConsent's transition detector.
+	private static final String[] CONSENT_VALUES = { "yes", "no", "pending" };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -188,9 +189,22 @@ public class MainActivity extends AppCompatActivity {
 			String consentType = CONSENT_TYPES[spinnerConsentType.getSelectedItemPosition()];
 			String consentValue = CONSENT_VALUES[spinnerConsentValue.getSelectedItemPosition()];
 
-			// Create the consent value map
+			// Create the consent value map. Dropdown labels map to the XDM single-letter codes.
 			Map<String, String> valueMap = new HashMap<>();
-			valueMap.put("val", consentValue.equals("yes") ? "y" : "n");
+			final String valCode;
+			switch (consentValue) {
+				case "yes":
+					valCode = "y";
+					break;
+				case "pending":
+					valCode = "p";
+					break;
+				case "no":
+				default:
+					valCode = "n";
+					break;
+			}
+			valueMap.put("val", valCode);
 
 			// Handle nested consent types (containing periods)
 			if (consentType.contains(".")) {

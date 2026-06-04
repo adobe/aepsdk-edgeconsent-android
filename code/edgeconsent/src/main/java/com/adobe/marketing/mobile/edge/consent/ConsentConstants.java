@@ -33,6 +33,21 @@ final class ConsentConstants {
 
 		static final String TIME = "time";
 
+		static final String COLLECT = "collect";
+		static final String VAL = "val";
+		static final String YES = "y";
+		static final String NO = "n";
+		static final String PENDING = "p";
+
+		/**
+		 * Top-level boolean field included in {@link EventNames#CONSENT_PREFERENCES_UPDATED}
+		 * events when the effective {@code consents.collect.val} has just transitioned to
+		 * {@code "y"} from a non-{@code "y"} value (including absent / null). Absent when
+		 * no such transition occurred. Listeners that have data gated by collect consent
+		 * should re-sync when this flag is {@code true}.
+		 */
+		static final String COLLECT_CONSENT_RESYNC_REQUIRED = "collectConsentResyncRequired";
+
 		private EventDataKey() {}
 	}
 
@@ -40,6 +55,14 @@ final class ConsentConstants {
 
 		static final String DATASTORE_NAME = EXTENSION_NAME;
 		static final String CONSENT_PREFERENCES = "consent:preferences";
+
+		/**
+		 * Persisted "last definitive collect.val" used for cross-session transition
+		 * detection. Records the most recent {@code "y"}, {@code "n"}, or null observation
+		 * — {@code "p"} (pending) events do NOT advance it. See
+		 * {@link ConsentManager#evaluateCollectConsentTransition()}.
+		 */
+		static final String LAST_DEFINITIVE_COLLECT_CONSENT = "consent.lastDefinitiveCollect";
 
 		private DataStoreKey() {}
 	}

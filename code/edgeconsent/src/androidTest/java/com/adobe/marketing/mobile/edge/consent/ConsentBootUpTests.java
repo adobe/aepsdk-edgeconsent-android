@@ -136,8 +136,13 @@ public class ConsentBootUpTests {
 		assertEquals(1, consentResponseEvents.size());
 		Map<String, Object> consentResponseData = consentResponseEvents.get(0).getEventData();
 		String expected = "{\"consents\": {\"collect\": {\"val\": \"y\"}}}";
+		// First definitive observation of collect=y from defaults → transition null → y →
+		// the dispatched CONSENT_PREFERENCES_UPDATED event carries the resync flag.
+		// Shared state, GetConsent response, and persistence do NOT carry the flag.
+		String expectedConsentResponse =
+			"{\"consents\": {\"collect\": {\"val\": \"y\"}}, \"collectConsentResyncRequired\": true}";
 
-		JSONAsserts.assertEquals(expected, consentResponseData);
+		JSONAsserts.assertEquals(expectedConsentResponse, consentResponseData);
 
 		//  verify getConsent API
 		Map<String, Object> getConsentResponse = getConsentsSync();

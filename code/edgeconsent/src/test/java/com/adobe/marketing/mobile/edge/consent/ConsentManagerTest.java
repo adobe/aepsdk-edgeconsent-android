@@ -580,4 +580,262 @@ public class ConsentManagerTest {
 				new ConsentsBuilder().setCollect("y").setAdId("n").setTime(SAMPLE_METADATA_TIMESTAMP).buildToString()
 			);
 	}
+
+	// ========================================================================================
+	// Test Scenario    : evaluateCollectConsentTransition (collectConsentResyncRequired)
+	// Test method      : evaluateCollectConsentTransition
+	//
+	// Original mergeAndPersist / updateDefaultConsents signatures are unchanged — the
+	// transition signal lives in a separate method that callers invoke explicitly.
+	// Tests below exercise the matrix documented in the plan's invariants table.
+	// ========================================================================================
+
+	/** null -> "y": first definitive observation after fresh install must fire the flag. */
+	@Test
+	public void test_evaluateCollectConsentTransition_nullToYes_returnsResyncRequired() {
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, null))
+			.thenReturn(null);
+		consentManager = new ConsentManager(mockNamedCollection);
+
+		consentManager.mergeAndPersist(new Consents(new ConsentsBuilder().setCollect("y").buildToMap()));
+
+		assertTrue(consentManager.evaluateCollectConsentTransition());
+		verify(mockNamedCollection, times(1))
+			.setString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, "y");
+	}
+
+	/** "n" -> "y": classic recovery transition must fire the flag. */
+	@Test
+	public void test_evaluateCollectConsentTransition_nToYes_returnsResyncRequired() {
+		// Simulate previous-session persisted "n" via the named collection mock
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, null))
+			.thenReturn("n");
+		consentManager = new ConsentManager(mockNamedCollection);
+
+		consentManager.mergeAndPersist(new Consents(new ConsentsBuilder().setCollect("y").buildToMap()));
+
+		assertTrue(consentManager.evaluateCollectConsentTransition());
+		verify(mockNamedCollection, times(1))
+			.setString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, "y");
+	}
+
+	/** "y" -> "y": idempotent. No transition. */
+	@Test
+	public void test_evaluateCollectConsentTransition_yToYes_doesNotReturnResyncRequired() {
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, null))
+			.thenReturn("y");
+		consentManager = new ConsentManager(mockNamedCollection);
+
+		consentManager.mergeAndPersist(new Consents(new ConsentsBuilder().setCollect("y").buildToMap()));
+
+		assertFalse(consentManager.evaluateCollectConsentTransition());
+		// "y" already persisted — no redundant write
+		verify(mockNamedCollection, Mockito.never())
+			.setString(eq(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT), Mockito.anyString());
+	}
+
+	/**
+	 * <b>Load-bearing test for the user-flagged case.</b>
+	 * "y" -> "p" -> "y": pending must NOT overwrite the prior "y"; the final "y" compares
+	 * against {@code lastDefinitive = "y"} and must NOT fire the flag.
+	 */
+	@Test
+	public void test_evaluateCollectConsentTransition_yToPToY_doesNotReturnResyncRequired() {
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, null))
+			.thenReturn("y");
+		consentManager = new ConsentManager(mockNamedCollection);
+
+		// "p" must not advance lastDefinitive (and must not write to persistence)
+		consentManager.mergeAndPersist(new Consents(new ConsentsBuilder().setCollect("p").buildToMap()));
+		assertFalse(consentManager.evaluateCollectConsentTransition());
+
+		// Subsequent "y" — lastDefinitive should still be "y" (mock continues to return "y")
+		consentManager.mergeAndPersist(new Consents(new ConsentsBuilder().setCollect("y").buildToMap()));
+		assertFalse("y -> p -> y must not fire the flag", consentManager.evaluateCollectConsentTransition());
+		// LAST_DEFINITIVE_COLLECT_CONSENT must NEVER have been written during this sequence
+		verify(mockNamedCollection, Mockito.never())
+			.setString(eq(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT), Mockito.anyString());
+	}
+
+	/**
+	 * "n" -> "p" -> "y": pending in the middle must not erase the "n"; the final "y" is a
+	 * transition from "n" and must fire the flag.
+	 */
+	@Test
+	public void test_evaluateCollectConsentTransition_nToPToY_returnsResyncRequired() {
+		// Persisted lastDefinitive starts at "n" (returned by both reads since "p" doesn't update it).
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, null))
+			.thenReturn("n");
+		consentManager = new ConsentManager(mockNamedCollection);
+
+		consentManager.mergeAndPersist(new Consents(new ConsentsBuilder().setCollect("p").buildToMap()));
+		assertFalse(consentManager.evaluateCollectConsentTransition());
+
+		consentManager.mergeAndPersist(new Consents(new ConsentsBuilder().setCollect("y").buildToMap()));
+		assertTrue(consentManager.evaluateCollectConsentTransition());
+
+		verify(mockNamedCollection, times(1))
+			.setString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, "y");
+	}
+
+	/**
+	 * "y" -> "n" -> "p" -> "y": the "p" in the middle must not erase the prior "n" that
+	 * landed in lastDefinitive. The final "y" must still fire the flag because the
+	 * effective comparison is against "n" (not "y").
+	 */
+	@Test
+	public void test_evaluateCollectConsentTransition_yToNToPToY_returnsResyncRequired() {
+		// Start with lastDefinitive = "y" — Mockito returns "y" until we overwrite via the setter.
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, null))
+			.thenReturn("y");
+		consentManager = new ConsentManager(mockNamedCollection);
+
+		// "y" -> "n": flag false, lastDefinitive advances to "n"
+		consentManager.mergeAndPersist(new Consents(new ConsentsBuilder().setCollect("n").buildToMap()));
+		assertFalse(consentManager.evaluateCollectConsentTransition());
+		verify(mockNamedCollection, times(1))
+			.setString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, "n");
+
+		// Switch the mock to return "n" now (mimicking what the prior setString did)
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, null))
+			.thenReturn("n");
+
+		// "n" -> "p": flag false, lastDefinitive MUST NOT advance (still "n")
+		consentManager.mergeAndPersist(new Consents(new ConsentsBuilder().setCollect("p").buildToMap()));
+		assertFalse(consentManager.evaluateCollectConsentTransition());
+		// No additional setString for the pending event
+		verify(mockNamedCollection, Mockito.times(1))
+			.setString(eq(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT), Mockito.anyString());
+
+		// "p" -> "y": flag MUST fire because lastDefinitive is still "n"
+		consentManager.mergeAndPersist(new Consents(new ConsentsBuilder().setCollect("y").buildToMap()));
+		assertTrue(consentManager.evaluateCollectConsentTransition());
+		verify(mockNamedCollection, times(1))
+			.setString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, "y");
+	}
+
+	/**
+	 * "p" as the first-ever event must NOT persist anything in lastDefinitiveCollectConsent
+	 * and must NOT fire the flag.
+	 */
+	@Test
+	public void test_evaluateCollectConsentTransition_pendingAlone_doesNotPersistOrFire() {
+		// Note: evaluateCollectConsentTransition early-returns on "p" before reading
+		// LAST_DEFINITIVE_COLLECT_CONSENT, so we deliberately do NOT stub that getString
+		// — adding an unused stub would trigger Mockito's strict runner.
+		consentManager = new ConsentManager(mockNamedCollection);
+
+		consentManager.mergeAndPersist(new Consents(new ConsentsBuilder().setCollect("p").buildToMap()));
+		assertFalse(consentManager.evaluateCollectConsentTransition());
+
+		// Pending alone must not write to lastDefinitive
+		verify(mockNamedCollection, Mockito.never())
+			.setString(eq(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT), Mockito.anyString());
+		// And it certainly must not REMOVE either (no prior value to clear).
+		verify(mockNamedCollection, Mockito.never())
+			.remove(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT);
+	}
+
+	/**
+	 * A change to a non-{@code collect} dimension (e.g. adID) must NOT fire the flag, even
+	 * though {@code mergeAndPersist} returns true (state did change).
+	 */
+	@Test
+	public void test_evaluateCollectConsentTransition_otherDimensionChange_doesNotFireFlag() {
+		// Persisted lastDefinitive = "y" so the y -> y case applies and no flag fires.
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, null))
+			.thenReturn("y");
+		// Existing persisted consent already has collect=y
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES, null))
+			.thenReturn(new ConsentsBuilder().setCollect("y").buildToString());
+		consentManager = new ConsentManager(mockNamedCollection);
+
+		// Update only adID — collect stays at "y"
+		final boolean changed = consentManager.mergeAndPersist(
+			new Consents(new ConsentsBuilder().setAdId("n").buildToMap())
+		);
+		assertTrue("adID change should still be a state change", changed);
+		assertFalse(consentManager.evaluateCollectConsentTransition());
+	}
+
+	/**
+	 * Defensive: when the manager is constructed with a {@code null} {@link NamedCollection}
+	 * (e.g. the data-store service was unavailable), {@link ConsentManager#evaluateCollectConsentTransition()}
+	 * must not crash. The read returns {@code null}, the write is a no-op, and the flag
+	 * is still computed correctly from in-memory state.
+	 *
+	 * <p>This exercises the {@code namedCollection == null} guard in both
+	 * {@code getLastDefinitiveCollectConsent} and {@code setLastDefinitiveCollectConsent}.
+	 */
+	@Test(expected = Test.None.class)
+	public void test_evaluateCollectConsentTransition_nullNamedCollection_doesNotCrash() {
+		consentManager = new ConsentManager(null);
+		consentManager.mergeAndPersist(new Consents(new ConsentsBuilder().setCollect("y").buildToMap()));
+
+		// Read returns null (no persistence), write is a no-op.
+		assertNull(consentManager.getLastDefinitiveCollectConsent());
+		// With null persistence the "previous definitive" is null and the new collect is "y",
+		// so the transition still fires correctly from in-memory state.
+		assertTrue(consentManager.evaluateCollectConsentTransition());
+	}
+
+	/**
+	 * If the effective {@code collect.val} becomes {@code null} (e.g. a merge produces a
+	 * state with no {@code collect} key) and there is a previously persisted definitive
+	 * value, the tracker must be cleared via {@link NamedCollection#remove(String)} rather
+	 * than written. Exercises the {@code value == null} branch of
+	 * {@code setLastDefinitiveCollectConsent}.
+	 */
+	@Test
+	public void test_evaluateCollectConsentTransition_currentCollectAbsent_clearsPersistedTracker() {
+		// Persisted lastDefinitive = "y" so the value transitions to null on the next merge
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, null))
+			.thenReturn("y");
+		// Persisted consents have only adID — no collect key at all
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.CONSENT_PREFERENCES, null))
+			.thenReturn(new ConsentsBuilder().setAdId("n").buildToString());
+		consentManager = new ConsentManager(mockNamedCollection);
+
+		// newCollectVal is null (no collect key); previousDefinitive is "y" → not equal → clear
+		assertFalse(consentManager.evaluateCollectConsentTransition());
+
+		verify(mockNamedCollection, times(1)).remove(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT);
+		// Must NOT also write a string
+		verify(mockNamedCollection, Mockito.never())
+			.setString(eq(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT), Mockito.anyString());
+	}
+
+	/**
+	 * When both the effective {@code collect.val} AND the persisted definitive are {@code null}
+	 * — i.e. fresh manager observing only non-collect updates — the equality check returns true,
+	 * so neither {@code setString} nor {@code remove} is called. Exercises the
+	 * {@code a == null && b == null} branch of the private {@code equals} helper.
+	 */
+	@Test
+	public void test_evaluateCollectConsentTransition_bothNull_noPersistedWrite() {
+		// Mock returns null by default for LAST_DEFINITIVE_COLLECT_CONSENT (no stub needed).
+		consentManager = new ConsentManager(mockNamedCollection);
+
+		// Merge a non-collect-only consent update so the current state has no collect key
+		consentManager.mergeAndPersist(new Consents(new ConsentsBuilder().setAdId("y").buildToMap()));
+
+		assertFalse(consentManager.evaluateCollectConsentTransition());
+
+		// Neither path of setLastDefinitiveCollectConsent should be exercised
+		verify(mockNamedCollection, Mockito.never())
+			.setString(eq(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT), Mockito.anyString());
+		verify(mockNamedCollection, Mockito.never())
+			.remove(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT);
+	}
 }
