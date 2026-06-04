@@ -143,9 +143,25 @@ public class ConsentPublicAPITests {
 
 		Map<String, Object> consentResponseData = consentResponseEvents.get(0).getEventData();
 
-		// verify that only collect consent and metadata are updated
+		// First definitive observation of collect=y → transition null → y →
+		// the dispatched CONSENT_PREFERENCES_UPDATED event carries the resync flag.
+		// EDGE_CONSENT_UPDATE, shared state, and persistence do NOT carry the flag.
+		String expectedConsentResponse =
+			"{" +
+			"  \"consents\": {" +
+			"    \"collect\": {" +
+			"      \"val\": \"y\"" +
+			"    }," +
+			"    \"metadata\": {" +
+			"      \"time\": \"STRING_TYPE\"" +
+			"    }" +
+			"  }," +
+			"  \"collectConsentResyncRequired\": true" +
+			"}";
+
+		// verify that collect consent, metadata, and the transition flag are present
 		assertExactMatch(
-			expected,
+			expectedConsentResponse,
 			consentResponseData,
 			new CollectionEqualCount(Subtree),
 			new ValueTypeMatch("consents.metadata.time")

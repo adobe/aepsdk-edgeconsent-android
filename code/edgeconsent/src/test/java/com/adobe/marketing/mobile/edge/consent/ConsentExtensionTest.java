@@ -884,4 +884,270 @@ public class ConsentExtensionTest {
 		ArgumentCaptor<Event> eventCaptor2 = ArgumentCaptor.forClass(Event.class);
 		verify(mockExtensionApi, times(0)).dispatch(any(Event.class));
 	}
+
+	// ========================================================================================
+	// collectConsentResyncRequired flag in dispatched CONSENT_PREFERENCES_UPDATED events
+	// ========================================================================================
+
+	/**
+	 * Public-API path: an "n" -> "y" sequence must produce CONSENT_PREFERENCES_UPDATED
+	 * events; the one corresponding to the n->y transition carries the flag, others do not.
+	 */
+	@Test
+	public void test_consentUpdate_collectYesFromN_dispatchesPreferencesUpdatedWithFlag() {
+		// First update: collect = "n" — establishes lastDefinitive = "n"
+		setupExistingConsents(null);
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, null))
+			.thenReturn(null);
+		extension.handleConsentUpdate(buildConsentUpdateEvent("n", null));
+
+		ArgumentCaptor<Event> firstCaptor = ArgumentCaptor.forClass(Event.class);
+		verify(mockExtensionApi, times(2)).dispatch(firstCaptor.capture());
+
+		Event firstPrefsUpdated = firstCaptor.getAllValues().get(0);
+		assertEquals(ConsentConstants.EventNames.CONSENT_PREFERENCES_UPDATED, firstPrefsUpdated.getName());
+		assertNull(
+			"First 'n' event must not carry the flag",
+			firstPrefsUpdated.getEventData().get(ConsentConstants.EventDataKey.COLLECT_CONSENT_RESYNC_REQUIRED)
+		);
+
+		// Now simulate the persisted lastDefinitive flipping to "n" (which the previous merge wrote)
+		Mockito.reset(mockExtensionApi);
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, null))
+			.thenReturn("n");
+		// Recreate extension so ConsentManager re-reads current state with lastDefinitive = "n"
+		setupExistingConsents(new ConsentsBuilder().setCollect("n").buildToString());
+
+		// Second update: collect = "y" — should fire the flag
+		extension.handleConsentUpdate(buildConsentUpdateEvent("y", null));
+
+		ArgumentCaptor<Event> secondCaptor = ArgumentCaptor.forClass(Event.class);
+		verify(mockExtensionApi, times(2)).dispatch(secondCaptor.capture());
+		Event secondPrefsUpdated = secondCaptor.getAllValues().get(0);
+		assertEquals(ConsentConstants.EventNames.CONSENT_PREFERENCES_UPDATED, secondPrefsUpdated.getName());
+		assertEquals(
+			"n -> y transition must carry the flag",
+			Boolean.TRUE,
+			secondPrefsUpdated.getEventData().get(ConsentConstants.EventDataKey.COLLECT_CONSENT_RESYNC_REQUIRED)
+		);
+	}
+
+	/**
+	 * Repeated "y" updates: the persisted lastDefinitive is already "y", so the event
+	 * must not carry the flag. (The first y-update still dispatches because the
+	 * timeout has elapsed since `lastConsentUpdateTime = 0`.)
+	 */
+	@Test
+	public void test_consentUpdate_collectYesRepeated_secondHasNoFlag() {
+		// Persisted "y" — established by a prior session.
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, null))
+			.thenReturn("y");
+		setupExistingConsents(new ConsentsBuilder().setCollect("y").buildToString());
+
+		// Send "y" — no transition (lastDefinitive already "y"), but the dispatch still
+		// happens because outsideTimeout is true on the first call.
+		extension.handleConsentUpdate(buildConsentUpdateEvent("y", null));
+
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+		// CONSENT_PREFERENCES_UPDATED + EDGE_CONSENT_UPDATE = 2 dispatches
+		verify(mockExtensionApi, times(2)).dispatch(eventCaptor.capture());
+		Event prefsUpdated = null;
+		for (Event evt : eventCaptor.getAllValues()) {
+			if (ConsentConstants.EventNames.CONSENT_PREFERENCES_UPDATED.equals(evt.getName())) {
+				prefsUpdated = evt;
+				break;
+			}
+		}
+		assertNotNull("Expected a CONSENT_PREFERENCES_UPDATED dispatch", prefsUpdated);
+		assertNull(
+			"Repeated y must not carry the flag",
+			prefsUpdated.getEventData().get(ConsentConstants.EventDataKey.COLLECT_CONSENT_RESYNC_REQUIRED)
+		);
+	}
+
+	/**
+	 * GET_CONSENTS_RESPONSE (response to the public getConsents() query) must NEVER carry
+	 * the transition flag — it answers a different question (current state).
+	 */
+	@Test
+	public void test_getConsents_responseDoesNotIncludeFlag() {
+		setupExistingConsents(new ConsentsBuilder().setCollect("y").buildToString());
+
+		Event requestEvent = new Event.Builder(
+			ConsentConstants.EventNames.GET_CONSENTS_REQUEST,
+			EventType.CONSENT,
+			EventSource.REQUEST_CONTENT
+		)
+			.setEventData(new HashMap<String, Object>())
+			.build();
+		extension.handleRequestContent(requestEvent);
+
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+		verify(mockExtensionApi).dispatch(eventCaptor.capture());
+		Event response = eventCaptor.getValue();
+		assertEquals(ConsentConstants.EventNames.GET_CONSENTS_RESPONSE, response.getName());
+		assertNull(
+			"GET_CONSENTS_RESPONSE must never carry the transition flag",
+			response.getEventData().get(ConsentConstants.EventDataKey.COLLECT_CONSENT_RESYNC_REQUIRED)
+		);
+	}
+
+	/**
+	 * EDGE_CONSENT_UPDATE (Edge-bound) must never carry the transition flag.
+	 */
+	@Test
+	public void test_edgeConsentUpdate_doesNotIncludeFlag() {
+		setupExistingConsents(null);
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, null))
+			.thenReturn(null);
+
+		extension.handleConsentUpdate(buildConsentUpdateEvent("y", null));
+
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+		verify(mockExtensionApi, times(2)).dispatch(eventCaptor.capture());
+
+		Event edgeUpdate = null;
+		for (Event evt : eventCaptor.getAllValues()) {
+			if (ConsentConstants.EventNames.EDGE_CONSENT_UPDATE.equals(evt.getName())) {
+				edgeUpdate = evt;
+				break;
+			}
+		}
+		assertNotNull("Expected an EDGE_CONSENT_UPDATE dispatch", edgeUpdate);
+		assertNull(
+			"EDGE_CONSENT_UPDATE must never carry the transition flag",
+			edgeUpdate.getEventData().get(ConsentConstants.EventDataKey.COLLECT_CONSENT_RESYNC_REQUIRED)
+		);
+	}
+
+	/**
+	 * Load-bearing invariant for the refactor: the XDM shared state must NOT contain
+	 * the {@code collectConsentResyncRequired} flag, even though {@code shareCurrentConsents}
+	 * mutates the same {@code xdmConsents} map in place after calling
+	 * {@code createXDMSharedState}. The shared state describes <i>current state</i>; the
+	 * flag describes a <i>transient transition</i> and only belongs on the dispatched event.
+	 *
+	 * <p>This relies on the production {@code ExtensionApi.createXDMSharedState} contract
+	 * of snapshotting the supplied map synchronously. The test uses {@code doAnswer} to
+	 * mimic that snapshot at call time — a plain {@code ArgumentCaptor} would hold a
+	 * reference and incorrectly see the post-call mutation.
+	 */
+	@Test
+	public void test_sharedStateDoesNotCarryFlag_onTransitionDispatch() {
+		// Persisted lastDefinitive = "n" so the next "y" update triggers a transition
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, null))
+			.thenReturn("n");
+		setupExistingConsents(new ConsentsBuilder().setCollect("n").buildToString());
+
+		// Snapshot the shared-state map at the moment createXDMSharedState is invoked,
+		// mimicking the production EventHub's internal deep-copy behavior. Without this,
+		// the captured reference would see post-call mutations and the assertion below
+		// would be meaningless.
+		final Map<String, Object> snapshottedSharedState = new HashMap<>();
+		Mockito
+			.doAnswer(invocation -> {
+				@SuppressWarnings("unchecked")
+				final Map<String, Object> arg = invocation.getArgument(0);
+				snapshottedSharedState.clear();
+				snapshottedSharedState.putAll(arg);
+				return null;
+			})
+			.when(mockExtensionApi)
+			.createXDMSharedState(any(Map.class), any(Event.class));
+
+		extension.handleConsentUpdate(buildConsentUpdateEvent("y", null));
+
+		// Shared state MUST NOT contain the flag (snapshot was taken before the in-place mutation)
+		assertNull(
+			"XDM shared state must not carry the transient transition flag",
+			snapshottedSharedState.get(ConsentConstants.EventDataKey.COLLECT_CONSENT_RESYNC_REQUIRED)
+		);
+
+		// Dispatched CONSENT_PREFERENCES_UPDATED event MUST contain the flag
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+		verify(mockExtensionApi, times(2)).dispatch(eventCaptor.capture());
+		Event prefsUpdated = null;
+		for (Event evt : eventCaptor.getAllValues()) {
+			if (ConsentConstants.EventNames.CONSENT_PREFERENCES_UPDATED.equals(evt.getName())) {
+				prefsUpdated = evt;
+				break;
+			}
+		}
+		assertNotNull("Expected a CONSENT_PREFERENCES_UPDATED dispatch", prefsUpdated);
+		assertEquals(
+			"CONSENT_PREFERENCES_UPDATED must carry the flag on n -> y",
+			Boolean.TRUE,
+			prefsUpdated.getEventData().get(ConsentConstants.EventDataKey.COLLECT_CONSENT_RESYNC_REQUIRED)
+		);
+	}
+
+	/**
+	 * Parity coverage: the Edge handle dispatch path
+	 * ({@code handleEdgeConsentPreferenceHandle}) is one of the three callers of
+	 * {@code shareCurrentConsents}; it must also fire the flag on a non-y -> y transition.
+	 */
+	@Test
+	public void test_edgeConsentPreferenceHandle_collectYesFromN_dispatchesFlag() throws Exception {
+		// Persisted lastDefinitive = "n" so the next "y" arriving via Edge handle triggers a transition
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, null))
+			.thenReturn("n");
+		setupExistingConsents(new ConsentsBuilder().setCollect("n").buildToString());
+
+		// Build an Edge consent:preferences handle whose payload sets collect=y
+		final String jsonString =
+			"{ \"payload\": [ { \"collect\": { \"val\": \"y\" } } ], \"type\": \"consent:preferences\" }";
+		extension.handleEdgeConsentPreferenceHandle(buildEdgeConsentPreferenceEvent(jsonString));
+
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+		// Only a CONSENT_PREFERENCES_UPDATED is dispatched on the Edge handle path
+		// (no EDGE_CONSENT_UPDATE — that only goes out from handleConsentUpdate).
+		verify(mockExtensionApi).dispatch(eventCaptor.capture());
+		Event prefsUpdated = eventCaptor.getValue();
+		assertEquals(ConsentConstants.EventNames.CONSENT_PREFERENCES_UPDATED, prefsUpdated.getName());
+		assertEquals(
+			"Edge handle path must fire the flag on n -> y",
+			Boolean.TRUE,
+			prefsUpdated.getEventData().get(ConsentConstants.EventDataKey.COLLECT_CONSENT_RESYNC_REQUIRED)
+		);
+	}
+
+	/**
+	 * Parity coverage: the configuration-defaults dispatch path
+	 * ({@code handleConfigurationResponse}) is the third caller of
+	 * {@code shareCurrentConsents}; flipping the default from "n" to "y" with no
+	 * persisted user preference must fire the flag.
+	 */
+	@Test
+	public void test_configurationResponse_defaultCollectYesFromN_dispatchesFlag() throws Exception {
+		// Persisted lastDefinitive = "n" so updating defaults to "y" triggers a transition
+		Mockito
+			.when(mockNamedCollection.getString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, null))
+			.thenReturn("n");
+		// Seed an existing default of "n" so the subsequent "y" default flips the effective state.
+		extension.handleConfigurationResponse(
+			buildConfigurationResponseEvent(new ConsentsBuilder().setCollect("n").buildToString())
+		);
+		Mockito.reset(mockExtensionApi);
+
+		// Now flip the default to "y" — effective collect goes n -> y
+		extension.handleConfigurationResponse(
+			buildConfigurationResponseEvent(new ConsentsBuilder().setCollect("y").buildToString())
+		);
+
+		ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+		verify(mockExtensionApi).dispatch(eventCaptor.capture());
+		Event prefsUpdated = eventCaptor.getValue();
+		assertEquals(ConsentConstants.EventNames.CONSENT_PREFERENCES_UPDATED, prefsUpdated.getName());
+		assertEquals(
+			"Defaults path must fire the flag on n -> y",
+			Boolean.TRUE,
+			prefsUpdated.getEventData().get(ConsentConstants.EventDataKey.COLLECT_CONSENT_RESYNC_REQUIRED)
+		);
+	}
 }

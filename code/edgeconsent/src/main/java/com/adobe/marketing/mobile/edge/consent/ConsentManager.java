@@ -107,6 +107,73 @@ final class ConsentManager {
 	}
 
 	/**
+	 * Examines the current merged {@code consents.collect.val} and advances the persisted
+	 * {@code lastDefinitiveCollectConsent} tracker accordingly, returning {@code true} iff
+	 * the effective value is now {@code "y"} and the previously stored definitive value was
+	 * not {@code "y"}.
+	 *
+	 * <p><b>Side effect:</b> the persisted {@code lastDefinitiveCollectConsent} is overwritten
+	 * with the new effective {@code collect.val} unless that value is {@code "p"} (pending).
+	 * Pending is deliberately ignored — pending is "user has not made a fresh choice yet,"
+	 * not "user revoked." Treating it as no-information preserves the user's prior {@code "y"}
+	 * opt-in and keeps a {@code y -> p -> y} sequence from spuriously firing a re-sync.
+	 *
+	 * <p>Intended to be called by {@link ConsentExtension} AFTER a successful
+	 * {@link #mergeAndPersist(Consents)} or {@link #updateDefaultConsents(Consents)} call,
+	 * before dispatching {@code CONSENT_PREFERENCES_UPDATED}. Leaves
+	 * {@code mergeAndPersist} / {@code updateDefaultConsents} untouched so their public
+	 * contract is preserved.
+	 *
+	 * @return {@code true} iff a non-{@code "y"} → {@code "y"} transition was just observed
+	 */
+	boolean evaluateCollectConsentTransition() {
+		final String newCollectVal = getCurrentConsents().getCollectVal();
+		if (ConsentConstants.EventDataKey.PENDING.equals(newCollectVal)) {
+			return false;
+		}
+		final String previousDefinitive = getLastDefinitiveCollectConsent();
+		// Only persist when the value actually changed — avoids redundant disk writes on no-op merges.
+		if (!equals(newCollectVal, previousDefinitive)) {
+			setLastDefinitiveCollectConsent(newCollectVal);
+		}
+		return (
+			ConsentConstants.EventDataKey.YES.equals(newCollectVal) &&
+			!ConsentConstants.EventDataKey.YES.equals(previousDefinitive)
+		);
+	}
+
+	/**
+	 * Reads the persisted "last definitive" collect-consent value (or {@code null} on a
+	 * fresh install / first session after upgrade).
+	 */
+	@VisibleForTesting
+	String getLastDefinitiveCollectConsent() {
+		if (namedCollection == null) {
+			return null;
+		}
+		return namedCollection.getString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, null);
+	}
+
+	/**
+	 * Writes (or clears, on {@code null}) the persisted "last definitive" collect-consent value.
+	 */
+	private void setLastDefinitiveCollectConsent(final String value) {
+		if (namedCollection == null) {
+			return;
+		}
+		if (value == null) {
+			namedCollection.remove(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT);
+		} else {
+			namedCollection.setString(ConsentConstants.DataStoreKey.LAST_DEFINITIVE_COLLECT_CONSENT, value);
+		}
+	}
+
+	/** Null-safe equality for two nullable Strings. */
+	private static boolean equals(final String a, final String b) {
+		return a == null ? b == null : a.equals(b);
+	}
+
+	/**
 	 * Loads the requested consents from persistence. The jsonString from persistence is serialized
 	 * into {@link Consents} object and returned.
 	 *

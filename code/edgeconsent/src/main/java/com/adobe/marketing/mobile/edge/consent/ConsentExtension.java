@@ -345,10 +345,18 @@ class ConsentExtension extends Extension {
 	private void shareCurrentConsents(final Event event) {
 		final Map<String, Object> xdmConsents = consentManager.getCurrentConsents().asXDMMap();
 
-		// set the shared state
+		// set the shared state first, with consent values only — the transient transition
+		// flag does not belong in shared state (it describes an event, not current state).
 		getApi().createXDMSharedState(xdmConsents, event);
 
-		// create and dispatch an consent response event
+		// Augment the same map with the transition flag (if any) and dispatch it as the
+		// consent response event. createXDMSharedState above takes a snapshot, so adding
+		// the flag here does not leak it into the shared state.
+		if (consentManager.evaluateCollectConsentTransition()) {
+			xdmConsents.put(ConsentConstants.EventDataKey.COLLECT_CONSENT_RESYNC_REQUIRED, true);
+		}
+
+		// create and dispatch a consent response event
 		Event responseEvent = new Event.Builder(
 			ConsentConstants.EventNames.CONSENT_PREFERENCES_UPDATED,
 			EventType.CONSENT,

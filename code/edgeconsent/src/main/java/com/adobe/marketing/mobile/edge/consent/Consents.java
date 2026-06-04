@@ -123,6 +123,25 @@ final class Consents {
 	}
 
 	/**
+	 * Convenience accessor for {@code consents.collect.val} (one of {@code "y"}, {@code "n"},
+	 * {@code "p"}, or {@code null} if absent at any layer of the path).
+	 *
+	 * @return the {@link String} value of {@code consents.collect.val}, or {@code null} if not present
+	 */
+	String getCollectVal() {
+		final Map<String, Object> collect = DataReader.optTypedMap(
+			Object.class,
+			consentsMap,
+			ConsentConstants.EventDataKey.COLLECT,
+			null
+		);
+		if (collect == null) {
+			return null;
+		}
+		return DataReader.optString(collect, ConsentConstants.EventDataKey.VAL, null);
+	}
+
+	/**
 	 * Merges the provided {@link Consents} with the current object. The current object is
 	 * undisturbed if the provided consent is null or empty.
 	 * This method performs a deep merge, handling nested maps properly.
